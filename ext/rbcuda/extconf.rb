@@ -29,11 +29,13 @@ LIB_DIRS = [
   '/usr/lib',
 ]
 
-dir_config(extension_name, HEADER_DIRS, LIB_DIRS)
 
 have_library('cudart')
-have_library('libcublas')
+have_library('cublas')
+have_library('cusolver')
+have_library('curand')
 
+dir_config(extension_name, HEADER_DIRS, LIB_DIRS)
 
 basenames = %w{rbcuda}
 $objs = basenames.map { |b| "#{b}.o"   }
