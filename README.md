@@ -1,8 +1,16 @@
 # Rbcuda
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/rbcuda`. To experiment with that code, run `bin/console` for an interactive prompt.
+The main objective of RbCUDA would be:
+1. Map all of CUDA into Ruby
+2. Ready-made on-GPU linear algebra, reduction, scan using cuBLAS, cuMath, cuSolver libraries.
+3. Random Numer generator using cuRand
+4. Near-zero wrapping overhead.
+5. CUDA profiler for Ruby.
 
-TODO: Delete this and the text above, and describe your gem
+In the near future:
+6. fast-fourier transform(cuFFT)
+7. Parallel Primitives and Data Structures(Thrust)
+8. Image processing (NVIDIA Performance Primitives Library).
 
 ## Installation
 
@@ -36,4 +44,10 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/[USERN
 
 ## Code of Conduct
 
-Everyone interacting in the Rbcuda project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/rbcuda/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the Rbcuda project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/prasunanand/rbcuda/blob/master/CODE_OF_CONDUCT.md).
+
+# LICENSE
+
+This software is distributed under the [BSD 3-Clause License](LICENSE).
+
+Copyright © 2017, Prasun Anand
