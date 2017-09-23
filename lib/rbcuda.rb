@@ -1,5 +1,6 @@
 require "rbcuda/version"
+require 'rbcuda.so'
 
-module Rbcuda
+module RbCUDA
   # Your code goes here...
 end

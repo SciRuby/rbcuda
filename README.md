@@ -8,6 +8,7 @@ The main objective of RbCUDA would be:
 5. CUDA profiler for Ruby.
 
 In the near future:
+
 6. fast-fourier transform(cuFFT)
 7. Parallel Primitives and Data Structures(Thrust)
 8. Image processing (NVIDIA Performance Primitives Library).
@@ -17,16 +18,11 @@ In the near future:
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'rbcuda'
+git clone https://github.com/prasunanand/rbcuda
+bundle install
+rake compile
+rake test
 ```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install rbcuda
 
 ## Usage
 
