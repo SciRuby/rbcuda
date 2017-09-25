@@ -631,6 +631,11 @@ void Init_rbcuda() {
   rb_define_singleton_method(CuRand, "curandGetDirectionVectors64", (METHOD)rb_curandGetDirectionVectors64, 0);
   rb_define_singleton_method(CuRand, "curandGetScrambleConstants64", (METHOD)rb_curandGetScrambleConstants64, 0);
 
+  Profiler = rb_define_module_under(RbCUDA, "Profiler");
+  rb_define_singleton_method(Profiler, "cudaProfilerInitialize", (METHOD)rb_cudaProfilerInitialize, 0);
+  rb_define_singleton_method(Profiler, "cudaProfilerStart", (METHOD)rb_cudaProfilerStart, 0);
+  rb_define_singleton_method(Profiler, "cudaProfilerStop", (METHOD)rb_cudaProfilerStop, 0);
+
 }
 
 static VALUE rbcu_hello(VALUE self){
