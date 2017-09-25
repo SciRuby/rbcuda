@@ -550,6 +550,59 @@ void Init_rbcuda() {
   rb_define_singleton_method(CuBLAS_v2, "cublasCtrttp", (METHOD)rb_cublasCtrttp, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasZtrttp", (METHOD)rb_cublasZtrttp, 0);
 
+  CuBLASXT = rb_define_module_under(RbCUDA, "CuBLASXT");
+  rb_define_singleton_method(CuBLASXT, "cublasXtCreate", (METHOD)rb_cublasXtCreate, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtDestroy", (METHOD)rb_cublasXtDestroy, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtGetNumBoards", (METHOD)rb_cublasXtGetNumBoards, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtMaxBoards", (METHOD)rb_cublasXtMaxBoards, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtDeviceSelect", (METHOD)rb_cublasXtDeviceSelect, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtSetBlockDim", (METHOD)rb_cublasXtSetBlockDim, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtGetBlockDim", (METHOD)rb_cublasXtGetBlockDim, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtGetPinningMemMode", (METHOD)rb_cublasXtGetPinningMemMode, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtSetPinningMemMode", (METHOD)rb_cublasXtSetPinningMemMode, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtSetCpuRoutine", (METHOD)rb_cublasXtSetCpuRoutine, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtSetCpuRatio", (METHOD)rb_cublasXtSetCpuRatio, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtSgemm", (METHOD)rb_cublasXtSgemm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtDgemm", (METHOD)rb_cublasXtDgemm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtCgemm", (METHOD)rb_cublasXtCgemm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtZgemm", (METHOD)rb_cublasXtZgemm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtSsyrk", (METHOD)rb_cublasXtSsyrk, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtDsyrk", (METHOD)rb_cublasXtDsyrk, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtCsyrk", (METHOD)rb_cublasXtCsyrk, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtZsyrk", (METHOD)rb_cublasXtZsyrk, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtCherk", (METHOD)rb_cublasXtCherk, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtZherk", (METHOD)rb_cublasXtZherk, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtSsyr2k", (METHOD)rb_cublasXtSsyr2k, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtDsyr2k", (METHOD)rb_cublasXtDsyr2k, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtCsyr2k", (METHOD)rb_cublasXtCsyr2k, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtZsyr2k", (METHOD)rb_cublasXtZsyr2k, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtCherkx", (METHOD)rb_cublasXtCherkx, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtZherkx", (METHOD)rb_cublasXtZherkx, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtStrsm", (METHOD)rb_cublasXtStrsm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtDtrsm", (METHOD)rb_cublasXtDtrsm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtCtrsm", (METHOD)rb_cublasXtCtrsm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtZtrsm", (METHOD)rb_cublasXtZtrsm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtSsymm", (METHOD)rb_cublasXtSsymm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtDsymm", (METHOD)rb_cublasXtDsymm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtCsymm", (METHOD)rb_cublasXtCsymm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtZsymm", (METHOD)rb_cublasXtZsymm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtChemm", (METHOD)rb_cublasXtChemm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtZhemm", (METHOD)rb_cublasXtZhemm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtSsyrkx", (METHOD)rb_cublasXtSsyrkx, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtDsyrkx", (METHOD)rb_cublasXtDsyrkx, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtCsyrkx", (METHOD)rb_cublasXtCsyrkx, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtZsyrkx", (METHOD)rb_cublasXtZsyrkx, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtCher2k", (METHOD)rb_cublasXtCher2k, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtZher2k", (METHOD)rb_cublasXtZher2k, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtSspmm", (METHOD)rb_cublasXtSspmm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtDspmm", (METHOD)rb_cublasXtDspmm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtCspmm", (METHOD)rb_cublasXtCspmm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtZspmm", (METHOD)rb_cublasXtZspmm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtStrmm", (METHOD)rb_cublasXtStrmm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtDtrmm", (METHOD)rb_cublasXtDtrmm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtCtrmm", (METHOD)rb_cublasXtCtrmm, 0);
+  rb_define_singleton_method(CuBLASXT, "cublasXtZtrmm", (METHOD)rb_cublasXtZtrmm, 0);
+
 }
 
 static VALUE rbcu_hello(VALUE self){
