@@ -2,6 +2,10 @@ require_relative 'mkmf.rb'
 
 extension_name = 'rbcuda'
 
+nmatrix_path = Gem::Specification.find_all_by_name('nmatrix').compact
+abort "Cannot locate NMatrix installation" unless nmatrix_path
+nmatrix_header_dir = File.join(nmatrix_path[0].require_path)
+
 $INSTALLFILES = [
   ['rbcuda.h'  , '$(archdir)'],
   ['rbcuda_config.h', '$(archdir)'],
@@ -20,6 +24,7 @@ HEADER_DIRS = [
   '/usr/local/include',
   INCLUDEDIR,
   '/usr/include',
+  nmatrix_header_dir
 ]
 
 LIB_DIRS = [
@@ -29,13 +34,16 @@ LIB_DIRS = [
   '/usr/lib',
 ]
 
+dir_config(extension_name, HEADER_DIRS, LIB_DIRS)
 
 have_library('cudart')
 have_library('cublas')
 have_library('cusolver')
 have_library('curand')
+have_library('nmatrix')
+have_header("nmatrix_config.h")
+abort "Cannot locate NMatrix header files : nmatrix.h" unless find_header("nmatrix.h")
 
-dir_config(extension_name, HEADER_DIRS, LIB_DIRS)
 
 basenames = %w{rbcuda}
 $objs = basenames.map { |b| "#{b}.o"   }

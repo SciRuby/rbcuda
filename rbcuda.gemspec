@@ -35,4 +35,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake-compiler', '~>0.8'
   spec.add_development_dependency "minitest", "~> 5.0"
   spec.add_development_dependency 'pry', '~>0.10'
+  spec.add_development_dependency 'nmatrix', '~> 0.2.1'
 end
