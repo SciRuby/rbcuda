@@ -28,44 +28,42 @@ static VALUE rb_cublasXtGetBlockDim(VALUE self){
   return Qnil;
 }
 
-enum cublasXtPinnedMemMode_t
-{
-  CUBLASXT_PINNING_DISABLED = 0,
-  CUBLASXT_PINNING_ENABLED = 1
-}
+const char* const CuBLASXtPinnedMemMode_t[2] = {
+  "CUBLASXT_PINNING_DISABLED",
+  "CUBLASXT_PINNING_ENABLED"
+};
 
 static VALUE rb_cublasXtGetPinningMemMode(VALUE self){
   return Qnil;
 }
+
 static VALUE rb_cublasXtSetPinningMemMode(VALUE self){
   return Qnil;
 }
 
-enum cublasXtOpType_t
-{
-  CUBLASXT_FLOAT = 0,
-  CUBLASXT_DOUBLE = 1,
-  CUBLASXT_COMPLEX = 2,
-  CUBLASXT_DOUBLECOMPLEX = 3
-}
+const char* const CuBLASXtOpType_t[4] = {
+  "CUBLASXT_FLOAT",
+  "CUBLASXT_DOUBLE",
+  "CUBLASXT_COMPLEX",
+  "CUBLASXT_DOUBLECOMPLEX"
+};
 
-enum cublasXtBlasOp_t
-{
-  CUBLASXT_GEMM = 0,
-  CUBLASXT_SYRK = 1,
-  CUBLASXT_HERK = 2,
-  CUBLASXT_SYMM = 3,
-  CUBLASXT_HEMM = 4,
-  CUBLASXT_TRSM = 5,
-  CUBLASXT_SYR2K = 6,
-  CUBLASXT_HER2K = 7,
+const char* const CuBLASXtBlasOp_t[13] = {
+  "CUBLASXT_GEMM",
+  "CUBLASXT_SYRK",
+  "CUBLASXT_HERK",
+  "CUBLASXT_SYMM",
+  "CUBLASXT_HEMM",
+  "CUBLASXT_TRSM",
+  "CUBLASXT_SYR2K",
+  "CUBLASXT_HER2K",
 
-  CUBLASXT_SPMM = 8,
-  CUBLASXT_SYRKX = 9,
-  CUBLASXT_HERKX = 10,
-  CUBLASXT_TRMM = 11,
-  CUBLASXT_ROUTINE_MAX = 12
-}
+  "CUBLASXT_SPMM",
+  "CUBLASXT_SYRKX",
+  "CUBLASXT_HERKX",
+  "CUBLASXT_TRMM",
+  "CUBLASXT_ROUTINE_MAX"
+};
 
 /* Currently only 32-bit integer BLAS routines are supported */
 static VALUE rb_cublasXtSetCpuRoutine(VALUE self){
