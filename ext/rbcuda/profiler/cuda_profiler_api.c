@@ -1,9 +1,11 @@
-static VALUE cudaProfilerInitialize(VALUE self){
+static VALUE rb_cudaProfilerInitialize(VALUE self){
   return Qnil;
 }
-static VALUE cudaProfilerStart(VALUE self){
+
+static VALUE rb_cudaProfilerStart(VALUE self){
   return Qnil;
 }
-static VALUE cudaProfilerStop(VALUE self){
+
+static VALUE rb_cudaProfilerStop(VALUE self){
   return Qnil;
 }
