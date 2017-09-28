@@ -1,77 +1,69 @@
-// alias void* cudaStream_t;
+// // alias void* cudaStream_t;
 
 
-struct half {
-   ushort x;
-}
+// struct half {
+//    ushort x;
+// };
 
-struct half2 {
-   uint x;
-}
+// struct half2 {
+//    uint x;
+// };
 
-enum cublasStatus_t
-{
-    CUBLAS_STATUS_SUCCESS = 0,
-    CUBLAS_STATUS_NOT_INITIALIZED = 1,
-    CUBLAS_STATUS_ALLOC_FAILED = 3,
-    CUBLAS_STATUS_INVALID_VALUE = 7,
-    CUBLAS_STATUS_ARCH_MISMATCH = 8,
-    CUBLAS_STATUS_MAPPING_ERROR = 11,
-    CUBLAS_STATUS_EXECUTION_FAILED = 13,
-    CUBLAS_STATUS_INTERNAL_ERROR = 14,
-    CUBLAS_STATUS_NOT_SUPPORTED = 15,
-    CUBLAS_STATUS_LICENSE_ERROR = 16
-}
+std::map<char*, size_t> CuBLAS_status_t = {
+  {"CUBLAS_STATUS_SUCCESS", 0},
+  {"CUBLAS_STATUS_NOT_INITIALIZED", 1},
+  {"CUBLAS_STATUS_ALLOC_FAILED", 3},
+  {"CUBLAS_STATUS_INVALID_VALUE", 7},
+  {"CUBLAS_STATUS_ARCH_MISMATCH", 8},
+  {"CUBLAS_STATUS_MAPPING_ERROR", 11},
+  {"CUBLAS_STATUS_EXECUTION_FAILED", 13},
+  {"CUBLAS_STATUS_INTERNAL_ERROR", 14},
+  {"CUBLAS_STATUS_NOT_SUPPORTED", 15},
+  {"CUBLAS_STATUS_LICENSE_ERROR", 16}
+};
 
-enum cublasFillMode_t
-{
-    CUBLAS_FILL_MODE_LOWER = 0,
-    CUBLAS_FILL_MODE_UPPER = 1
-}
+std::map<char*, size_t> CuBLAS_FillMode_t = {
+  {"CUBLAS_FILL_MODE_LOWER", 0},
+  {"CUBLAS_FILL_MODE_UPPER", 1}
+};
 
-enum cublasDiagType_t
-{
-    CUBLAS_DIAG_NON_UNIT = 0,
-    CUBLAS_DIAG_UNIT = 1
-}
+std::map<char*, size_t> CuBLAS_DiagType_t = {
+  {"CUBLAS_DIAG_NON_UNIT", 0},
+  {"CUBLAS_DIAG_UNIT", 1}
+};
 
-enum cublasSideMode_t
-{
-    CUBLAS_SIDE_LEFT = 0,
-    CUBLAS_SIDE_RIGHT = 1
-}
+std::map<char*, size_t> CuBLAS_SideMode_t = {
+  {"CUBLAS_SIDE_LEFT", 0},
+  {"CUBLAS_SIDE_RIGHT", 1}
+};
 
-enum cublasOperation_t
-{
-    CUBLAS_OP_N = 0,
-    CUBLAS_OP_T = 1,
-    CUBLAS_OP_C = 2
-}
+std::map<char*, size_t> CuBLAS_Operation_t = {
+  {"CUBLAS_OP_N", 0},
+  {"CUBLAS_OP_T", 1},
+  {"CUBLAS_OP_C", 2}
+};
 
-enum cublasPointerMode_t
-{
-    CUBLAS_POINTER_MODE_HOST = 0,
-    CUBLAS_POINTER_MODE_DEVICE = 1
-}
+std::map<char*, size_t> CuBLAS_PointerMode_t = {
+  {"CUBLAS_POINTER_MODE_HOST", 0},
+  {"CUBLAS_POINTER_MODE_DEVICE", 1}
+};
 
-enum cublasAtomicsMode_t
-{
-    CUBLAS_ATOMICS_NOT_ALLOWED = 0,
-    CUBLAS_ATOMICS_ALLOWED = 1
-}
+std::map<char*, size_t> CuBLAS_AtomicsMode_t = {
+  {"CUBLAS_ATOMICS_NOT_ALLOWED", 0},
+  {"CUBLAS_ATOMICS_ALLOWED", 1}
+};
 
 /* Used by cublasSgemmEx */
-enum cublasDataType_t
-{
-    CUBLAS_DATA_FLOAT = 0,
-    CUBLAS_DATA_DOUBLE = 1,
-    CUBLAS_DATA_HALF = 2,
-    CUBLAS_DATA_INT8 = 3
-}
+std::map<char*, size_t> CuBLAS_DataType_t = {
+  {"CUBLAS_DATA_FLOAT", 0},
+  {"CUBLAS_DATA_DOUBLE", 1},
+  {"CUBLAS_DATA_HALF", 2},
+  {"CUBLAS_DATA_INT8", 3}
+};
 
-/* Opaque structure holding CUBLAS library context */
-struct cublasContext;
-alias cublasHandle_t = cublasContext*;
+// /* Opaque structure holding CUBLAS library context */
+// struct cublasContext;
+// alias cublasHandle_t = cublasContext*;
 
 static VALUE rb_cublasCreate_v2(VALUE self){
   return Qnil;
@@ -148,7 +140,7 @@ static VALUE rb_cublasGetMatrixAsync(VALUE self){
 
 
 
-void cublasXerbla (const(char)* srName, int info);
+// void cublasXerbla (const(char)* srName, int info);
 /* ---------------- CUBLAS BLAS1 functions ---------------- */
 static VALUE rb_cublasSnrm2_v2(VALUE self){
 return Qnil;
@@ -413,10 +405,6 @@ static VALUE rb_cublasCgbmv_v2(VALUE self){
 }
 
 static VALUE rb_cublasZgbmv_v2(VALUE self){
-  return Qnil;
-}
-
-static VALUE rb_cublasStrmv_v2(VALUE self){
   return Qnil;
 }
 
