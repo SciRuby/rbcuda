@@ -277,7 +277,10 @@ static VALUE rb_cudaMallocArray(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cudaFree(VALUE self){
+static VALUE rb_cudaFree(VALUE self, VALUE ptr_val){
+  dev_ptr* ptr;
+  Data_Get_Struct(ptr_val, dev_ptr, ptr);
+  cudaFree(ptr->carray);
   return Qnil;
 }
 
@@ -369,7 +372,7 @@ static VALUE rb_cudaMemcpy(VALUE self, VALUE dest_array, VALUE source_ary, VALUE
     cudaMemcpy((void*)ptr->carray, (void*)host_array, sizeof(double)*count, rbcu_memcopy_kind(kind));
   }else{
     dev_ptr* ptr;
-    Data_Get_Struct(dest_array, dev_ptr, ptr);
+    Data_Get_Struct(source_ary, dev_ptr, ptr);
     double* host_array = ALLOC_N(double, count);
     cudaMemcpy((void*)host_array, (void*)ptr->carray, sizeof(double)*count, rbcu_memcopy_kind(kind));
     VALUE* tem = ALLOC_N(VALUE, count);
@@ -377,6 +380,7 @@ static VALUE rb_cudaMemcpy(VALUE self, VALUE dest_array, VALUE source_ary, VALUE
       tem[index] = DBL2NUM(host_array[index]);
     }
     dest_array = rb_ary_new4(count, tem);
+    return dest_array;
   }
   return Qnil;
 }
