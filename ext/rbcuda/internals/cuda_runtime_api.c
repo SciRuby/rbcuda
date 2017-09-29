@@ -254,8 +254,15 @@ static VALUE rb_cudaMallocManaged(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cudaMalloc(VALUE self){
-  return Qnil;
+static VALUE rb_cudaMalloc(VALUE self, VALUE shape){
+  dev_ptr* ptr = ALLOC(dev_ptr);
+  size_t count = 1;
+  for (size_t index = 0; index < 2; index++) {
+    count *= (size_t)FIX2LONG(RARRAY_AREF(shape, index));
+  }
+  size_t size = sizeof(double)*count;
+  cudaMalloc((void **)&ptr->carray, size);
+  return Data_Wrap_Struct(Dev_Array, NULL, rbcu_free, ptr);
 }
 
 static VALUE rb_cudaMallocHost(VALUE self){
@@ -347,7 +354,30 @@ static VALUE rb_cudaArrayGetInfo(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cudaMemcpy(VALUE self){
+static VALUE rb_cudaMemcpy(VALUE self, VALUE dest_array, VALUE source_ary, VALUE count_val, VALUE kind){
+  cudaMemcpyKind flag = rbcu_memcopy_kind(kind);
+  size_t count = NUM2UINT(count_val);
+
+  if(flag == cudaMemcpyHostToDevice){
+    dev_ptr* ptr;
+    Data_Get_Struct(dest_array, dev_ptr, ptr);
+    double* host_array = ALLOC_N(double, count);
+    for (size_t index = 0; index < count; index++) {
+      host_array[index] = (double)NUM2DBL(RARRAY_AREF(source_ary, index));
+    }
+
+    cudaMemcpy((void*)ptr->carray, (void*)host_array, sizeof(double)*count, rbcu_memcopy_kind(kind));
+  }else{
+    dev_ptr* ptr;
+    Data_Get_Struct(dest_array, dev_ptr, ptr);
+    double* host_array = ALLOC_N(double, count);
+    cudaMemcpy((void*)host_array, (void*)ptr->carray, sizeof(double)*count, rbcu_memcopy_kind(kind));
+    VALUE* tem = ALLOC_N(VALUE, count);
+    for (size_t index = 0; index < count; index++){
+      tem[index] = DBL2NUM(host_array[index]);
+    }
+    dest_array = rb_ary_new4(count, tem);
+  }
   return Qnil;
 }
 

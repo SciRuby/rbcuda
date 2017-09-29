@@ -2,6 +2,12 @@
   #define RUBY_CUDA_H
 #endif
 
+
+typedef struct DEV_PTR
+{
+  double* carray;
+}dev_ptr;
+
 #ifndef HAVE_RB_ARRAY_CONST_PTR
 static inline const VALUE *
 rb_array_const_ptr(VALUE a)

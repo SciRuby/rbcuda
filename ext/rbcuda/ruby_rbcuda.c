@@ -4,11 +4,14 @@ VALUE CuBLAS = Qnil;
 VALUE CuBLAS_v2 = Qnil;
 VALUE CuBLASXT = Qnil;
 VALUE CuRand = Qnil;
+VALUE Dev_Array = Qnil;
 VALUE Profiler = Qnil;
 
 // prototypes
 void Init_rbcuda();
 
+static void rbcu_free(dev_ptr* ptr);
+cudaMemcpyKind rbcu_memcopy_kind(VALUE sym);
 
 //CuBLAS
 static VALUE rb_cublasInit(VALUE self);
@@ -521,7 +524,7 @@ static VALUE rb_cudaConfigureCall(VALUE self);
 static VALUE rb_cudaSetupArgument(VALUE self);
 static VALUE rb_cudaLaunch(VALUE self);
 static VALUE rb_cudaMallocManaged(VALUE self);
-static VALUE rb_cudaMalloc(VALUE self);
+static VALUE rb_cudaMalloc(VALUE self, VALUE shape);
 static VALUE rb_cudaMallocHost(VALUE self);
 static VALUE rb_cudaMallocPitch(VALUE self);
 static VALUE rb_cudaMallocArray(VALUE self);
@@ -544,7 +547,7 @@ static VALUE rb_cudaMemcpy3DAsync(VALUE self);
 static VALUE rb_cudaMemcpy3DPeerAsync(VALUE self);
 static VALUE rb_cudaMemGetInfo(VALUE self);
 static VALUE rb_cudaArrayGetInfo(VALUE self);
-static VALUE rb_cudaMemcpy(VALUE self);
+static VALUE rb_cudaMemcpy(VALUE self, VALUE source_ary, VALUE dest_array, VALUE count, VALUE kind);
 static VALUE rb_cudaMemcpyPeer(VALUE self);
 static VALUE rb_cudaMemcpyToArray(VALUE self);
 static VALUE rb_cudaMemcpyFromArray(VALUE self);
@@ -644,6 +647,8 @@ static VALUE rb_curandGetScrambleConstants64(VALUE self);
 void Init_rbcuda() {
   RbCUDA = rb_define_module("RbCUDA");
 
+  Dev_Array = rb_define_class_under(RbCUDA, "Dev_Array", rb_cObject);
+
   CUDA = rb_define_module_under(RbCUDA, "CUDA");
   rb_define_singleton_method(CUDA, "cudaDeviceReset", (METHOD)rb_cudaDeviceReset, 0);
   rb_define_singleton_method(CUDA, "cudaDeviceSynchronize", (METHOD)rb_cudaDeviceSynchronize, 0);
@@ -708,7 +713,7 @@ void Init_rbcuda() {
   rb_define_singleton_method(CUDA, "cudaSetupArgument", (METHOD)rb_cudaSetupArgument, 0);
   rb_define_singleton_method(CUDA, "cudaLaunch", (METHOD)rb_cudaLaunch, 0);
   rb_define_singleton_method(CUDA, "cudaMallocManaged", (METHOD)rb_cudaMallocManaged, 0);
-  rb_define_singleton_method(CUDA, "cudaMalloc", (METHOD)rb_cudaMalloc, 0);
+  rb_define_singleton_method(CUDA, "cudaMalloc", (METHOD)rb_cudaMalloc, 1);
   rb_define_singleton_method(CUDA, "cudaMallocHost", (METHOD)rb_cudaMallocHost, 0);
   rb_define_singleton_method(CUDA, "cudaMallocPitch", (METHOD)rb_cudaMallocPitch, 0);
   rb_define_singleton_method(CUDA, "cudaMallocArray", (METHOD)rb_cudaMallocArray, 0);
@@ -731,7 +736,7 @@ void Init_rbcuda() {
   rb_define_singleton_method(CUDA, "cudaMemcpy3DPeerAsync", (METHOD)rb_cudaMemcpy3DPeerAsync, 0);
   rb_define_singleton_method(CUDA, "cudaMemGetInfo", (METHOD)rb_cudaMemGetInfo, 0);
   rb_define_singleton_method(CUDA, "cudaArrayGetInfo", (METHOD)rb_cudaArrayGetInfo, 0);
-  rb_define_singleton_method(CUDA, "cudaMemcpy", (METHOD)rb_cudaMemcpy, 0);
+  rb_define_singleton_method(CUDA, "cudaMemcpy", (METHOD)rb_cudaMemcpy, 4);
   rb_define_singleton_method(CUDA, "cudaMemcpyPeer", (METHOD)rb_cudaMemcpyPeer, 0);
   rb_define_singleton_method(CUDA, "cudaMemcpyToArray", (METHOD)rb_cudaMemcpyToArray, 0);
   rb_define_singleton_method(CUDA, "cudaMemcpyFromArray", (METHOD)rb_cudaMemcpyFromArray, 0);
@@ -1272,6 +1277,10 @@ void Init_rbcuda() {
 
 }
 
+static void rbcu_free(dev_ptr* ptr){
+  xfree(ptr);
+}
+
 #include "blas/cublas.c"
 #include "blas/cublas_api.c"
 #include "blas/cublas_v2.c"
@@ -1279,6 +1288,7 @@ void Init_rbcuda() {
 
 #include "interfaces/nmatrix.c"
 
+#include "internals/cuda.c"
 #include "internals/cuda_runtime_api.c"
 
 #include "profiler/cuda_profiler_api.c"
