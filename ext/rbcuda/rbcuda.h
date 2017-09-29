@@ -8,6 +8,11 @@ typedef struct DEV_PTR
   double* carray;
 }dev_ptr;
 
+typedef struct RB_CUBLAS_HANDLE
+{
+  cublasHandle_t handle;
+}rb_cublas_handle;
+
 #ifndef HAVE_RB_ARRAY_CONST_PTR
 static inline const VALUE *
 rb_array_const_ptr(VALUE a)

@@ -7,12 +7,14 @@ VALUE CuRand = Qnil;
 VALUE Dev_Array = Qnil;
 VALUE Profiler = Qnil;
 VALUE Runtime = Qnil;
+VALUE CuBLASHandler = Qnil;
 
 // prototypes
 void Init_rbcuda();
 
 static void rbcu_free(dev_ptr* ptr);
 cudaMemcpyKind rbcu_memcopy_kind(VALUE sym);
+cublasOperation_t rbcu_cublasOperation_t(VALUE sym);
 
 //CuBLAS
 static VALUE rb_cublasInit(VALUE self);
@@ -230,7 +232,7 @@ static VALUE rb_cublasXtZtrmm(VALUE self);
 
 //CuBLAS_api
 static VALUE rb_cublasCreate_v2(VALUE self);
-static VALUE rb_cublasDestroy_v2(VALUE self);
+static VALUE rb_cublasDestroy_v2(VALUE self, VALUE handler_val);
 static VALUE rb_cublasGetVersion_v2(VALUE self);
 static VALUE rb_cublasSetStream_v2(VALUE self);
 static VALUE rb_cublasGetStream_v2(VALUE self);
@@ -374,7 +376,10 @@ static VALUE rb_cublasDspr2_v2(VALUE self);
 static VALUE rb_cublasChpr2_v2(VALUE self);
 static VALUE rb_cublasZhpr2_v2(VALUE self);
 static VALUE rb_cublasSgemm_v2(VALUE self);
-static VALUE rb_cublasDgemm_v2(VALUE self);
+static VALUE rb_cublasDgemm_v2(VALUE self, VALUE handler_val, VALUE transa, VALUE trans,
+                                VALUE m, VALUE n, VALUE k, VALUE alpha_val,
+                                VALUE A_val, VALUE lda, VALUE b_val, VALUE ldb,
+                                VALUE beta_val, VALUE C_val, VALUE ldc);
 static VALUE rb_cublasCgemm_v2(VALUE self);
 static VALUE rb_cublasZgemm_v2(VALUE self);
 static VALUE rb_cublasHgemm(VALUE self);
@@ -726,7 +731,7 @@ static VALUE rb_cudaMalloc(VALUE self, VALUE shape);
 static VALUE rb_cudaMallocHost(VALUE self);
 static VALUE rb_cudaMallocPitch(VALUE self);
 static VALUE rb_cudaMallocArray(VALUE self);
-static VALUE rb_cudaFree(VALUE self);
+static VALUE rb_cudaFree(VALUE self, VALUE ptr_val);
 static VALUE rb_cudaFreeHost(VALUE self);
 static VALUE rb_cudaFreeArray(VALUE self);
 static VALUE rb_cudaFreeMipmappedArray(VALUE self);
@@ -846,6 +851,7 @@ void Init_rbcuda() {
   RbCUDA = rb_define_module("RbCUDA");
 
   Dev_Array = rb_define_class_under(RbCUDA, "Dev_Array", rb_cObject);
+  CuBLASHandler= rb_define_class_under(RbCUDA, "CuBLASHandler", rb_cObject);
 
   CUDA = rb_define_module_under(RbCUDA, "CUDA");
   rb_define_singleton_method(CUDA, "cuGetErrorString", (METHOD)rb_cuGetErrorString, 0);
@@ -1113,7 +1119,7 @@ void Init_rbcuda() {
   rb_define_singleton_method(Runtime, "cudaMallocHost", (METHOD)rb_cudaMallocHost, 0);
   rb_define_singleton_method(Runtime, "cudaMallocPitch", (METHOD)rb_cudaMallocPitch, 0);
   rb_define_singleton_method(Runtime, "cudaMallocArray", (METHOD)rb_cudaMallocArray, 0);
-  rb_define_singleton_method(Runtime, "cudaFree", (METHOD)rb_cudaFree, 0);
+  rb_define_singleton_method(Runtime, "cudaFree", (METHOD)rb_cudaFree, 1);
   rb_define_singleton_method(Runtime, "cudaFreeHost", (METHOD)rb_cudaFreeHost, 0);
   rb_define_singleton_method(Runtime, "cudaFreeArray", (METHOD)rb_cudaFreeArray, 0);
   rb_define_singleton_method(Runtime, "cudaFreeMipmappedArray", (METHOD)rb_cudaFreeMipmappedArray, 0);
@@ -1355,7 +1361,7 @@ void Init_rbcuda() {
 
   CuBLAS_v2 = rb_define_module_under(RbCUDA, "CuBLAS_v2");
   rb_define_singleton_method(CuBLAS_v2, "cublasCreate_v2", (METHOD)rb_cublasCreate_v2, 0);
-  rb_define_singleton_method(CuBLAS_v2, "cublasDestroy_v2", (METHOD)rb_cublasDestroy_v2, 0);
+  rb_define_singleton_method(CuBLAS_v2, "cublasDestroy_v2", (METHOD)rb_cublasDestroy_v2, 1);
   rb_define_singleton_method(CuBLAS_v2, "cublasGetVersion_v2", (METHOD)rb_cublasGetVersion_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasSetStream_v2", (METHOD)rb_cublasSetStream_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasGetStream_v2", (METHOD)rb_cublasGetStream_v2, 0);
@@ -1499,7 +1505,7 @@ void Init_rbcuda() {
   rb_define_singleton_method(CuBLAS_v2, "cublasChpr2_v2", (METHOD)rb_cublasChpr2_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasZhpr2_v2", (METHOD)rb_cublasZhpr2_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasSgemm_v2", (METHOD)rb_cublasSgemm_v2, 0);
-  rb_define_singleton_method(CuBLAS_v2, "cublasDgemm_v2", (METHOD)rb_cublasDgemm_v2, 0);
+  rb_define_singleton_method(CuBLAS_v2, "cublasDgemm_v2", (METHOD)rb_cublasDgemm_v2, 14);
   rb_define_singleton_method(CuBLAS_v2, "cublasCgemm_v2", (METHOD)rb_cublasCgemm_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasZgemm_v2", (METHOD)rb_cublasZgemm_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasHgemm", (METHOD)rb_cublasHgemm, 0);

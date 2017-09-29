@@ -37,11 +37,25 @@ std::map<char*, size_t> CuBLAS_SideMode_t = {
   {"CUBLAS_SIDE_RIGHT", 1}
 };
 
-std::map<char*, size_t> CuBLAS_Operation_t = {
-  {"CUBLAS_OP_N", 0},
-  {"CUBLAS_OP_T", 1},
-  {"CUBLAS_OP_C", 2}
+const char* const CuBLAS_Operation_t[3] = {
+  "CUBLAS_OP_N",
+  "CUBLAS_OP_T",
+  "CUBLAS_OP_C"
 };
+
+cublasOperation_t rbcu_cublasOperation_t(VALUE sym) {
+  ID sym_id = SYM2ID(sym);
+
+  for (size_t index = 0; index < 3; ++index) {
+    if (sym_id == rb_intern(CuBLAS_Operation_t[index])) {
+      return static_cast<cublasOperation_t>(index);
+    }
+  }
+
+  VALUE str = rb_any_to_s(sym);
+  rb_raise(rb_eArgError, "invalid data type symbol (:%s) specified", RSTRING_PTR(str));
+}
+
 
 std::map<char*, size_t> CuBLAS_PointerMode_t = {
   {"CUBLAS_POINTER_MODE_HOST", 0},
@@ -61,15 +75,22 @@ std::map<char*, size_t> CuBLAS_DataType_t = {
   {"CUBLAS_DATA_INT8", 3}
 };
 
+
+
 // /* Opaque structure holding CUBLAS library context */
 // struct cublasContext;
 // alias cublasHandle_t = cublasContext*;
 
 static VALUE rb_cublasCreate_v2(VALUE self){
-  return Qnil;
+  rb_cublas_handle* handler = ALLOC(rb_cublas_handle);;
+  cublasCreate_v2(&handler->handle);
+  return Data_Wrap_Struct(CuBLASHandler, NULL, rbcu_free, handler);
 }
 
-static VALUE rb_cublasDestroy_v2(VALUE self){
+static VALUE rb_cublasDestroy_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
+  cublasDestroy_v2(handler->handle);
   return Qnil;
 }
 
@@ -713,7 +734,27 @@ static VALUE rb_cublasSgemm_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDgemm_v2(VALUE self){
+static VALUE rb_cublasDgemm_v2(VALUE self, VALUE handler_val, VALUE transa, VALUE transb,
+                                VALUE m, VALUE n, VALUE k, VALUE alpha_val,
+                                VALUE a_val, VALUE lda, VALUE b_val, VALUE ldb,
+                                VALUE beta_val, VALUE c_val, VALUE ldc){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
+  dev_ptr* ptr_a;
+  dev_ptr* ptr_b;
+  dev_ptr* ptr_c;
+  Data_Get_Struct(a_val, dev_ptr, ptr_a);
+  Data_Get_Struct(b_val, dev_ptr, ptr_b);
+  Data_Get_Struct(c_val, dev_ptr, ptr_c);
+
+  const double alf = 1;
+  const double bet = 0;
+  const double *alpha = &alf;
+  const double *beta = &bet;
+
+  cublasDgemm_v2(handler->handle, rbcu_cublasOperation_t(transa), rbcu_cublasOperation_t(transb),
+                                  NUM2INT(m), NUM2INT(n), NUM2INT(k), alpha,
+                                  ptr_a->carray, NUM2INT(lda), ptr_b->carray, NUM2INT(ldb), beta, ptr_c->carray, NUM2INT(ldc));
   return Qnil;
 }
 
