@@ -8,6 +8,7 @@ VALUE Dev_Array = Qnil;
 VALUE Profiler = Qnil;
 VALUE Runtime = Qnil;
 VALUE CuBLASHandler = Qnil;
+VALUE Driver = Qnil;
 
 // prototypes
 void Init_rbcuda();
@@ -15,6 +16,16 @@ void Init_rbcuda();
 static void rbcu_free(dev_ptr* ptr);
 cudaMemcpyKind rbcu_memcopy_kind(VALUE sym);
 cublasOperation_t rbcu_cublasOperation_t(VALUE sym);
+
+inline void __checkCudaErrors( CUresult err, const char *file, const int line );
+void initCUDA(char* module_file);
+void finalizeCUDA();
+void setupDeviceMemory(CUdeviceptr *d_a, CUdeviceptr *d_b, CUdeviceptr *d_c);
+void releaseDeviceMemory(CUdeviceptr d_a, CUdeviceptr d_b, CUdeviceptr d_c);
+void runKernel(CUdeviceptr d_a, CUdeviceptr d_b, CUdeviceptr d_c);
+static VALUE test(char* module_file);
+
+static VALUE test_kernel(VALUE self, VALUE module_file_name);
 
 //CuBLAS
 static VALUE rb_cublasInit(VALUE self);
@@ -852,6 +863,8 @@ void Init_rbcuda() {
 
   Dev_Array = rb_define_class_under(RbCUDA, "Dev_Array", rb_cObject);
   CuBLASHandler= rb_define_class_under(RbCUDA, "CuBLASHandler", rb_cObject);
+  Driver = rb_define_class_under(RbCUDA, "Driver", rb_cObject);
+  rb_define_singleton_method(Driver, "test_kernel", (METHOD)test_kernel, 1);
 
   CUDA = rb_define_module_under(RbCUDA, "CUDA");
   rb_define_singleton_method(CUDA, "cuGetErrorString", (METHOD)rb_cuGetErrorString, 0);
@@ -1688,6 +1701,7 @@ static void rbcu_free(dev_ptr* ptr){
 #include "blas/cublas_v2.c"
 #include "blas/cublasXt.c"
 
+
 #include "interfaces/nmatrix.c"
 
 #include "internals/cuda.c"
@@ -1697,3 +1711,4 @@ static void rbcu_free(dev_ptr* ptr){
 #include "profiler/cuda_profiler_api.c"
 
 #include "random/curand.c"
+#include "driver/driver.c"

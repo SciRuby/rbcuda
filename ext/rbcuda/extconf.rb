@@ -36,6 +36,7 @@ LIB_DIRS = [
 
 dir_config(extension_name, HEADER_DIRS, LIB_DIRS)
 
+have_library('cuda')
 have_library('cudart')
 have_library('cublas')
 have_library('cusolver')
