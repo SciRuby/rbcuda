@@ -9,6 +9,7 @@ VALUE Profiler = Qnil;
 VALUE Runtime = Qnil;
 VALUE CuBLASHandler = Qnil;
 VALUE Driver = Qnil;
+VALUE Arithmetic = Qnil;
 
 // prototypes
 void Init_rbcuda();
@@ -18,7 +19,7 @@ cudaMemcpyKind rbcu_memcopy_kind(VALUE sym);
 cublasOperation_t rbcu_cublasOperation_t(VALUE sym);
 
 inline void __checkCudaErrors( CUresult err, const char *file, const int line );
-void initCUDA(char* module_file);
+void initCUDA(char* module_file, char* kernel_name);
 void finalizeCUDA();
 void setupDeviceMemory(CUdeviceptr *d_a, CUdeviceptr *d_b, CUdeviceptr *d_c);
 void releaseDeviceMemory(CUdeviceptr d_a, CUdeviceptr d_b, CUdeviceptr d_c);
@@ -26,6 +27,9 @@ void runKernel(CUdeviceptr d_a, CUdeviceptr d_b, CUdeviceptr d_c);
 static VALUE test(char* module_file);
 
 static VALUE test_kernel(VALUE self, VALUE module_file_name);
+
+//Arithmetic
+static VALUE rb_elementwise_addition(VALUE self, VALUE array1_val, VALUE array2_val, VALUE size);
 
 //CuBLAS
 static VALUE rb_cublasInit(VALUE self);
@@ -870,7 +874,10 @@ void Init_rbcuda() {
   RbCUDA = rb_define_module("RbCUDA");
 
   Dev_Array = rb_define_class_under(RbCUDA, "Dev_Array", rb_cObject);
-  rb_define_method(Dev_Array, "to_nmatrix", (METHOD)rb_dev_ary_to_nmatrix, 0);
+  rb_define_method(Dev_Array, "to_nmatrix", (METHOD)rb_dev_ary_to_nmatrix, 1);
+
+  Arithmetic = rb_define_module_under(RbCUDA, "Arithmetic");
+  rb_define_singleton_method(Arithmetic, "add", (METHOD)rb_elementwise_addition, 3);
 
   cNMatrix = rb_define_class("NMatrix", rb_cObject);
   rb_define_method(cNMatrix, "to_af_array", (METHOD)rb_nmatrix_to_gpu_ary_method, 0);
@@ -1725,3 +1732,4 @@ static void rbcu_free(dev_ptr* ptr){
 
 #include "random/curand.c"
 #include "driver/driver.c"
+#include "elementwise/arithmetic.c"

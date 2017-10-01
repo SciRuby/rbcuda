@@ -42,6 +42,7 @@ dev_ptr* rb_nmatrix_to_dev_ary(VALUE nm) {
     rb_raise(rb_eStandardError, "requires dtype of :float64 to convert to an Af_Array");
   }
 
+  cudaMalloc((void **)&ptr->carray, sizeof(double) * nmat->count);
   cudaMemcpy((void*)ptr->carray, (void*)nmat->elements, sizeof(double) * nmat->count, cudaMemcpyHostToDevice);
 
   return ptr;

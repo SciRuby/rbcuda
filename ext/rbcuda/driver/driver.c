@@ -1,3 +1,5 @@
+// C code partially borrowed from source : https://gist.github.com/tautologico/2879581
+
 #define checkCudaErrors(err)  __checkCudaErrors (err, __FILE__, __LINE__)
 
 inline void __checkCudaErrors( CUresult err, const char *file, const int line )
@@ -30,9 +32,9 @@ CUfunction function;
 size_t     totalGlobalMem;
 
 // char       *module_file = (char*) "matSumKernel.ptx";
-char       *kernel_name = (char*) "matSum";
+// char       *kernel_name = (char*) "matSum";
 
-void initCUDA(char* module_file){
+void initCUDA(char* module_file, char* kernel_name){
     int deviceCount = 0;
     CUresult err = cuInit(0);
     int major = 0, minor = 0;
@@ -114,6 +116,16 @@ void runKernel(CUdeviceptr d_a, CUdeviceptr d_b, CUdeviceptr d_c)
                                     0, 0, args, 0) );
 }
 
+void runKernel2(double* d_a, double* d_b, double* d_c)
+{
+    void *args[3] = { &d_a, &d_b, &d_c };
+
+    // grid for kernel: <<<N, 1>>>
+    checkCudaErrors( cuLaunchKernel(function, N, 1, 1,  // Nx1x1 blocks
+                                    1, 1, 1,            // 1x1x1 threads
+                                    0, 0, args, 0) );
+}
+
 static VALUE test(char* module_file){
     int a[N], b[N], c[N];
     CUdeviceptr d_a, d_b, d_c;
@@ -126,7 +138,7 @@ static VALUE test(char* module_file){
 
     // initialize
     printf("- Initializing...\n");
-    initCUDA(module_file);
+    initCUDA(module_file, "matSum");
 
     // allocate memory
     setupDeviceMemory(&d_a, &d_b, &d_c);
