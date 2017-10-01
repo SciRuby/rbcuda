@@ -258,7 +258,7 @@ static VALUE rb_cudaMalloc(VALUE self, VALUE shape){
   dev_ptr* ptr = ALLOC(dev_ptr);
   size_t count = 1;
   for (size_t index = 0; index < 2; index++) {
-    count *= (size_t)FIX2LONG(RARRAY_AREF(shape, index));
+    count *= (size_t)NUM2LONG(RARRAY_AREF(shape, index));
   }
   size_t size = sizeof(double)*count;
   cudaMalloc((void **)&ptr->carray, size);

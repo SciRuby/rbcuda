@@ -858,10 +858,23 @@ static VALUE rb_curandGetScrambleConstants32(VALUE self);
 static VALUE rb_curandGetDirectionVectors64(VALUE self);
 static VALUE rb_curandGetScrambleConstants64(VALUE self);
 
+// NMatrix
+extern "C++" {
+  VALUE cNMatrix;
+}
+static VALUE rb_dev_ary_to_nmatrix(VALUE self, VALUE shape);
+extern VALUE rb_nmatrix_to_gpu_ary_method(VALUE nmatrix);
+dev_ptr* rb_nmatrix_to_dev_ary(VALUE nm);
+
 void Init_rbcuda() {
   RbCUDA = rb_define_module("RbCUDA");
 
   Dev_Array = rb_define_class_under(RbCUDA, "Dev_Array", rb_cObject);
+  rb_define_method(Dev_Array, "to_nmatrix", (METHOD)rb_dev_ary_to_nmatrix, 0);
+
+  cNMatrix = rb_define_class("NMatrix", rb_cObject);
+  rb_define_method(cNMatrix, "to_af_array", (METHOD)rb_nmatrix_to_gpu_ary_method, 0);
+
   CuBLASHandler= rb_define_class_under(RbCUDA, "CuBLASHandler", rb_cObject);
   Driver = rb_define_class_under(RbCUDA, "Driver", rb_cObject);
   rb_define_singleton_method(Driver, "test_kernel", (METHOD)test_kernel, 1);
