@@ -17,6 +17,7 @@ void Init_rbcuda();
 static void rbcu_free(dev_ptr* ptr);
 cudaMemcpyKind rbcu_memcopy_kind(VALUE sym);
 cublasOperation_t rbcu_cublasOperation_t(VALUE sym);
+cudaOutputMode_t rb_cuda_output_from_rbsymbol(VALUE sym);
 
 inline void __checkCudaErrors( CUresult err, const char *file, const int line );
 void initCUDA(char* module_file, char* kernel_name);
@@ -829,7 +830,7 @@ static VALUE rb_cudaGetExportTable(VALUE self);
 
 
 //Profiler
-static VALUE rb_cudaProfilerInitialize(VALUE self);
+static VALUE rb_cudaProfilerInitialize(VALUE self, VALUE config_file_val, VALUE output_file_val, VALUE output_mode_val);
 static VALUE rb_cudaProfilerStart(VALUE self);
 static VALUE rb_cudaProfilerStop(VALUE self);
 
@@ -1706,7 +1707,7 @@ void Init_rbcuda() {
   rb_define_singleton_method(CuRand, "curandGetScrambleConstants64", (METHOD)rb_curandGetScrambleConstants64, 0);
 
   Profiler = rb_define_module_under(RbCUDA, "Profiler");
-  rb_define_singleton_method(Profiler, "cudaProfilerInitialize", (METHOD)rb_cudaProfilerInitialize, 0);
+  rb_define_singleton_method(Profiler, "cudaProfilerInitialize", (METHOD)rb_cudaProfilerInitialize, 3);
   rb_define_singleton_method(Profiler, "cudaProfilerStart", (METHOD)rb_cudaProfilerStart, 0);
   rb_define_singleton_method(Profiler, "cudaProfilerStop", (METHOD)rb_cudaProfilerStop, 0);
 
