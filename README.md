@@ -1,6 +1,6 @@
-# Rbcuda
+# RbCUDA
 
-The main objective of RbCUDA would be:
+The main objectives of RbCUDA are:
 1. Map all of CUDA into Ruby
 2. Ready-made on-GPU linear algebra, reduction, scan using cuBLAS, cuMath, cuSolver libraries.
 3. Random Numer generator using cuRand
