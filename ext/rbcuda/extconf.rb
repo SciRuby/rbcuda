@@ -25,14 +25,14 @@ HEADER_DIRS = [
   INCLUDEDIR,
   '/usr/include',
   nmatrix_header_dir
-]
+] + (ENV['CPATH'] || '').split(':')
 
 LIB_DIRS = [
   '/opt/local/lib',
   '/usr/local/lib',
   LIBDIR,
   '/usr/lib',
-]
+] + (ENV['LIBRARY_PATH'] || '').split(':')
 
 dir_config(extension_name, HEADER_DIRS, LIB_DIRS)
 
