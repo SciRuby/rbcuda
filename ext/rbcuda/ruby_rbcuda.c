@@ -9,6 +9,10 @@ VALUE Profiler = Qnil;
 VALUE Runtime = Qnil;
 VALUE CuBLASHandler = Qnil;
 VALUE RbCuContext = Qnil;
+VALUE RbCuModule = Qnil;
+VALUE RbCuFunction = Qnil;
+VALUE RbCuTexture = Qnil;
+VALUE RbCuSurface = Qnil;
 VALUE Driver = Qnil;
 VALUE Arithmetic = Qnil;
 
@@ -28,6 +32,8 @@ CUfunc_cache rb_cu_func_cache_from_rbsymbol(VALUE sym);
 const char* get_func_cache_name(CUfunc_cache cache);
 CUsharedconfig rb_cu_shared_config_from_rbsymbol(VALUE sym);
 const char* get_shared_config_name(CUsharedconfig config);
+CUjit_option rb_cu_jit_option_from_rbsymbol(VALUE sym);
+const char* get_jit_option_name(CUjit_option option);
 
 inline void __checkCudaErrors( CUresult err, const char *file, const int line );
 void initCUDA(char* module_file, char* kernel_name);
@@ -527,15 +533,15 @@ static VALUE rb_cuCtxGetApiVersion(VALUE self, VALUE ctx_val);
 static VALUE rb_cuCtxGetStreamPriorityRange(VALUE self);
 static VALUE rb_cuCtxAttach(VALUE self, VALUE flags);
 static VALUE rb_cuCtxDetach(VALUE self, VALUE ctx_val);
-static VALUE rb_cuModuleLoad(VALUE self);
-static VALUE rb_cuModuleLoadData(VALUE self);
-static VALUE rb_cuModuleLoadDataEx(VALUE self);
-static VALUE rb_cuModuleLoadFatBinary(VALUE self);
-static VALUE rb_cuModuleUnload(VALUE self);
-static VALUE rb_cuModuleGetFunction(VALUE self);
-static VALUE rb_cuModuleGetGlobal_v2(VALUE self);
-static VALUE rb_cuModuleGetTexRef(VALUE self);
-static VALUE rb_cuModuleGetSurfRef(VALUE self);
+static VALUE rb_cuModuleLoad(VALUE self, VALUE file_name);
+static VALUE rb_cuModuleLoadData(VALUE self, VALUE image);
+static VALUE rb_cuModuleLoadDataEx(VALUE self, VALUE image, VALUE num_options, VALUE option_val, VALUE options_values);
+static VALUE rb_cuModuleLoadFatBinary(VALUE self, VALUE fat_cu_bin);
+static VALUE rb_cuModuleUnload(VALUE self, VALUE module_val);
+static VALUE rb_cuModuleGetFunction(VALUE self, VALUE module_val, VALUE func_name);
+static VALUE rb_cuModuleGetGlobal_v2(VALUE self, VALUE module_val, VALUE global_name);
+static VALUE rb_cuModuleGetTexRef(VALUE self, VALUE module_val, VALUE texture_name);
+static VALUE rb_cuModuleGetSurfRef(VALUE self, VALUE module_val, VALUE surface_name);
 static VALUE rb_cuLinkCreate_v2(VALUE self);
 static VALUE rb_cuLinkAddData_v2(VALUE self);
 static VALUE rb_cuLinkAddFile_v2(VALUE self);
@@ -895,7 +901,10 @@ void Init_rbcuda() {
 
   CuBLASHandler= rb_define_class_under(RbCUDA, "CuBLASHandler", rb_cObject);
   RbCuContext= rb_define_class_under(RbCUDA, "RbCuContext", rb_cObject);
-
+  RbCuModule = rb_define_class_under(RbCUDA, "RbCuModule", rb_cObject);
+  RbCuFunction = rb_define_class_under(RbCUDA, "RbCuFunction", rb_cObject);
+  RbCuTexture = rb_define_class_under(RbCUDA, "RbCuTexture", rb_cObject);
+  RbCuSurface = rb_define_class_under(RbCUDA, "RbCuSurface", rb_cObject);
 
   Driver = rb_define_class_under(RbCUDA, "Driver", rb_cObject);
   rb_define_singleton_method(Driver, "test_kernel", (METHOD)test_kernel, 1);

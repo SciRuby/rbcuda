@@ -554,74 +554,281 @@ static VALUE rb_cuCtxDetach(VALUE self, VALUE ctx_val){
   return Qnil;
 }
 
-static VALUE rb_cuModuleLoad(VALUE self){
-  CUresult cuModuleLoad (CUmodule* module_, const(char)* fname);
+// CUresult cuModuleLoad ( CUmodule* module, const char* fname )
+// Loads a compute module.
+// Parameters
+// module
+// - Returned module
+// fname
+// - Filename of module to load
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT,
+// CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_INVALID_PTX, CUDA_ERROR_NOT_FOUND, CUDA_ERROR_OUT_OF_MEMORY,
+// CUDA_ERROR_FILE_NOT_FOUND, CUDA_ERROR_NO_BINARY_FOR_GPU, CUDA_ERROR_SHARED_OBJECT_SYMBOL_NOT_FOUND,
+// CUDA_ERROR_SHARED_OBJECT_INIT_FAILED
+
+static VALUE rb_cuModuleLoad(VALUE self, VALUE file_name){
+  mod_ptr* mod = ALLOC(mod_ptr);
+  const char* fname = StringValueCStr(file_name);
+  CUresult result = cuModuleLoad(&mod->module, fname);
+  return Data_Wrap_Struct(RbCuModule, NULL, rbcu_free, mod);
+}
+
+// CUresult cuModuleLoadData ( CUmodule* module, const void* image )
+// Load a module's data.
+// Parameters
+// module
+// - Returned module
+// image
+// - Module data to load
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT,
+// CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_INVALID_PTX, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_NO_BINARY_FOR_GPU,
+// CUDA_ERROR_SHARED_OBJECT_SYMBOL_NOT_FOUND, CUDA_ERROR_SHARED_OBJECT_INIT_FAILED
+
+static VALUE rb_cuModuleLoadData(VALUE self, VALUE image){
+  mod_ptr* mod = ALLOC(mod_ptr);
+  CUresult result = cuModuleLoadData(&mod->module, (void*)image);
+  return Data_Wrap_Struct(RbCuModule, NULL, rbcu_free, mod);
+}
+
+// CUresult cuModuleLoadDataEx ( CUmodule* module, const void* image, unsigned int  numOptions, CUjit_option* options, void** optionValues )
+// Load a module's data with options.
+// Parameters
+// module
+// - Returned module
+// image
+// - Module data to load
+// numOptions
+// - Number of options
+// options
+// - Options for JIT
+// optionValues
+// - Option values for JIT
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT,
+// CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_INVALID_PTX, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_NO_BINARY_FOR_GPU,
+// CUDA_ERROR_SHARED_OBJECT_SYMBOL_NOT_FOUND, CUDA_ERROR_SHARED_OBJECT_INIT_FAILED
+
+static VALUE rb_cuModuleLoadDataEx(VALUE self, VALUE image, VALUE num_options, VALUE option_val, VALUE options_values){
+  mod_ptr* mod = ALLOC(mod_ptr);
+  CUjit_option options = rb_cu_jit_option_from_rbsymbol(option_val);
+  CUresult result = cuModuleLoadDataEx (&mod->module, (void*)image, NUM2UINT(num_options), &options, (void**)options_values);
+  return Data_Wrap_Struct(RbCuModule, NULL, rbcu_free, mod);
+}
+
+// CUresult cuModuleLoadFatBinary ( CUmodule* module, const void* fatCubin )
+// Load a module's data.
+// Parameters
+// module
+// - Returned module
+// fatCubin
+// - Fat binary to load
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT,
+// CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_INVALID_PTX, CUDA_ERROR_NOT_FOUND, CUDA_ERROR_OUT_OF_MEMORY,
+// CUDA_ERROR_NO_BINARY_FOR_GPU, CUDA_ERROR_SHARED_OBJECT_SYMBOL_NOT_FOUND, CUDA_ERROR_SHARED_OBJECT_INIT_FAILED
+
+static VALUE rb_cuModuleLoadFatBinary(VALUE self, VALUE fat_cu_bin){
+  mod_ptr* mod = ALLOC(mod_ptr);
+  CUresult result = cuModuleLoadFatBinary(&mod->module, (void*)fat_cu_bin);
+  return Data_Wrap_Struct(RbCuModule, NULL, rbcu_free, mod);
+}
+
+// CUresult cuModuleUnload ( CUmodule hmod )
+// Unloads a module.
+// Parameters
+// hmod
+// - Module to unload
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuModuleUnload(VALUE self, VALUE module_val){
+  mod_ptr* mod;
+  Data_Get_Struct(module_val, mod_ptr, mod);
+  CUresult result = cuModuleUnload(mod->module);
   return Qnil;
 }
 
-static VALUE rb_cuModuleLoadData(VALUE self){
-  CUresult cuModuleLoadData (CUmodule* module_, const(void)* image);
+// CUresult cuModuleGetFunction ( CUfunction* hfunc, CUmodule hmod, const char* name )
+// Returns a function handle.
+// Parameters
+// hfunc
+// - Returned function handle
+// hmod
+// - Module to retrieve function from
+// name
+// - Name of function to retrieve
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_NOT_FOUND
+
+static VALUE rb_cuModuleGetFunction(VALUE self, VALUE module_val, VALUE func_name){
+  mod_ptr* hmod;
+  Data_Get_Struct(module_val, mod_ptr, hmod);
+  function_ptr* hfunc = ALLOC(function_ptr);
+  CUresult result = cuModuleGetFunction(&hfunc->function, hmod->module, StringValueCStr(func_name));
+  return Data_Wrap_Struct(RbCuFunction, NULL, rbcu_free, hfunc);
+}
+
+// CUresult cuModuleGetGlobal ( CUdeviceptr* dptr, size_t* bytes, CUmodule hmod, const char* name )
+// Returns a global pointer from a module.
+// Parameters
+// dptr
+// - Returned global device pointer
+// bytes
+// - Returned global size in bytes
+// hmod
+// - Module to retrieve global from
+// name
+// - Name of global to retrieve
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_NOT_FOUND
+
+static VALUE rb_cuModuleGetGlobal_v2(VALUE self, VALUE module_val, VALUE global_name){
+  CUdeviceptr dptr;
+  size_t bytes;
+  mod_ptr* hmod;
+  Data_Get_Struct(module_val, mod_ptr, hmod);
+  CUresult result = cuModuleGetGlobal_v2 (&dptr, &bytes, hmod->module, StringValueCStr(global_name));
   return Qnil;
 }
 
-static VALUE rb_cuModuleLoadDataEx(VALUE self){
-  CUresult cuModuleLoadDataEx (CUmodule* module_, const(void)* image, uint numOptions, CUjit_option* options, void** optionValues);
-  return Qnil;
+// CUresult cuModuleGetTexRef ( CUtexref* pTexRef, CUmodule hmod, const char* name )
+// Returns a handle to a texture reference.
+// Parameters
+// pTexRef
+// - Returned texture reference
+// hmod
+// - Module to retrieve texture reference from
+// name
+// - Name of texture reference to retrieve
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_NOT_FOUND
+
+static VALUE rb_cuModuleGetTexRef(VALUE self, VALUE module_val, VALUE texture_name){
+  texture_ptr* pTexRef = ALLOC(texture_ptr);
+  mod_ptr* hmod;
+  Data_Get_Struct(module_val, mod_ptr, hmod);
+  CUresult result = cuModuleGetTexRef(&pTexRef->texture, hmod->module, StringValueCStr(texture_name));
+  return Data_Wrap_Struct(RbCuTexture, NULL, rbcu_free, pTexRef);
 }
 
-static VALUE rb_cuModuleLoadFatBinary(VALUE self){
-  CUresult cuModuleLoadFatBinary (CUmodule* module_, const(void)* fatCubin);
-  return Qnil;
+// CUresult cuModuleGetSurfRef ( CUsurfref* pSurfRef, CUmodule hmod, const char* name )
+// Returns a handle to a surface reference.
+// Parameters
+// pSurfRef
+// - Returned surface reference
+// hmod
+// - Module to retrieve surface reference from
+// name
+// - Name of surface reference to retrieve
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_NOT_FOUND
+
+static VALUE rb_cuModuleGetSurfRef(VALUE self, VALUE module_val, VALUE surface_name){
+  surface_ptr* pSurfRef = ALLOC(surface_ptr);
+  mod_ptr* hmod;
+  Data_Get_Struct(module_val, mod_ptr, hmod);
+  CUresult result = cuModuleGetSurfRef(&pSurfRef->surface, hmod->module, StringValueCStr(surface_name));
+  return Data_Wrap_Struct(RbCuSurface, NULL, rbcu_free, pSurfRef);
 }
 
-static VALUE rb_cuModuleUnload(VALUE self){
-  CUresult cuModuleUnload (CUmodule hmod);
-  return Qnil;
-}
-
-static VALUE rb_cuModuleGetFunction(VALUE self){
-  CUresult cuModuleGetFunction (CUfunction* hfunc, CUmodule hmod, const(char)* name);
-  return Qnil;
-}
-
-static VALUE rb_cuModuleGetGlobal_v2(VALUE self){
-  CUresult cuModuleGetGlobal_v2 (CUdeviceptr* dptr, size_t* bytes, CUmodule hmod, const(char)* name);
-  return Qnil;
-}
-
-static VALUE rb_cuModuleGetTexRef(VALUE self){
-  CUresult cuModuleGetTexRef (CUtexref* pTexRef, CUmodule hmod, const(char)* name);
-  return Qnil;
-}
-
-static VALUE rb_cuModuleGetSurfRef(VALUE self){
-  CUresult cuModuleGetSurfRef (CUsurfref* pSurfRef, CUmodule hmod, const(char)* name);
-  return Qnil;
-}
+// CUresult cuLinkCreate ( unsigned int  numOptions, CUjit_option* options, void** optionValues, CUlinkState* stateOut )
+// Creates a pending JIT linker invocation.
+// Parameters
+// numOptions
+// Size of options arrays
+// options
+// Array of linker and compiler options
+// optionValues
+// Array of option values, each cast to void *
+// stateOut
+// On success, this will contain a CUlinkState to specify and complete this action
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_OUT_OF_MEMORY
 
 static VALUE rb_cuLinkCreate_v2(VALUE self){
-  CUresult cuLinkCreate_v2 ( uint numOptions, CUjit_option* options, void** optionValues, CUlinkState* stateOut);
+  CUresult result = cuLinkCreate_v2 ( uint numOptions, CUjit_option* options, void** optionValues, CUlinkState* stateOut);
   return Qnil;
 }
 
+// CUresult cuLinkAddData ( CUlinkState state, CUjitInputType type, void* data, size_t size, const char* name, unsigned int  numOptions, CUjit_option* options, void** optionValues )
+// Add an input to a pending linker invocation.
+// Parameters
+// state
+// A pending linker action.
+// type
+// The type of the input data.
+// data
+// The input data. PTX must be NULL-terminated.
+// size
+// The length of the input data.
+// name
+// An optional name for this input in log messages.
+// numOptions
+// Size of options.
+// options
+// Options to be applied only for this input (overrides options from cuLinkCreate).
+// optionValues
+// Array of option values, each cast to void *.
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_INVALID_IMAGE, CUDA_ERROR_INVALID_PTX, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_NO_BINARY_FOR_GPU
 
 static VALUE rb_cuLinkAddData_v2(VALUE self){
-  CUresult cuLinkAddData_v2(CUlinkState state, CUjitInputType type, void* data, size_t size, const(char)* name, uint numOptions, CUjit_option* options, void** optionValues);
+  CUresult result = cuLinkAddData_v2(CUlinkState state, CUjitInputType type, void* data, size_t size, const(char)* name, uint numOptions, CUjit_option* options, void** optionValues);
   return Qnil;
 }
+
+// CUresult cuLinkAddFile ( CUlinkState state, CUjitInputType type, const char* path, unsigned int  numOptions, CUjit_option* options, void** optionValues )
+// Add a file input to a pending linker invocation.
+// Parameters
+// state
+// A pending linker action
+// type
+// The type of the input data
+// path
+// Path to the input file
+// numOptions
+// Size of options
+// options
+// Options to be applied only for this input (overrides options from cuLinkCreate)
+// optionValues
+// Array of option values, each cast to void *
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_FILE_NOT_FOUNDCUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_INVALID_IMAGE, CUDA_ERROR_INVALID_PTX, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_NO_BINARY_FOR_GPU
 
 static VALUE rb_cuLinkAddFile_v2(VALUE self){
-  CUresult cuLinkAddFile_v2 ( CUlinkState state, CUjitInputType type, const(char)* path, uint numOptions, CUjit_option* options, void** optionValues);
+  CUresult result = cuLinkAddFile_v2 ( CUlinkState state, CUjitInputType type, const(char)* path, uint numOptions, CUjit_option* options, void** optionValues);
   return Qnil;
 }
+
+// CUresult cuLinkComplete ( CUlinkState state, void** cubinOut, size_t* sizeOut )
+// Complete a pending linker invocation.
+// Parameters
+// state
+// A pending linker invocation
+// cubinOut
+// On success, this will point to the output image
+// sizeOut
+// Optional parameter to receive the size of the generated image
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_OUT_OF_MEMORY
 
 static VALUE rb_cuLinkComplete(VALUE self){
-  CUresult cuLinkComplete (CUlinkState state, void** cubinOut, size_t* sizeOut);
+  CUresult result = cuLinkComplete (CUlinkState state, void** cubinOut, size_t* sizeOut);
   return Qnil;
 }
 
+// CUresult cuLinkDestroy ( CUlinkState state )
+// Destroys state for a JIT linker invocation.
+// Parameters
+// state
+// State object for the linker invocation
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_INVALID_HANDLE
+
 static VALUE rb_cuLinkDestroy(VALUE self){
-  CUresult cuLinkDestroy (CUlinkState state);
+  CUresult result = cuLinkDestroy (CUlinkState state);
   return Qnil;
 }
 

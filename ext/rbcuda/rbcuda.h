@@ -13,11 +13,29 @@ typedef struct CONTEXT_PTR
   CUcontext ctx;
 }ctx_ptr;
 
+typedef struct MODULE_PTR
+{
+  CUmodule module;
+}mod_ptr;
+
+typedef struct FUNCTION_PTR
+{
+  CUfunction function;
+}function_ptr;
+
+typedef struct TEXTURE_PTR{
+  CUtexref texture;
+}texture_ptr;
+
+typedef struct SURFACE_PTR{
+  CUsurfref surface;
+}surface_ptr;
 
 typedef struct RB_CUBLAS_HANDLE
 {
   cublasHandle_t handle;
 }rb_cublas_handle;
+
 
 #ifndef HAVE_RB_ARRAY_CONST_PTR
 static inline const VALUE *

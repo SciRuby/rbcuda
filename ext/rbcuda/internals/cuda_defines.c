@@ -289,3 +289,40 @@ CUsharedconfig rb_cu_shared_config_from_rbsymbol(VALUE sym) {
 const char* get_shared_config_name(CUsharedconfig config){
   return RbCUfunc_cache_enum[config];
 }
+
+const char* const RbCUjit_option_enum[16] = {
+  "CU_JIT_MAX_REGISTERS",
+  "CU_JIT_THREADS_PER_BLOCK",
+  "CU_JIT_WALL_TIME",
+  "CU_JIT_INFO_LOG_BUFFER",
+  "CU_JIT_INFO_LOG_BUFFER_SIZE_BYTES",
+  "CU_JIT_ERROR_LOG_BUFFER",
+  "CU_JIT_ERROR_LOG_BUFFER_SIZE_BYTES",
+  "CU_JIT_OPTIMIZATION_LEVEL",
+  "CU_JIT_TARGET_FROM_CUCONTEXT",
+  "CU_JIT_TARGET",
+  "CU_JIT_FALLBACK_STRATEGY",
+  "CU_JIT_GENERATE_DEBUG_INFO",
+  "CU_JIT_LOG_VERBOSE",
+  "CU_JIT_GENERATE_LINE_INFO",
+  "CU_JIT_CACHE_MODE",
+  "CU_JIT_NUM_OPTIONS"
+};
+
+CUjit_option rb_cu_jit_option_from_rbsymbol(VALUE sym) {
+  ID sym_id = SYM2ID(sym);
+
+  for (size_t index = 0; index < 16; ++index) {
+    if (sym_id == rb_intern(RbCUjit_option_enum[index])) {
+      return static_cast<CUjit_option>(index);
+    }
+  }
+
+  VALUE str = rb_any_to_s(sym);
+  rb_raise(rb_eArgError, "invalid jit option symbol (:%s) specified", RSTRING_PTR(str));
+}
+
+const char* get_jit_option_name(CUjit_option option){
+  return RbCUfunc_cache_enum[option];
+}
+
