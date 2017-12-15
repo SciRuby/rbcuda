@@ -221,4 +221,71 @@ CUdevice_attribute rb_cu_get_attrib_from_rbsymbol(VALUE sym) {
   rb_raise(rb_eArgError, "invalid CUresult type symbol (:%s) specified", RSTRING_PTR(str));
 }
 
+const char* const RbCUlimit_enum[6] = {
+  "CU_LIMIT_STACK_SIZE", /**< GPU thread stack size */
+  "CU_LIMIT_PRINTF_FIFO_SIZE", /**< GPU printf FIFO size */
+  "CU_LIMIT_MALLOC_HEAP_SIZE", /**< GPU malloc heap size */
+  "CU_LIMIT_DEV_RUNTIME_SYNC_DEPTH", /**< GPU device runtime launch synchronize depth */
+  "CU_LIMIT_DEV_RUNTIME_PENDING_LAUNCH_COUNT", /**< GPU device runtime pending launch count */
+  "CU_LIMIT_MAX"
+};
 
+CUlimit rb_cu_limit_from_rbsymbol(VALUE sym) {
+  ID sym_id = SYM2ID(sym);
+
+  for (size_t index = 0; index < 6; ++index) {
+    if (sym_id == rb_intern(RbCUlimit_enum[index])) {
+      return static_cast<CUlimit>(index);
+    }
+  }
+
+  VALUE str = rb_any_to_s(sym);
+  rb_raise(rb_eArgError, "invalid Limit type symbol (:%s) specified", RSTRING_PTR(str));
+}
+
+const char* const RbCUfunc_cache_enum[4] = {
+  "CU_FUNC_CACHE_PREFER_NONE", /**< no preference for shared memory or L1 (default) */
+  "CU_FUNC_CACHE_PREFER_SHARED", /**< prefer larger shared memory and smaller L1 cache */
+  "CU_FUNC_CACHE_PREFER_L1", /**< prefer larger L1 cache and smaller shared memory */
+  "CU_FUNC_CACHE_PREFER_EQUAL" /**< prefer equal sized L1 cache and shared memory */
+};
+
+CUfunc_cache rb_cu_func_cache_from_rbsymbol(VALUE sym) {
+  ID sym_id = SYM2ID(sym);
+
+  for (size_t index = 0; index < 4; ++index) {
+    if (sym_id == rb_intern(RbCUfunc_cache_enum[index])) {
+      return static_cast<CUfunc_cache>(index);
+    }
+  }
+
+  VALUE str = rb_any_to_s(sym);
+  rb_raise(rb_eArgError, "invalid Func cache type symbol (:%s) specified", RSTRING_PTR(str));
+}
+
+const char* get_func_cache_name(CUfunc_cache cache){
+  return RbCUfunc_cache_enum[cache];
+}
+
+const char* const RbCUsharedconfig_enum[3] = {
+  "CU_SHARED_MEM_CONFIG_DEFAULT_BANK_SIZE", /**< set default shared memory bank size */
+  "CU_SHARED_MEM_CONFIG_FOUR_BYTE_BANK_SIZE", /**< set shared memory bank width to four bytes */
+  "CU_SHARED_MEM_CONFIG_EIGHT_BYTE_BANK_SIZE" /**< set shared memory bank width to eight bytes */
+};
+
+CUsharedconfig rb_cu_shared_config_from_rbsymbol(VALUE sym) {
+  ID sym_id = SYM2ID(sym);
+
+  for (size_t index = 0; index < 3; ++index) {
+    if (sym_id == rb_intern(RbCUsharedconfig_enum[index])) {
+      return static_cast<CUsharedconfig>(index);
+    }
+  }
+
+  VALUE str = rb_any_to_s(sym);
+  rb_raise(rb_eArgError, "invalid Shared config name symbol (:%s) specified", RSTRING_PTR(str));
+}
+
+const char* get_shared_config_name(CUsharedconfig config){
+  return RbCUfunc_cache_enum[config];
+}

@@ -8,6 +8,7 @@ VALUE Dev_Array = Qnil;
 VALUE Profiler = Qnil;
 VALUE Runtime = Qnil;
 VALUE CuBLASHandler = Qnil;
+VALUE RbCuContext = Qnil;
 VALUE Driver = Qnil;
 VALUE Arithmetic = Qnil;
 
@@ -22,6 +23,11 @@ cublasOperation_t rbcu_cublasOperation_t(VALUE sym);
 cudaOutputMode_t rb_cuda_output_from_rbsymbol(VALUE sym);
 CUresult rb_cuda_cu_result_from_rbsymbol(VALUE sym);
 CUdevice_attribute rb_cu_get_attrib_from_rbsymbol(VALUE sym);
+CUlimit rb_cu_limit_from_rbsymbol(VALUE sym);
+CUfunc_cache rb_cu_func_cache_from_rbsymbol(VALUE sym);
+const char* get_func_cache_name(CUfunc_cache cache);
+CUsharedconfig rb_cu_shared_config_from_rbsymbol(VALUE sym);
+const char* get_shared_config_name(CUsharedconfig config);
 
 inline void __checkCudaErrors( CUresult err, const char *file, const int line );
 void initCUDA(char* module_file, char* kernel_name);
@@ -502,25 +508,25 @@ static VALUE rb_cuDevicePrimaryCtxRelease(VALUE self, VALUE device_val);
 static VALUE rb_cuDevicePrimaryCtxSetFlags(VALUE self, VALUE  device_val, VALUE flags);
 static VALUE rb_cuDevicePrimaryCtxGetState(VALUE self, VALUE device_val);
 static VALUE rb_cuDevicePrimaryCtxReset(VALUE self, VALUE device_val);
-static VALUE rb_cuCtxCreate_v2(VALUE self);
-static VALUE rb_cuCtxDestroy_v2(VALUE self);
-static VALUE rb_cuCtxPushCurrent_v2(VALUE self);
+static VALUE rb_cuCtxCreate_v2(VALUE self, VALUE flags, VALUE device_val);
+static VALUE rb_cuCtxDestroy_v2(VALUE self, VALUE ctx_val);
+static VALUE rb_cuCtxPushCurrent_v2(VALUE self, VALUE ctx_val);
 static VALUE rb_cuCtxPopCurrent_v2(VALUE self);
-static VALUE rb_cuCtxSetCurrent(VALUE self);
+static VALUE rb_cuCtxSetCurrent(VALUE self, VALUE ctx_val);
 static VALUE rb_cuCtxGetCurrent(VALUE self);
 static VALUE rb_cuCtxGetDevice(VALUE self);
 static VALUE rb_cuCtxGetFlags(VALUE self);
 static VALUE rb_cuCtxSynchronize(VALUE self);
-static VALUE rb_cuCtxSetLimit(VALUE self);
-static VALUE rb_cuCtxGetLimit(VALUE self);
+static VALUE rb_cuCtxSetLimit(VALUE self, VALUE limit_val, VALUE limit_size);
+static VALUE rb_cuCtxGetLimit(VALUE self, VALUE limit_val);
 static VALUE rb_cuCtxGetCacheConfig(VALUE self);
-static VALUE rb_cuCtxSetCacheConfig(VALUE self);
+static VALUE rb_cuCtxSetCacheConfig(VALUE self, VALUE config_val);
 static VALUE rb_cuCtxGetSharedMemConfig(VALUE self);
-static VALUE rb_cuCtxSetSharedMemConfig(VALUE self);
-static VALUE rb_cuCtxGetApiVersion(VALUE self);
+static VALUE rb_cuCtxSetSharedMemConfig(VALUE self, VALUE config_val);
+static VALUE rb_cuCtxGetApiVersion(VALUE self, VALUE ctx_val);
 static VALUE rb_cuCtxGetStreamPriorityRange(VALUE self);
-static VALUE rb_cuCtxAttach(VALUE self);
-static VALUE rb_cuCtxDetach(VALUE self);
+static VALUE rb_cuCtxAttach(VALUE self, VALUE flags);
+static VALUE rb_cuCtxDetach(VALUE self, VALUE ctx_val);
 static VALUE rb_cuModuleLoad(VALUE self);
 static VALUE rb_cuModuleLoadData(VALUE self);
 static VALUE rb_cuModuleLoadDataEx(VALUE self);
@@ -888,6 +894,9 @@ void Init_rbcuda() {
   rb_define_method(cNMatrix, "to_af_array", (METHOD)rb_nmatrix_to_gpu_ary_method, 0);
 
   CuBLASHandler= rb_define_class_under(RbCUDA, "CuBLASHandler", rb_cObject);
+  RbCuContext= rb_define_class_under(RbCUDA, "RbCuContext", rb_cObject);
+
+
   Driver = rb_define_class_under(RbCUDA, "Driver", rb_cObject);
   rb_define_singleton_method(Driver, "test_kernel", (METHOD)test_kernel, 1);
 

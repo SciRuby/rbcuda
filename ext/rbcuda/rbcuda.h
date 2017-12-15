@@ -8,6 +8,12 @@ typedef struct DEV_PTR
   double* carray;
 }dev_ptr;
 
+typedef struct CONTEXT_PTR
+{
+  CUcontext ctx;
+}ctx_ptr;
+
+
 typedef struct RB_CUBLAS_HANDLE
 {
   cublasHandle_t handle;
