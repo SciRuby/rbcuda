@@ -326,3 +326,30 @@ const char* get_jit_option_name(CUjit_option option){
   return RbCUfunc_cache_enum[option];
 }
 
+const char* const RbCUjitInputType_enum[6] = {
+  "CU_JIT_INPUT_CUBIN",
+  "CU_JIT_INPUT_PTX",
+  "CU_JIT_INPUT_FATBINARY",
+  "CU_JIT_INPUT_OBJECT",
+  "CU_JIT_INPUT_LIBRARY",
+  "CU_JIT_NUM_INPUT_TYPES"
+};
+
+
+CUjitInputType rb_cu_jit_type_from_rbsymbol(VALUE sym) {
+  ID sym_id = SYM2ID(sym);
+
+  for (size_t index = 0; index < 6; ++index) {
+    if (sym_id == rb_intern(RbCUjitInputType_enum[index])) {
+      return static_cast<CUjitInputType>(index);
+    }
+  }
+
+  VALUE str = rb_any_to_s(sym);
+  rb_raise(rb_eArgError, "invalid jit option symbol (:%s) specified", RSTRING_PTR(str));
+}
+
+const char* get_jit_type_name(CUjitInputType option){
+  return RbCUfunc_cache_enum[option];
+}
+

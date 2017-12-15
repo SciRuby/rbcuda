@@ -23,13 +23,20 @@ typedef struct FUNCTION_PTR
   CUfunction function;
 }function_ptr;
 
-typedef struct TEXTURE_PTR{
+typedef struct TEXTURE_PTR
+{
   CUtexref texture;
 }texture_ptr;
 
-typedef struct SURFACE_PTR{
+typedef struct SURFACE_PTR
+{
   CUsurfref surface;
 }surface_ptr;
+
+typedef struct LINK_STATE_PTR
+{
+  CUlinkState link_state;
+}link_state_ptr;
 
 typedef struct RB_CUBLAS_HANDLE
 {

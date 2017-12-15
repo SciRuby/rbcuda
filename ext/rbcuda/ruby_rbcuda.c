@@ -13,6 +13,7 @@ VALUE RbCuModule = Qnil;
 VALUE RbCuFunction = Qnil;
 VALUE RbCuTexture = Qnil;
 VALUE RbCuSurface = Qnil;
+VALUE RbCuLinkState = Qnil;
 VALUE Driver = Qnil;
 VALUE Arithmetic = Qnil;
 
@@ -34,6 +35,8 @@ CUsharedconfig rb_cu_shared_config_from_rbsymbol(VALUE sym);
 const char* get_shared_config_name(CUsharedconfig config);
 CUjit_option rb_cu_jit_option_from_rbsymbol(VALUE sym);
 const char* get_jit_option_name(CUjit_option option);
+CUjitInputType rb_cu_jit_type_from_rbsymbol(VALUE sym);
+const char* get_jit_type_name(CUjitInputType option);
 
 inline void __checkCudaErrors( CUresult err, const char *file, const int line );
 void initCUDA(char* module_file, char* kernel_name);
@@ -542,11 +545,11 @@ static VALUE rb_cuModuleGetFunction(VALUE self, VALUE module_val, VALUE func_nam
 static VALUE rb_cuModuleGetGlobal_v2(VALUE self, VALUE module_val, VALUE global_name);
 static VALUE rb_cuModuleGetTexRef(VALUE self, VALUE module_val, VALUE texture_name);
 static VALUE rb_cuModuleGetSurfRef(VALUE self, VALUE module_val, VALUE surface_name);
-static VALUE rb_cuLinkCreate_v2(VALUE self);
-static VALUE rb_cuLinkAddData_v2(VALUE self);
-static VALUE rb_cuLinkAddFile_v2(VALUE self);
-static VALUE rb_cuLinkComplete(VALUE self);
-static VALUE rb_cuLinkDestroy(VALUE self);
+static VALUE rb_cuLinkCreate_v2(VALUE self, VALUE num_options, VALUE options, VALUE option_values);
+static VALUE rb_cuLinkAddData_v2(VALUE self, VALUE state_val, VALUE jit_type, VALUE data, VALUE size, VALUE name, VALUE num_options, VALUE options, VALUE option_values);
+static VALUE rb_cuLinkAddFile_v2(VALUE self, VALUE state_val, VALUE jit_type, VALUE path, VALUE num_options, VALUE options, VALUE option_values);
+static VALUE rb_cuLinkComplete(VALUE self, VALUE state_val);
+static VALUE rb_cuLinkDestroy(VALUE self, VALUE state_val);
 static VALUE rb_cuMemGetInfo_v2(VALUE self);
 static VALUE rb_cuMemAlloc_v2(VALUE self);
 static VALUE rb_cuMemAllocPitch_v2(VALUE self);
@@ -899,12 +902,13 @@ void Init_rbcuda() {
   cNMatrix = rb_define_class("NMatrix", rb_cObject);
   rb_define_method(cNMatrix, "to_af_array", (METHOD)rb_nmatrix_to_gpu_ary_method, 0);
 
-  CuBLASHandler= rb_define_class_under(RbCUDA, "CuBLASHandler", rb_cObject);
-  RbCuContext= rb_define_class_under(RbCUDA, "RbCuContext", rb_cObject);
-  RbCuModule = rb_define_class_under(RbCUDA, "RbCuModule", rb_cObject);
-  RbCuFunction = rb_define_class_under(RbCUDA, "RbCuFunction", rb_cObject);
-  RbCuTexture = rb_define_class_under(RbCUDA, "RbCuTexture", rb_cObject);
-  RbCuSurface = rb_define_class_under(RbCUDA, "RbCuSurface", rb_cObject);
+  CuBLASHandler = rb_define_class_under(RbCUDA, "CuBLASHandler", rb_cObject);
+  RbCuContext   = rb_define_class_under(RbCUDA, "RbCuContext",   rb_cObject);
+  RbCuModule    = rb_define_class_under(RbCUDA, "RbCuModule",    rb_cObject);
+  RbCuFunction  = rb_define_class_under(RbCUDA, "RbCuFunction",  rb_cObject);
+  RbCuTexture   = rb_define_class_under(RbCUDA, "RbCuTexture",   rb_cObject);
+  RbCuSurface   = rb_define_class_under(RbCUDA, "RbCuSurface",   rb_cObject);
+  RbCuLinkState = rb_define_class_under(RbCUDA, "RbCuLinkState", rb_cObject);
 
   Driver = rb_define_class_under(RbCUDA, "Driver", rb_cObject);
   rb_define_singleton_method(Driver, "test_kernel", (METHOD)test_kernel, 1);

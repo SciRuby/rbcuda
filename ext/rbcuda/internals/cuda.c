@@ -747,9 +747,11 @@ static VALUE rb_cuModuleGetSurfRef(VALUE self, VALUE module_val, VALUE surface_n
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_OUT_OF_MEMORY
 
-static VALUE rb_cuLinkCreate_v2(VALUE self){
-  CUresult result = cuLinkCreate_v2 ( uint numOptions, CUjit_option* options, void** optionValues, CUlinkState* stateOut);
-  return Qnil;
+static VALUE rb_cuLinkCreate_v2(VALUE self, VALUE num_options, VALUE options, VALUE option_values){
+  link_state_ptr* state_out = ALLOC(link_state_ptr);
+  CUjit_option jit_option = rb_cu_jit_option_from_rbsymbol(options);
+  CUresult result = cuLinkCreate_v2(NUM2UINT(num_options), &jit_option, (void**)option_values, &state_out->link_state);
+  return Data_Wrap_Struct(RbCuLinkState, NULL, rbcu_free, state_out);
 }
 
 // CUresult cuLinkAddData ( CUlinkState state, CUjitInputType type, void* data, size_t size, const char* name, unsigned int  numOptions, CUjit_option* options, void** optionValues )
@@ -774,9 +776,12 @@ static VALUE rb_cuLinkCreate_v2(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_INVALID_IMAGE, CUDA_ERROR_INVALID_PTX, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_NO_BINARY_FOR_GPU
 
-static VALUE rb_cuLinkAddData_v2(VALUE self){
-  CUresult result = cuLinkAddData_v2(CUlinkState state, CUjitInputType type, void* data, size_t size, const(char)* name, uint numOptions, CUjit_option* options, void** optionValues);
-  return Qnil;
+static VALUE rb_cuLinkAddData_v2(VALUE self, VALUE state_val, VALUE jit_type, VALUE data, VALUE size, VALUE name, VALUE num_options, VALUE options, VALUE option_values){
+  link_state_ptr* state_out;
+  Data_Get_Struct(state_val, link_state_ptr, state_out);
+  CUjit_option jit_option = rb_cu_jit_option_from_rbsymbol(options);
+  CUresult result = cuLinkAddData_v2(state_out->link_state, rb_cu_jit_type_from_rbsymbol(jit_type), (void*)data, NUM2ULONG(size), StringValueCStr(name), NUM2UINT(num_options), &jit_option, (void**)option_values);
+  return Qtrue;
 }
 
 // CUresult cuLinkAddFile ( CUlinkState state, CUjitInputType type, const char* path, unsigned int  numOptions, CUjit_option* options, void** optionValues )
@@ -797,9 +802,12 @@ static VALUE rb_cuLinkAddData_v2(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_FILE_NOT_FOUNDCUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_INVALID_IMAGE, CUDA_ERROR_INVALID_PTX, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_NO_BINARY_FOR_GPU
 
-static VALUE rb_cuLinkAddFile_v2(VALUE self){
-  CUresult result = cuLinkAddFile_v2 ( CUlinkState state, CUjitInputType type, const(char)* path, uint numOptions, CUjit_option* options, void** optionValues);
-  return Qnil;
+static VALUE rb_cuLinkAddFile_v2(VALUE self, VALUE state_val, VALUE jit_type, VALUE path, VALUE num_options, VALUE options, VALUE option_values){
+  link_state_ptr* state_out;
+  Data_Get_Struct(state_val, link_state_ptr, state_out);
+  CUjit_option jit_option = rb_cu_jit_option_from_rbsymbol(options);
+  CUresult result = cuLinkAddFile_v2(state_out->link_state, rb_cu_jit_type_from_rbsymbol(jit_type), StringValueCStr(path), NUM2UINT(num_options), &jit_option, (void**)option_values);
+  return Qtrue;
 }
 
 // CUresult cuLinkComplete ( CUlinkState state, void** cubinOut, size_t* sizeOut )
@@ -814,8 +822,12 @@ static VALUE rb_cuLinkAddFile_v2(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_OUT_OF_MEMORY
 
-static VALUE rb_cuLinkComplete(VALUE self){
-  CUresult result = cuLinkComplete (CUlinkState state, void** cubinOut, size_t* sizeOut);
+static VALUE rb_cuLinkComplete(VALUE self, VALUE state_val){
+  link_state_ptr* state_out;
+  Data_Get_Struct(state_val, link_state_ptr, state_out);
+  void* cubin_out;
+  size_t size_out;
+  CUresult result = cuLinkComplete(state_out->link_state, &cubin_out, &size_out);
   return Qnil;
 }
 
@@ -827,8 +839,10 @@ static VALUE rb_cuLinkComplete(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_INVALID_HANDLE
 
-static VALUE rb_cuLinkDestroy(VALUE self){
-  CUresult result = cuLinkDestroy (CUlinkState state);
+static VALUE rb_cuLinkDestroy(VALUE self, VALUE state_val){
+  link_state_ptr* state_out;
+  Data_Get_Struct(state_val, link_state_ptr, state_out);
+  CUresult result = cuLinkDestroy(state_out->link_state);
   return Qnil;
 }
 
