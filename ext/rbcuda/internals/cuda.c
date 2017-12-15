@@ -139,7 +139,7 @@ static VALUE rb_cuDeviceTotalMem_v2(VALUE self, VALUE device_val){
 static VALUE rb_cuDeviceGetAttribute(VALUE self, VALUE pi_val, VALUE attrib_val, VALUE device_val){
   int pi;
   CUdevice dev = NUM2ULONG(device_val);
-  CUdevice_attribute attrib = rb_cu_get_attrib_value(attrib_val);
+  CUdevice_attribute attrib = rb_cu_get_attrib_from_rbsymbol(attrib_val);
   CUresult result = cuDeviceGetAttribute(&pi, attrib, dev);
   return INT2NUM(pi);
 }
@@ -155,8 +155,8 @@ static VALUE rb_cuDeviceGetAttribute(VALUE self, VALUE pi_val, VALUE attrib_val,
 static VALUE rb_cuDeviceGetProperties(VALUE self, VALUE device_val){
   CUdevice dev = NUM2ULONG(device_val);
   CUdevprop* prop;
-  CUresult cuDeviceGetProperties(prop, dev);
-  return Qnil;
+  CUresult result = cuDeviceGetProperties(prop, dev);
+  return ULONG2NUM(dev);
 }
 
 // CUresult cuDeviceComputeCapability ( int* major, int* minor, CUdevice dev )

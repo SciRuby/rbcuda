@@ -21,6 +21,7 @@ cublasOperation_t rbcu_cublasOperation_t(VALUE sym);
 //cuda_defines.c
 cudaOutputMode_t rb_cuda_output_from_rbsymbol(VALUE sym);
 CUresult rb_cuda_cu_result_from_rbsymbol(VALUE sym);
+CUdevice_attribute rb_cu_get_attrib_from_rbsymbol(VALUE sym);
 
 inline void __checkCudaErrors( CUresult err, const char *file, const int line );
 void initCUDA(char* module_file, char* kernel_name);
@@ -495,12 +496,12 @@ static VALUE rb_cuDeviceGetName(VALUE self, VALUE len_val, VALUE device_val);
 static VALUE rb_cuDeviceTotalMem_v2(VALUE self, VALUE device_val);
 static VALUE rb_cuDeviceGetAttribute(VALUE self, VALUE pi_val, VALUE attrib_val, VALUE device_val)
 static VALUE rb_cuDeviceGetProperties(VALUE self, VALUE device_val)
-static VALUE rb_cuDeviceComputeCapability(VALUE self);
-static VALUE rb_cuDevicePrimaryCtxRetain(VALUE self);
-static VALUE rb_cuDevicePrimaryCtxRelease(VALUE self);
-static VALUE rb_cuDevicePrimaryCtxSetFlags(VALUE self);
-static VALUE rb_cuDevicePrimaryCtxGetState(VALUE self);
-static VALUE rb_cuDevicePrimaryCtxReset(VALUE self);
+static VALUE rb_cuDeviceComputeCapability(VALUE self, VALUE device_val);
+static VALUE rb_cuDevicePrimaryCtxRetain(VALUE self, VALUE device_val);
+static VALUE rb_cuDevicePrimaryCtxRelease(VALUE self, VALUE device_val);
+static VALUE rb_cuDevicePrimaryCtxSetFlags(VALUE self, VALUE  device_val, VALUE flags);
+static VALUE rb_cuDevicePrimaryCtxGetState(VALUE self, VALUE device_val);
+static VALUE rb_cuDevicePrimaryCtxReset(VALUE self, VALUE device_val);
 static VALUE rb_cuCtxCreate_v2(VALUE self);
 static VALUE rb_cuCtxDestroy_v2(VALUE self);
 static VALUE rb_cuCtxPushCurrent_v2(VALUE self);
