@@ -8,8 +8,8 @@
 */
 
 static VALUE rb_cuGetErrorString(VALUE self, VALUE error_val){
-  char* pStr;
-  CUresult error = rb_cu_get_error(error_val);
+  const char* pStr;
+  CUresult error = rb_cuda_cu_result_from_rbsymbol(error_val);
   CUresult result = cuGetErrorString(error, &pStr);
   return rb_str_new_cstr(pStr);
 }
@@ -25,8 +25,8 @@ static VALUE rb_cuGetErrorString(VALUE self, VALUE error_val){
 // CUDA_SUCCESS, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuGetErrorName(VALUE self, VALUE error_val){
-  char* pStr;
-  CUresult error = rb_cu_get_error(error_val);
+  const char* pStr;
+  CUresult error = rb_cuda_cu_result_from_rbsymbol(error_val);
   CUresult result = cuGetErrorName(error, &pStr);
   return rb_str_new_cstr(pStr);
 }
@@ -53,8 +53,9 @@ static VALUE rb_cuInit(VALUE self, VALUE flags){
 // CUDA_SUCCESS, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuDriverGetVersion(VALUE self, VALUE driver_version_val){
-  CUresult result = cuDriverGetVersion(int* driverVersion);
-  return Qtrue;
+  int driverVersion;
+  CUresult result = cuDriverGetVersion(&driverVersion);
+  return INT2NUM(driverVersion);
 }
 
 // CUresult cuDeviceGet ( CUdevice* device, int  ordinal )
@@ -67,9 +68,10 @@ static VALUE rb_cuDriverGetVersion(VALUE self, VALUE driver_version_val){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_INVALID_DEVICE
 
-static VALUE rb_cuDeviceGet(VALUE self, VALUE device_val, VALUE ordinal){
-  CUresult result = cuDeviceGet(CUdevice* device, int ordinal);
-  return Qtrue;
+static VALUE rb_cuDeviceGet(VALUE self, VALUE ordinal){
+  CUdevice device;
+  CUresult result = cuDeviceGet(&device, NUM2INT(ordinal));
+  return UINT2NUM(device);
 }
 
 // CUresult cuDeviceGetCount ( int* count )
@@ -82,7 +84,7 @@ static VALUE rb_cuDeviceGet(VALUE self, VALUE device_val, VALUE ordinal){
 
 static VALUE rb_cuDeviceGetCount(VALUE self){
   int count;
-  CUresult result = cuDeviceGetCount(count);
+  CUresult result = cuDeviceGetCount(&count);
   return INT2NUM(count);
 }
 
@@ -100,9 +102,9 @@ static VALUE rb_cuDeviceGetCount(VALUE self){
 
 static VALUE rb_cuDeviceGetName(VALUE self, VALUE len_val, VALUE device_val){
   char* name;
-  CUdevice dev = rb_cu_get_dev_value(device_val);
-  CUresult result = cuDeviceGetName(name, NUM2INT(len_val), CUdevice dev);
-  return rb_str_new_cstr(name);;
+  CUdevice dev = NUM2ULONG(device_val);
+  CUresult result = cuDeviceGetName(name, NUM2INT(len_val), dev);
+  return rb_str_new_cstr(name);
 }
 
 // CUresult cuDeviceTotalMem ( size_t* bytes, CUdevice dev )
@@ -116,10 +118,10 @@ static VALUE rb_cuDeviceGetName(VALUE self, VALUE len_val, VALUE device_val){
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_INVALID_DEVICE
 
 static VALUE rb_cuDeviceTotalMem_v2(VALUE self, VALUE device_val){
-  CUdevice dev = rb_cu_get_dev_value(device_val);
   size_t bytes;
-  CUresult result = cuDeviceTotalMem_v2(&bytes, CUdevice dev);
-  return UINT2NUM(bytes);
+  CUdevice dev = NUM2ULONG(device_val);
+  CUresult result = cuDeviceTotalMem_v2(&bytes, dev);
+  return ULONG2NUM(bytes);
 }
 
 // CUresult cuDeviceGetAttribute ( int* pi, CUdevice_attribute attrib, CUdevice dev )
@@ -135,66 +137,199 @@ static VALUE rb_cuDeviceTotalMem_v2(VALUE self, VALUE device_val){
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_INVALID_DEVICE
 
 static VALUE rb_cuDeviceGetAttribute(VALUE self, VALUE pi_val, VALUE attrib_val, VALUE device_val){
-  CUdevice dev = rb_cu_get_dev_value(device_val);
+  int pi;
+  CUdevice dev = NUM2ULONG(device_val);
   CUdevice_attribute attrib = rb_cu_get_attrib_value(attrib_val);
-  CUresult result = cuDeviceGetAttribute (int* pi, attrib, dev);
+  CUresult result = cuDeviceGetAttribute(&pi, attrib, dev);
+  return INT2NUM(pi);
+}
+
+// CUresult cuDeviceGetProperties ( CUdevprop* prop, CUdevice dev )
+// Returns properties for a selected device.
+// Parameters
+// prop
+// - Returned properties of device
+// dev
+// - Device to get properties for
+
+static VALUE rb_cuDeviceGetProperties(VALUE self, VALUE device_val){
+  CUdevice dev = NUM2ULONG(device_val);
+  CUdevprop* prop;
+  CUresult cuDeviceGetProperties(prop, dev);
   return Qnil;
 }
 
-static VALUE rb_cuDeviceGetProperties(VALUE self){
-  CUresult cuDeviceGetProperties (CUdevprop* prop, CUdevice dev);
+// CUresult cuDeviceComputeCapability ( int* major, int* minor, CUdevice dev )
+// Returns the compute capability of the device.
+// Parameters
+// major
+// - Major revision number
+// minor
+// - Minor revision number
+// dev
+// - Device handle
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_INVALID_DEVICE
+
+static VALUE rb_cuDeviceComputeCapability(VALUE self, VALUE device_val){
+  int major, minor;
+  CUdevice dev = NUM2ULONG(device_val);
+  CUresult result = cuDeviceComputeCapability(&major, &minor, dev);
   return Qnil;
 }
 
-static VALUE rb_cuDeviceComputeCapability(VALUE self){
-  CUresult cuDeviceComputeCapability (int* major, int* minor, CUdevice dev);
+// CUresult cuDevicePrimaryCtxRetain ( CUcontext* pctx, CUdevice dev )
+// Retain the primary context on the GPU.
+// Parameters
+// pctx
+// - Returned context handle of the new context
+// dev
+// - Device for which primary context is requested
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT,
+// CUDA_ERROR_INVALID_DEVICE, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_UNKNOWN
+
+static VALUE rb_cuDevicePrimaryCtxRetain(VALUE self, VALUE device_val){
+  CUdevice dev = NUM2ULONG(device_val);
+  CUcontext* pctx;
+  CUresult result = cuDevicePrimaryCtxRetain(&pctx, CUdevice dev);
   return Qnil;
 }
 
-static VALUE rb_cuDevicePrimaryCtxRetain(VALUE self){
-  CUresult cuDevicePrimaryCtxRetain (CUcontext* pctx, CUdevice dev);
+// CUresult cuDevicePrimaryCtxRelease ( CUdevice dev )
+// Release the primary context on the GPU.
+// Parameters
+// dev
+// - Device which primary context is released
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_DEVICE
+
+static VALUE rb_cuDevicePrimaryCtxRelease(VALUE self, VALUE device_val){
+  CUdevice dev = NUM2ULONG(device_val);
+  CUresult result = cuDevicePrimaryCtxRelease(CUdevice dev);
   return Qnil;
 }
 
-static VALUE rb_cuDevicePrimaryCtxRelease(VALUE self){
-  CUresult cuDevicePrimaryCtxRelease (CUdevice dev);
+// CUresult cuDevicePrimaryCtxSetFlags ( CUdevice dev, unsigned int  flags )
+// Set flags for the primary context.
+// Parameters
+// dev
+// - Device for which the primary context flags are set
+// flags
+// - New flags for the device
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_DEVICE,
+// CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_PRIMARY_CONTEXT_ACTIVE
+
+
+static VALUE rb_cuDevicePrimaryCtxSetFlags(VALUE self, VALUE  device_val, VALUE flags){
+  CUdevice dev = NUM2ULONG(device_val);
+  CUresult result = cuDevicePrimaryCtxSetFlags (CUdevice dev, NUM2UINT(flags));
   return Qnil;
 }
 
-static VALUE rb_cuDevicePrimaryCtxSetFlags(VALUE self){
-  CUresult cuDevicePrimaryCtxSetFlags (CUdevice dev, uint flags);
+// CUresult cuDevicePrimaryCtxGetState ( CUdevice dev, unsigned int* flags, int* active )
+// Get the state of the primary context.
+// Parameters
+// dev
+// - Device to get primary context flags for
+// flags
+// - Pointer to store flags
+// active
+// - Pointer to store context state; 0 = inactive, 1 = active
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_DEVICE, CUDA_ERROR_INVALID_VALUE,
+
+static VALUE rb_cuDevicePrimaryCtxGetState(VALUE self, VALUE device_val){
+  CUdevice dev = NUM2ULONG(device_val);
+  uint flags;
+  int active;
+  CUresult cuDevicePrimaryCtxGetState(CUdevice dev, &flags, &active);
   return Qnil;
 }
 
-static VALUE rb_cuDevicePrimaryCtxGetState(VALUE self){
-  CUresult cuDevicePrimaryCtxGetState (CUdevice dev, uint* flags, int* active);
+// CUresult cuDevicePrimaryCtxReset ( CUdevice dev )
+// Destroy all allocations and reset all state on the primary context.
+// Parameters
+// dev
+// - Device for which primary context is destroyed
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_DEVICE,
+// CUDA_ERROR_PRIMARY_CONTEXT_ACTIVE
+
+static VALUE rb_cuDevicePrimaryCtxReset(VALUE self, VALUE device_val){
+  CUdevice dev = NUM2ULONG(device_val);
+  CUresult cuDevicePrimaryCtxReset(dev);
   return Qnil;
 }
 
-static VALUE rb_cuDevicePrimaryCtxReset(VALUE self){
-  CUresult cuDevicePrimaryCtxReset (CUdevice dev);
-  return Qnil;
-}
+// CUresult cuCtxCreate ( CUcontext* pctx, unsigned int  flags, CUdevice dev )
+// Create a CUDA context.
+// Parameters
+// pctx
+// - Returned context handle of the new context
+// flags
+// - Context creation flags
+// dev
+// - Device to create context on
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT,
+// CUDA_ERROR_INVALID_DEVICE, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_UNKNOWN
+
+
+/////////////////////////////////////////////////////////
+//////             Context Management              //////
+/////////////////////////////////////////////////////////
 
 static VALUE rb_cuCtxCreate_v2(VALUE self){
   CUresult cuCtxCreate_v2 (CUcontext* pctx, uint flags, CUdevice dev);
   return Qnil;
 }
 
+// CUresult cuCtxDestroy ( CUcontext ctx )
+// Destroy a CUDA context.
+// Parameters
+// ctx
+// - Context to destroy
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
 static VALUE rb_cuCtxDestroy_v2(VALUE self){
   CUresult cuCtxDestroy_v2 (CUcontext ctx);
   return Qnil;
 }
+
+// CUresult cuCtxPushCurrent ( CUcontext ctx )
+// Pushes a context on the current CPU thread.
+// Parameters
+// ctx
+// - Context to push
 
 static VALUE rb_cuCtxPushCurrent_v2(VALUE self){
   CUresult cuCtxPushCurrent_v2 (CUcontext ctx);
   return Qnil;
 }
 
+// CUresult cuCtxPopCurrent ( CUcontext* pctx )
+// Pops the current CUDA context from the current CPU thread.
+// Parameters
+// pctx
+// - Returned new context handle
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT
+
 static VALUE rb_cuCtxPopCurrent_v2(VALUE self){
   CUresult cuCtxPopCurrent_v2 (CUcontext* pctx);
   return Qnil;
 }
+
+// CUresult cuCtxSetCurrent ( CUcontext ctx )
+// Binds the specified CUDA context to the calling CPU thread.
+// Parameters
+// ctx
+// - Context to bind to the calling CPU thread
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT
 
 static VALUE rb_cuCtxSetCurrent(VALUE self){
   CUresult cuCtxSetCurrent (CUcontext ctx);
@@ -216,47 +351,122 @@ static VALUE rb_cuCtxGetFlags(VALUE self){
   return Qnil;
 }
 
+// CUresult cuCtxSynchronize ( void )
+// Block for a context's tasks to complete.
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT
+
 static VALUE rb_cuCtxSynchronize(VALUE self){
-  CUresult cuCtxSynchronize ();
-  return Qnil;
+  CUresult result = cuCtxSynchronize();
+  return Qtrue;
 }
+
+// CUresult cuCtxSetLimit ( CUlimit limit, size_t value )
+// Set resource limits.
+// Parameters
+// limit
+// - Limit to set
+// value
+// - Size of limit
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_UNSUPPORTED_LIMIT, CUDA_ERROR_OUT_OF_MEMORY
 
 static VALUE rb_cuCtxSetLimit(VALUE self){
   CUresult cuCtxSetLimit (CUlimit limit, size_t value);
   return Qnil;
 }
 
+// CUresult cuCtxGetLimit ( size_t* pvalue, CUlimit limit )
+// Returns resource limits.
+// Parameters
+// pvalue
+// - Returned size of limit
+// limit
+// - Limit to query
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_UNSUPPORTED_LIMIT
 
 static VALUE rb_cuCtxGetLimit(VALUE self){
   CUresult cuCtxGetLimit (size_t* pvalue, CUlimit limit);
   return Qnil;
 }
 
+// CUresult cuCtxGetCacheConfig ( CUfunc_cache* pconfig )
+// Returns the preferred cache configuration for the current context.
+// Parameters
+// pconfig
+// - Returned cache configuration
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
 static VALUE rb_cuCtxGetCacheConfig(VALUE self){
   CUresult cuCtxGetCacheConfig (CUfunc_cache* pconfig);
   return Qnil;
 }
+
+// CUresult cuCtxSetCacheConfig ( CUfunc_cache config )
+// Sets the preferred cache configuration for the current context.
+// Parameters
+// config
+// - Requested cache configuration
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuCtxSetCacheConfig(VALUE self){
   CUresult cuCtxSetCacheConfig (CUfunc_cache config);
   return Qnil;
 }
 
+// CUresult cuCtxGetSharedMemConfig ( CUsharedconfig* pConfig )
+// Returns the current shared memory configuration for the current context.
+// Parameters
+// pConfig
+// - returned shared memory configuration
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
 static VALUE rb_cuCtxGetSharedMemConfig(VALUE self){
   CUresult cuCtxGetSharedMemConfig (CUsharedconfig* pConfig);
   return Qnil;
 }
+
+// CUresult cuCtxSetSharedMemConfig ( CUsharedconfig config )
+// Sets the shared memory configuration for the current context.
+// Parameters
+// config
+// - requested shared memory configuration
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuCtxSetSharedMemConfig(VALUE self){
   CUresult cuCtxSetSharedMemConfig (CUsharedconfig config);
   return Qnil;
 }
 
+// CUresult cuCtxGetApiVersion ( CUcontext ctx, unsigned int* version )
+// Gets the context's API version.
+// Parameters
+// ctx
+// - Context to check
+// version
+// - Pointer to version
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_UNKNOWN
 
 static VALUE rb_cuCtxGetApiVersion(VALUE self){
   CUresult cuCtxGetApiVersion (CUcontext ctx, uint* version_);
   return Qnil;
 }
+
+// CUresult cuCtxGetStreamPriorityRange ( int* leastPriority, int* greatestPriority )
+// Returns numerical values that correspond to the least and greatest stream priorities.
+// Parameters
+// leastPriority
+// - Pointer to an int in which the numerical value for least stream priority is returned
+// greatestPriority
+// - Pointer to an int in which the numerical value for greatest stream priority is returned
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_INVALID_VALUE,
 
 
 static VALUE rb_cuCtxGetStreamPriorityRange(VALUE self){
@@ -265,13 +475,14 @@ static VALUE rb_cuCtxGetStreamPriorityRange(VALUE self){
 }
 
 
+
 static VALUE rb_cuCtxAttach(VALUE self){
   CUresult cuCtxAttach (CUcontext* pctx, uint flags);
   return Qnil;
 }
 
 static VALUE rb_cuCtxDetach(VALUE self){
-  CUresult cuCtxDetach (CUcontext ctx);
+  CUresult cuCtxDetach(CUcontext ctx);
   return Qnil;
 }
 

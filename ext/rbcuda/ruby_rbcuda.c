@@ -485,16 +485,16 @@ static VALUE rb_cublasCtrttp(VALUE self);
 static VALUE rb_cublasZtrttp(VALUE self);
 
 //CUDA API
-static VALUE rb_cuGetErrorString(VALUE self);
-static VALUE rb_cuGetErrorName(VALUE self);
-static VALUE rb_cuInit(VALUE self);
-static VALUE rb_cuDriverGetVersion(VALUE self);
-static VALUE rb_cuDeviceGet(VALUE self);
+static VALUE rb_cuGetErrorString(VALUE self, VALUE error_val);
+static VALUE rb_cuGetErrorName(VALUE self, VALUE error_val);
+static VALUE rb_cuInit(VALUE self, VALUE flags);
+static VALUE rb_cuDriverGetVersion(VALUE self, VALUE driver_version_val);
+static VALUE rb_cuDeviceGet(VALUE self, VALUE ordinal);
 static VALUE rb_cuDeviceGetCount(VALUE self);
-static VALUE rb_cuDeviceGetName(VALUE self);
-static VALUE rb_cuDeviceTotalMem_v2(VALUE self);
-static VALUE rb_cuDeviceGetAttribute(VALUE self);
-static VALUE rb_cuDeviceGetProperties(VALUE self);
+static VALUE rb_cuDeviceGetName(VALUE self, VALUE len_val, VALUE device_val);
+static VALUE rb_cuDeviceTotalMem_v2(VALUE self, VALUE device_val);
+static VALUE rb_cuDeviceGetAttribute(VALUE self, VALUE pi_val, VALUE attrib_val, VALUE device_val)
+static VALUE rb_cuDeviceGetProperties(VALUE self, VALUE device_val)
 static VALUE rb_cuDeviceComputeCapability(VALUE self);
 static VALUE rb_cuDevicePrimaryCtxRetain(VALUE self);
 static VALUE rb_cuDevicePrimaryCtxRelease(VALUE self);
