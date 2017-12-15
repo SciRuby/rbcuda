@@ -17,7 +17,10 @@ void Init_rbcuda();
 static void rbcu_free(dev_ptr* ptr);
 cudaMemcpyKind rbcu_memcopy_kind(VALUE sym);
 cublasOperation_t rbcu_cublasOperation_t(VALUE sym);
+
+//cuda_defines.c
 cudaOutputMode_t rb_cuda_output_from_rbsymbol(VALUE sym);
+CUresult rb_cuda_cu_result_from_rbsymbol(VALUE sym);
 
 inline void __checkCudaErrors( CUresult err, const char *file, const int line );
 void initCUDA(char* module_file, char* kernel_name);
