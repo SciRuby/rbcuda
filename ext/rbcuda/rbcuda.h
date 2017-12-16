@@ -38,6 +38,21 @@ typedef struct LINK_STATE_PTR
   CUlinkState link_state;
 }link_state_ptr;
 
+typedef struct  RB_CU_EVENT
+{
+  CUevent event;
+}cu_event;
+
+typedef struct  RB_CU_IPC_EVENT_HANDLE
+{
+  CUipcEventHandle handle;
+}ipc_event_handler;
+
+typedef struct  RB_CU_IPC_MEM_HANDLE
+{
+  CUipcMemHandle handle;
+}ipc_mem_handler;
+
 typedef struct RB_CUBLAS_HANDLE
 {
   cublasHandle_t handle;

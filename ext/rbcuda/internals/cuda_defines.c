@@ -351,6 +351,29 @@ CUjitInputType rb_cu_jit_type_from_rbsymbol(VALUE sym) {
 }
 
 const char* get_jit_type_name(CUjitInputType option){
-  return RbCUfunc_cache_enum[option];
+  return RbCUjitInputType_enum[option];
 }
 
+const char* const RbCUevent_flags_enum[4] = {
+  "CU_EVENT_DEFAULT", /**< Default event flag */
+  "CU_EVENT_BLOCKING_SYNC", /**< Event uses blocking synchronization */
+  "CU_EVENT_DISABLE_TIMING", /**< Event will not record timing data */
+  "CU_EVENT_INTERPROCESS" /**< Event is suitable for interprocess use. CU_EVENT_DISABLE_TIMING must be set */
+};
+
+CUevent_flags rb_cu_event_flags_from_rbsymbol(VALUE sym) {
+  ID sym_id = SYM2ID(sym);
+
+  for (size_t index = 0; index < 4; ++index) {
+    if (sym_id == rb_intern(RbCUevent_flags_enum[index])) {
+      return static_cast<CUevent_flags>(index);
+    }
+  }
+
+  VALUE str = rb_any_to_s(sym);
+  rb_raise(rb_eArgError, "invalid events symbol (:%s) specified", RSTRING_PTR(str));
+}
+
+const char* get_event_flags_name(CUevent_flags option){
+  return RbCUevent_flags_enum[option];
+}

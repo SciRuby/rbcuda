@@ -874,8 +874,8 @@ static VALUE rb_cuMemGetInfo_v2(VALUE self){
 
 static VALUE rb_cuMemAlloc_v2(VALUE self, VALUE byte_size){
   CUdeviceptr dptr;
-  CUresult result = cuMemAlloc_v2(&ptr, NUM2ULONG(byte_size));
-  return ULONG2NUM(ptr);
+  CUresult result = cuMemAlloc_v2(&dptr, NUM2ULONG(byte_size));
+  return ULONG2NUM(dptr);
 }
 
 // CUresult cuMemAllocPitch ( CUdeviceptr* dptr, size_t* pPitch, size_t WidthInBytes, size_t Height, unsigned int  ElementSizeBytes )
@@ -898,7 +898,7 @@ static VALUE rb_cuMemAllocPitch_v2(VALUE self, VALUE width_in_bytes, VALUE  heig
   CUdeviceptr dptr;
   size_t p_pitch;
   CUresult result = cuMemAllocPitch_v2(&dptr, &p_pitch, NUM2ULONG(width_in_bytes), NUM2ULONG(height), NUM2UINT(element_size_bytes));
-  return ULONG2NUM(ptr);
+  return ULONG2NUM(dptr);
 }
 
 // CUresult cuMemFree ( CUdeviceptr dptr )
@@ -1077,9 +1077,12 @@ static VALUE rb_cuDeviceGetPCIBusId(VALUE self, VALUE len, VALUE dev){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_MAP_FAILED
 
-static VALUE rb_cuIpcGetEventHandle(VALUE self){
-  CUresult result = cuIpcGetEventHandle (CUipcEventHandle* pHandle, CUevent event);
-  return Qnil;
+static VALUE rb_cuIpcGetEventHandle(VALUE self, VALUE event_val){
+  ipc_event_handler* handler = ALLOC(ipc_event_handler);
+  cu_event* event;
+  Data_Get_Struct(event_val, cu_event, event);
+  CUresult result = cuIpcGetEventHandle (&handler->handle, event->event);
+  return Data_Wrap_Struct(RbCuIPCEventHandler, NULL, rbcu_free, handler);
 }
 
 // CUresult cuIpcOpenEventHandle ( CUevent* phEvent, CUipcEventHandle handle )
@@ -1092,9 +1095,12 @@ static VALUE rb_cuIpcGetEventHandle(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_MAP_FAILED, CUDA_ERROR_PEER_ACCESS_UNSUPPORTED, CUDA_ERROR_INVALID_HANDLE
 
-static VALUE rb_cuIpcOpenEventHandle(VALUE self){
-  CUresult result = cuIpcOpenEventHandle (CUevent* phEvent, CUipcEventHandle handle);
-  return Qnil;
+static VALUE rb_cuIpcOpenEventHandle(VALUE self, VALUE ipc_handler_val){
+  cu_event* ph_event = ALLOC(cu_event);
+  ipc_event_handler* handler;
+  Data_Get_Struct(ipc_handler_val, ipc_event_handler, handler);
+  CUresult result = cuIpcOpenEventHandle(&ph_event->event, handler->handle);
+  return Data_Wrap_Struct(RbCuEvent, NULL, rbcu_free, ph_event);
 }
 
 // CUresult cuIpcGetMemHandle ( CUipcMemHandle* pHandle, CUdeviceptr dptr )
@@ -1107,9 +1113,10 @@ static VALUE rb_cuIpcOpenEventHandle(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_MAP_FAILED,
 
-static VALUE rb_cuIpcGetMemHandle(VALUE self){
-  CUresult result = cuIpcGetMemHandle (CUipcMemHandle* pHandle, CUdeviceptr dptr);
-  return Qnil;
+static VALUE rb_cuIpcGetMemHandle(VALUE self, VALUE dptr){
+  ipc_mem_handler* handler = ALLOC(ipc_mem_handler);
+  CUresult result = cuIpcGetMemHandle(&handler->handle, NUM2ULONG(dptr));
+  return Data_Wrap_Struct(RbCuIPCMemHandler, NULL, rbcu_free, handler);
 }
 
 // CUresult cuIpcOpenMemHandle ( CUdeviceptr* pdptr, CUipcMemHandle handle, unsigned int  Flags )
@@ -1124,9 +1131,12 @@ static VALUE rb_cuIpcGetMemHandle(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_MAP_FAILED, CUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_TOO_MANY_PEERS
 
-static VALUE rb_cuIpcOpenMemHandle(VALUE self){
-  CUresult result = cuIpcOpenMemHandle (CUdeviceptr* pdptr, CUipcMemHandle handle, uint Flags);
-  return Qnil;
+static VALUE rb_cuIpcOpenMemHandle(VALUE self, VALUE mem_handler_val, VALUE flags){
+  CUdeviceptr pdptr;
+  ipc_mem_handler* handler;
+  Data_Get_Struct(mem_handler_val, ipc_mem_handler, handler);
+  CUresult result = cuIpcOpenMemHandle(&pdptr, handler->handle, NUM2UINT(flags));
+  return ULONG2NUM(pdptr);
 }
 
 // CUresult cuIpcCloseMemHandle ( CUdeviceptr dptr )
@@ -1137,9 +1147,9 @@ static VALUE rb_cuIpcOpenMemHandle(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_MAP_FAILED, CUDA_ERROR_INVALID_HANDLE,
 
-static VALUE rb_cuIpcCloseMemHandle(VALUE self){
-  CUresult result = cuIpcCloseMemHandle (CUdeviceptr dptr);
-  return Qnil;
+static VALUE rb_cuIpcCloseMemHandle(VALUE self, VALUE dptr){
+  CUresult result = cuIpcCloseMemHandle(NUM2ULONG(dptr));
+  return Qtrue;
 }
 
 // CUresult cuMemHostRegister ( void* p, size_t bytesize, unsigned int  Flags )
@@ -1156,9 +1166,9 @@ static VALUE rb_cuIpcCloseMemHandle(VALUE self){
 // CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_HOST_MEMORY_ALREADY_REGISTERED,
 // CUDA_ERROR_NOT_PERMITTED, CUDA_ERROR_NOT_SUPPORTED
 
-static VALUE rb_cuMemHostRegister_v2(VALUE self){
-  CUresult result = cuMemHostRegister_v2 (void* p, size_t bytesize, uint Flags);
-  return Qnil;
+static VALUE rb_cuMemHostRegister_v2(VALUE self, VALUE p_val, VALUE byte_size, VALUE flags){
+  CUresult result = cuMemHostRegister_v2((void*)p_val, NUM2ULONG(byte_size), NUM2UINT(flags));
+  return Qtrue;
 }
 
 // CUresult cuMemHostUnregister ( void* p )
@@ -1170,9 +1180,9 @@ static VALUE rb_cuMemHostRegister_v2(VALUE self){
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT,
 // CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_HOST_MEMORY_NOT_REGISTERED,
 
-static VALUE rb_cuMemHostUnregister(VALUE self){
-  CUresult result = cuMemHostUnregister (void* p);
-  return Qnil;
+static VALUE rb_cuMemHostUnregister(VALUE self, VALUE p_val){
+  CUresult result = cuMemHostUnregister((void*)p_val);
+  return Qtrue;
 }
 
 // CUresult cuMemcpy ( CUdeviceptr dst, CUdeviceptr src, size_t ByteCount )
@@ -1187,9 +1197,9 @@ static VALUE rb_cuMemHostUnregister(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemcpy(VALUE self){
-  CUresult result = cuMemcpy (CUdeviceptr dst, CUdeviceptr src, size_t ByteCount);
-  return Qnil;
+static VALUE rb_cuMemcpy(VALUE self, VALUE dst_val, VALUE src_val, VALUE byte_count){
+  CUresult result = cuMemcpy(NUM2ULONG(dst_val), NUM2ULONG(src_val), NUM2ULONG(byte_count));
+  return Qtrue;
 }
 
 // CUresult cuMemcpyPeer ( CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount )
@@ -1208,8 +1218,12 @@ static VALUE rb_cuMemcpy(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemcpyPeer(VALUE self){
-  CUresult result = cuMemcpyPeer (CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount);
+static VALUE rb_cuMemcpyPeer(VALUE self, VALUE dst_device, VALUE dst_context, VALUE src_device, VALUE src_context, VALUE byte_count){
+  ctx_ptr* dst_ctx;
+  ctx_ptr* src_ctx;
+  Data_Get_Struct(dst_context, ctx_ptr, dst_ctx);
+  Data_Get_Struct(src_context, ctx_ptr, src_ctx);
+  CUresult result = cuMemcpyPeer(NUM2ULONG(dst_device), dst_ctx->ctx, NUM2ULONG(src_device), src_ctx->ctx, NUM2ULONG(byte_count));
   return Qnil;
 }
 
@@ -1312,252 +1326,252 @@ static VALUE rb_cuMemcpyPeerAsync(VALUE self){
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuMemcpyHtoDAsync_v2(VALUE self){
-  CUresult cuMemcpyHtoDAsync_v2 (CUdeviceptr dstDevice, const(void)* srcHost, size_t ByteCount, CUstream hStream);
+  // CUresult cuMemcpyHtoDAsync_v2 (CUdeviceptr dstDevice, const(void)* srcHost, size_t ByteCount, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuMemcpyDtoHAsync_v2(VALUE self){
-  CUresult cuMemcpyDtoHAsync_v2 (void* dstHost, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream);
+  // CUresult cuMemcpyDtoHAsync_v2 (void* dstHost, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuMemcpyDtoDAsync_v2(VALUE self){
-  CUresult cuMemcpyDtoDAsync_v2 (CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream);
+  // CUresult cuMemcpyDtoDAsync_v2 (CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuMemcpyHtoAAsync_v2(VALUE self){
-  CUresult cuMemcpyHtoAAsync_v2 (CUarray dstArray, size_t dstOffset, const(void)* srcHost, size_t ByteCount, CUstream hStream);
+  // CUresult cuMemcpyHtoAAsync_v2 (CUarray dstArray, size_t dstOffset, const(void)* srcHost, size_t ByteCount, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuMemcpyAtoHAsync_v2(VALUE self){
-  CUresult cuMemcpyAtoHAsync_v2 (void* dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount, CUstream hStream);
+  // CUresult cuMemcpyAtoHAsync_v2 (void* dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuMemcpy2DAsync_v2(VALUE self){
-  CUresult cuMemcpy2DAsync_v2 (const(CUDA_MEMCPY2D)* pCopy, CUstream hStream);
+  // CUresult cuMemcpy2DAsync_v2 (const(CUDA_MEMCPY2D)* pCopy, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuMemcpy3DAsync_v2(VALUE self){
-  CUresult cuMemcpy3DAsync_v2 (const(CUDA_MEMCPY3D)* pCopy, CUstream hStream);
+  // CUresult cuMemcpy3DAsync_v2 (const(CUDA_MEMCPY3D)* pCopy, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuMemcpy3DPeerAsync(VALUE self){
-  CUresult cuMemcpy3DPeerAsync (const(CUDA_MEMCPY3D_PEER)* pCopy, CUstream hStream);
+  // CUresult cuMemcpy3DPeerAsync (const(CUDA_MEMCPY3D_PEER)* pCopy, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuMemsetD8_v2(VALUE self){
-  CUresult cuMemsetD8_v2 (CUdeviceptr dstDevice, ubyte uc, size_t N);
+  // CUresult cuMemsetD8_v2 (CUdeviceptr dstDevice, ubyte uc, size_t N);
   return Qnil;
 }
 
 static VALUE rb_cuMemsetD16_v2(VALUE self){
-  CUresult cuMemsetD16_v2 (CUdeviceptr dstDevice, ushort us, size_t N);
+  // CUresult cuMemsetD16_v2 (CUdeviceptr dstDevice, ushort us, size_t N);
   return Qnil;
 }
 
 static VALUE rb_cuMemsetD32_v2(VALUE self){
-  CUresult cuMemsetD32_v2 (CUdeviceptr dstDevice, uint ui, size_t N);
+  // CUresult cuMemsetD32_v2 (CUdeviceptr dstDevice, uint ui, size_t N);
   return Qnil;
 }
 
 static VALUE rb_cuMemsetD2D8_v2(VALUE self){
-  CUresult cuMemsetD2D8_v2 (CUdeviceptr dstDevice, size_t dstPitch, ubyte uc, size_t Width, size_t Height);
+  // CUresult cuMemsetD2D8_v2 (CUdeviceptr dstDevice, size_t dstPitch, ubyte uc, size_t Width, size_t Height);
   return Qnil;
 }
 
 static VALUE rb_cuMemsetD2D16_v2(VALUE self){
-  CUresult cuMemsetD2D16_v2 (CUdeviceptr dstDevice, size_t dstPitch, ushort us, size_t Width, size_t Height);
+  // CUresult cuMemsetD2D16_v2 (CUdeviceptr dstDevice, size_t dstPitch, ushort us, size_t Width, size_t Height);
   return Qnil;
 }
 
 static VALUE rb_cuMemsetD2D32_v2(VALUE self){
-  CUresult cuMemsetD2D32_v2 (CUdeviceptr dstDevice, size_t dstPitch, uint ui, size_t Width, size_t Height);
+  // CUresult cuMemsetD2D32_v2 (CUdeviceptr dstDevice, size_t dstPitch, uint ui, size_t Width, size_t Height);
   return Qnil;
 }
 
 static VALUE rb_cuMemsetD8Async(VALUE self){
-  CUresult cuMemsetD8Async (CUdeviceptr dstDevice, ubyte uc, size_t N, CUstream hStream);
+  // CUresult cuMemsetD8Async (CUdeviceptr dstDevice, ubyte uc, size_t N, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuMemsetD16Async(VALUE self){
-  CUresult cuMemsetD16Async (CUdeviceptr dstDevice, ushort us, size_t N, CUstream hStream);
+  // CUresult cuMemsetD16Async (CUdeviceptr dstDevice, ushort us, size_t N, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuMemsetD32Async(VALUE self){
-  CUresult cuMemsetD32Async (CUdeviceptr dstDevice, uint ui, size_t N, CUstream hStream);
+  // CUresult cuMemsetD32Async (CUdeviceptr dstDevice, uint ui, size_t N, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuMemsetD2D8Async(VALUE self){
-  CUresult cuMemsetD2D8Async (CUdeviceptr dstDevice, size_t dstPitch, ubyte uc, size_t Width, size_t Height, CUstream hStream);
+  // CUresult cuMemsetD2D8Async (CUdeviceptr dstDevice, size_t dstPitch, ubyte uc, size_t Width, size_t Height, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuMemsetD2D16Async(VALUE self){
-  CUresult cuMemsetD2D16Async (CUdeviceptr dstDevice, size_t dstPitch, ushort us, size_t Width, size_t Height, CUstream hStream);
+  // CUresult cuMemsetD2D16Async (CUdeviceptr dstDevice, size_t dstPitch, ushort us, size_t Width, size_t Height, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuMemsetD2D32Async(VALUE self){
-  CUresult cuMemsetD2D32Async (CUdeviceptr dstDevice, size_t dstPitch, uint ui, size_t Width, size_t Height, CUstream hStream);
+  // CUresult cuMemsetD2D32Async (CUdeviceptr dstDevice, size_t dstPitch, uint ui, size_t Width, size_t Height, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuArrayCreate_v2(VALUE self){
-  CUresult cuArrayCreate_v2 (CUarray* pHandle, const(CUDA_ARRAY_DESCRIPTOR)* pAllocateArray);
+  // CUresult cuArrayCreate_v2 (CUarray* pHandle, const(CUDA_ARRAY_DESCRIPTOR)* pAllocateArray);
   return Qnil;
 }
 
 static VALUE rb_cuArrayGetDescriptor_v2(VALUE self){
-  CUresult cuArrayGetDescriptor_v2 (CUDA_ARRAY_DESCRIPTOR* pArrayDescriptor, CUarray hArray);
+  // CUresult cuArrayGetDescriptor_v2 (CUDA_ARRAY_DESCRIPTOR* pArrayDescriptor, CUarray hArray);
   return Qnil;
 }
 
 static VALUE rb_cuArrayDestroy(VALUE self){
-  CUresult cuArrayDestroy (CUarray hArray);
+  // CUresult cuArrayDestroy (CUarray hArray);
   return Qnil;
 }
 
 static VALUE rb_cuArray3DCreate_v2(VALUE self){
-  CUresult cuArray3DCreate_v2 (CUarray* pHandle, const(CUDA_ARRAY3D_DESCRIPTOR)* pAllocateArray);
+  // CUresult cuArray3DCreate_v2 (CUarray* pHandle, const(CUDA_ARRAY3D_DESCRIPTOR)* pAllocateArray);
   return Qnil;
 }
 
 static VALUE rb_cuArray3DGetDescriptor_v2(VALUE self){
-  CUresult cuArray3DGetDescriptor_v2 (CUDA_ARRAY3D_DESCRIPTOR* pArrayDescriptor, CUarray hArray);
+  // CUresult cuArray3DGetDescriptor_v2 (CUDA_ARRAY3D_DESCRIPTOR* pArrayDescriptor, CUarray hArray);
   return Qnil;
 }
 
 static VALUE rb_cuMipmappedArrayCreate(VALUE self){
-  CUresult cuMipmappedArrayCreate (CUmipmappedArray* pHandle, const(CUDA_ARRAY3D_DESCRIPTOR)* pMipmappedArrayDesc, uint numMipmapLevels);
+  // CUresult cuMipmappedArrayCreate (CUmipmappedArray* pHandle, const(CUDA_ARRAY3D_DESCRIPTOR)* pMipmappedArrayDesc, uint numMipmapLevels);
   return Qnil;
 }
 
 static VALUE rb_cuMipmappedArrayGetLevel(VALUE self){
-  CUresult cuMipmappedArrayGetLevel (CUarray* pLevelArray, CUmipmappedArray hMipmappedArray, uint level);
+  // CUresult cuMipmappedArrayGetLevel (CUarray* pLevelArray, CUmipmappedArray hMipmappedArray, uint level);
   return Qnil;
 }
 
 static VALUE rb_cuMipmappedArrayDestroy(VALUE self){
-  CUresult cuMipmappedArrayDestroy (CUmipmappedArray hMipmappedArray);
+  // CUresult cuMipmappedArrayDestroy (CUmipmappedArray hMipmappedArray);
   return Qnil;
 }
 
 static VALUE rb_cuPointerGetAttribute(VALUE self){
-  CUresult cuPointerGetAttribute (void* data, CUpointer_attribute attribute, CUdeviceptr ptr);
+  // CUresult cuPointerGetAttribute (void* data, CUpointer_attribute attribute, CUdeviceptr ptr);
   return Qnil;
 }
 
 static VALUE rb_cuPointerSetAttribute(VALUE self){
-  CUresult cuPointerSetAttribute (const(void)* value, CUpointer_attribute attribute, CUdeviceptr ptr);
+  // CUresult cuPointerSetAttribute (const(void)* value, CUpointer_attribute attribute, CUdeviceptr ptr);
   return Qnil;
 }
 
 static VALUE rb_cuPointerGetAttributes(VALUE self){
-  CUresult cuPointerGetAttributes (uint numAttributes, CUpointer_attribute* attributes, void** data, CUdeviceptr ptr);
+  // CUresult cuPointerGetAttributes (uint numAttributes, CUpointer_attribute* attributes, void** data, CUdeviceptr ptr);
   return Qnil;
 }
 
 static VALUE rb_cuStreamCreate(VALUE self){
-  CUresult cuStreamCreate (CUstream* phStream, uint Flags);
+  // CUresult cuStreamCreate (CUstream* phStream, uint Flags);
   return Qnil;
 }
 
 static VALUE rb_cuStreamCreateWithPriority(VALUE self){
-  CUresult cuStreamCreateWithPriority (CUstream* phStream, uint flags, int priority);
+  // CUresult cuStreamCreateWithPriority (CUstream* phStream, uint flags, int priority);
   return Qnil;
 }
 
 static VALUE rb_cuStreamGetPriority(VALUE self){
-  CUresult cuStreamGetPriority (CUstream hStream, int* priority);
+  // CUresult cuStreamGetPriority (CUstream hStream, int* priority);
   return Qnil;
 }
 
 static VALUE rb_cuStreamGetFlags(VALUE self){
-  CUresult cuStreamGetFlags (CUstream hStream, uint* flags);
+  // CUresult cuStreamGetFlags (CUstream hStream, uint* flags);
   return Qnil;
 }
 
 static VALUE rb_cuStreamWaitEvent(VALUE self){
-  CUresult cuStreamWaitEvent (CUstream hStream, CUevent hEvent, uint Flags);
+  // CUresult cuStreamWaitEvent (CUstream hStream, CUevent hEvent, uint Flags);
   return Qnil;
 }
 
 static VALUE rb_cuStreamAddCallback(VALUE self){
-  CUresult cuStreamAddCallback (CUstream hStream, CUstreamCallback callback, void* userData, uint flags);
+  // CUresult cuStreamAddCallback (CUstream hStream, CUstreamCallback callback, void* userData, uint flags);
   return Qnil;
 }
 
 static VALUE rb_cuStreamAttachMemAsync(VALUE self){
-  CUresult cuStreamAttachMemAsync (CUstream hStream, CUdeviceptr dptr, size_t length, uint flags);
+  // CUresult cuStreamAttachMemAsync (CUstream hStream, CUdeviceptr dptr, size_t length, uint flags);
   return Qnil;
 }
 
 static VALUE rb_cuStreamQuery(VALUE self){
-  CUresult cuStreamQuery (CUstream hStream);
+  // CUresult cuStreamQuery (CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuStreamSynchronize(VALUE self){
-  CUresult cuStreamSynchronize (CUstream hStream);
+  // CUresult cuStreamSynchronize (CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuStreamDestroy_v2(VALUE self){
-  CUresult cuStreamDestroy_v2 (CUstream hStream);
+  // CUresult cuStreamDestroy_v2 (CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuEventCreate(VALUE self){
-  CUresult cuEventCreate (CUevent* phEvent, uint Flags);
+  // CUresult cuEventCreate (CUevent* phEvent, uint Flags);
   return Qnil;
 }
 
 static VALUE rb_cuEventRecord(VALUE self){
-  CUresult cuEventRecord (CUevent hEvent, CUstream hStream);
+  // CUresult cuEventRecord (CUevent hEvent, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuEventQuery(VALUE self){
-  CUresult cuEventQuery (CUevent hEvent);
+  // CUresult cuEventQuery (CUevent hEvent);
   return Qnil;
 }
 
 static VALUE rb_cuEventSynchronize(VALUE self){
-  CUresult cuEventSynchronize (CUevent hEvent);
+  // CUresult cuEventSynchronize (CUevent hEvent);
   return Qnil;
 }
 
 static VALUE rb_cuEventDestroy_v2(VALUE self){
-  CUresult cuEventDestroy_v2 (CUevent hEvent);
+  // CUresult cuEventDestroy_v2 (CUevent hEvent);
   return Qnil;
 }
 
 static VALUE rb_cuEventElapsedTime(VALUE self){
-  CUresult cuEventElapsedTime (float* pMilliseconds, CUevent hStart, CUevent hEnd);
+  // CUresult cuEventElapsedTime (float* pMilliseconds, CUevent hStart, CUevent hEnd);
   return Qnil;
 }
 
 static VALUE rb_cuFuncGetAttribute(VALUE self){
-  CUresult cuFuncGetAttribute (int* pi, CUfunction_attribute attrib, CUfunction hfunc);
+  // CUresult cuFuncGetAttribute (int* pi, CUfunction_attribute attrib, CUfunction hfunc);
   return Qnil;
 }
 
 static VALUE rb_cuFuncSetCacheConfig(VALUE self){
-  CUresult cuFuncSetCacheConfig (CUfunction hfunc, CUfunc_cache config);
+  // CUresult cuFuncSetCacheConfig (CUfunction hfunc, CUfunc_cache config);
   return Qnil;
 }
 
 static VALUE rb_cuFuncSetSharedMemConfig(VALUE self){
-  CUresult cuFuncSetSharedMemConfig (CUfunction hfunc, CUsharedconfig config);
+  // CUresult cuFuncSetSharedMemConfig (CUfunction hfunc, CUsharedconfig config);
   return Qnil;
 }
 

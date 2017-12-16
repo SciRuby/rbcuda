@@ -14,6 +14,9 @@ VALUE RbCuFunction = Qnil;
 VALUE RbCuTexture = Qnil;
 VALUE RbCuSurface = Qnil;
 VALUE RbCuLinkState = Qnil;
+VALUE RbCuEvent = Qnil;
+VALUE RbCuIPCEventHandler = Qnil;
+VALUE RbCuIPCMemHandler = Qnil;
 VALUE Driver = Qnil;
 VALUE Arithmetic = Qnil;
 
@@ -37,6 +40,8 @@ CUjit_option rb_cu_jit_option_from_rbsymbol(VALUE sym);
 const char* get_jit_option_name(CUjit_option option);
 CUjitInputType rb_cu_jit_type_from_rbsymbol(VALUE sym);
 const char* get_jit_type_name(CUjitInputType option);
+CUevent_flags rb_cu_event_flags_from_rbsymbol(VALUE sym);
+const char* get_event_flags_name(CUevent_flags option);
 
 inline void __checkCudaErrors( CUresult err, const char *file, const int line );
 void initCUDA(char* module_file, char* kernel_name);
@@ -509,8 +514,8 @@ static VALUE rb_cuDeviceGet(VALUE self, VALUE ordinal);
 static VALUE rb_cuDeviceGetCount(VALUE self);
 static VALUE rb_cuDeviceGetName(VALUE self, VALUE len_val, VALUE device_val);
 static VALUE rb_cuDeviceTotalMem_v2(VALUE self, VALUE device_val);
-static VALUE rb_cuDeviceGetAttribute(VALUE self, VALUE pi_val, VALUE attrib_val, VALUE device_val)
-static VALUE rb_cuDeviceGetProperties(VALUE self, VALUE device_val)
+static VALUE rb_cuDeviceGetAttribute(VALUE self, VALUE pi_val, VALUE attrib_val, VALUE device_val);
+static VALUE rb_cuDeviceGetProperties(VALUE self, VALUE device_val);
 static VALUE rb_cuDeviceComputeCapability(VALUE self, VALUE device_val);
 static VALUE rb_cuDevicePrimaryCtxRetain(VALUE self, VALUE device_val);
 static VALUE rb_cuDevicePrimaryCtxRelease(VALUE self, VALUE device_val);
@@ -563,15 +568,15 @@ static VALUE rb_cuMemHostGetFlags(VALUE self, VALUE  p);
 static VALUE rb_cuMemAllocManaged(VALUE self, VALUE  byte_size, VALUE flags);
 static VALUE rb_cuDeviceGetByPCIBusId(VALUE self, VALUE pci_bus_id);
 static VALUE rb_cuDeviceGetPCIBusId(VALUE self, VALUE len, VALUE dev);
-static VALUE rb_cuIpcGetEventHandle(VALUE self);
-static VALUE rb_cuIpcOpenEventHandle(VALUE self);
-static VALUE rb_cuIpcGetMemHandle(VALUE self);
-static VALUE rb_cuIpcOpenMemHandle(VALUE self);
-static VALUE rb_cuIpcCloseMemHandle(VALUE self);
-static VALUE rb_cuMemHostRegister_v2(VALUE self);
-static VALUE rb_cuMemHostUnregister(VALUE self);
-static VALUE rb_cuMemcpy(VALUE self);
-static VALUE rb_cuMemcpyPeer(VALUE self);
+static VALUE rb_cuIpcGetEventHandle(VALUE self, VALUE event_val);
+static VALUE rb_cuIpcOpenEventHandle(VALUE self, VALUE ipc_handler_val);
+static VALUE rb_cuIpcGetMemHandle(VALUE self, VALUE dptr);
+static VALUE rb_cuIpcOpenMemHandle(VALUE self, VALUE mem_handler_val, VALUE flags);
+static VALUE rb_cuIpcCloseMemHandle(VALUE self, VALUE dptr);
+static VALUE rb_cuMemHostRegister_v2(VALUE self, VALUE p_val, VALUE byte_size, VALUE flags);
+static VALUE rb_cuMemHostUnregister(VALUE self, VALUE p_val);
+static VALUE rb_cuMemcpy(VALUE self, VALUE dst_val, VALUE src_val, VALUE byte_count);
+static VALUE rb_cuMemcpyPeer(VALUE self, VALUE dst_device, VALUE dst_context, VALUE src_device, VALUE src_context, VALUE byte_count);
 static VALUE rb_cuMemcpyHtoD_v2(VALUE self);
 static VALUE rb_cuMemcpyDtoH_v2(VALUE self);
 static VALUE rb_cuMemcpyDtoD_v2(VALUE self);
@@ -909,6 +914,9 @@ void Init_rbcuda() {
   RbCuTexture   = rb_define_class_under(RbCUDA, "RbCuTexture",   rb_cObject);
   RbCuSurface   = rb_define_class_under(RbCUDA, "RbCuSurface",   rb_cObject);
   RbCuLinkState = rb_define_class_under(RbCUDA, "RbCuLinkState", rb_cObject);
+  RbCuEvent     = rb_define_class_under(RbCUDA, "RbCuEvent",     rb_cObject);
+  RbCuIPCMemHandler   = rb_define_class_under(RbCUDA, "RbCuIPCMemHandler",   rb_cObject);
+  RbCuIPCEventHandler = rb_define_class_under(RbCUDA, "RbCuIPCEventHandler", rb_cObject);
 
   Driver = rb_define_class_under(RbCUDA, "Driver", rb_cObject);
   rb_define_singleton_method(Driver, "test_kernel", (METHOD)test_kernel, 1);
