@@ -1239,76 +1239,254 @@ static VALUE rb_cuMemcpyPeer(VALUE self, VALUE dst_device, VALUE dst_context, VA
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemcpyHtoD_v2(VALUE self){
-  CUresult result = cuMemcpyHtoD_v2 (CUdeviceptr dstDevice, const(void)* srcHost, size_t ByteCount);
+static VALUE rb_cuMemcpyHtoD_v2(VALUE self, VALUE dst_device, VALUE src_host, VALUE , VALUE byte_count){
+  CUresult result = cuMemcpyHtoD_v2(NUM2ULONG(dst_device), (void*)src_host, NUM2ULONG(byte_count));
+  return Qtrue;
+}
+
+// CUresult cuMemcpyDtoH ( void* dstHost, CUdeviceptr srcDevice, size_t ByteCount )
+// Copies memory from Device to Host.
+// Parameters
+// dstHost
+// - Destination host pointer
+// srcDevice
+// - Source device pointer
+// ByteCount
+// - Size of memory copy in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpyDtoH_v2(VALUE self, VALUE dst_host, VALUE src_device, VALUE byte_count){
+  CUresult result = cuMemcpyDtoH_v2((void*)dst_host, NUM2ULONG(src_device), NUM2ULONG(byte_count));
+  return Qtrue;
+}
+
+// CUresult cuMemcpyDtoD ( CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount )
+// Copies memory from Device to Device.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// srcDevice
+// - Source device pointer
+// ByteCount
+// - Size of memory copy in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpyDtoD_v2(VALUE self, VALUE dst_device, VALUE src_device, VALUE byte_count){
+  CUresult result = cuMemcpyDtoD_v2(NUM2ULONG(dst_device) , NUM2ULONG(src_device), NUM2ULONG(byte_count));
+  return Qtrue;
+}
+
+// CUresult cuMemcpyDtoA ( CUarray dstArray, size_t dstOffset, CUdeviceptr srcDevice, size_t ByteCount )
+// Copies memory from Device to Array.
+// Parameters
+// dstArray
+// - Destination array
+// dstOffset
+// - Offset in bytes of destination array
+// srcDevice
+// - Source device pointer
+// ByteCount
+// - Size of memory copy in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpyDtoA_v2(VALUE self, VALUE dst_array_val, VALUE dst_offset, VALUE src_device, VALUE byte_count){
+  cuarray_ptr* dst_array;
+  Data_Get_Struct(dst_array_val, cuarray_ptr, dst_array);
+  CUresult result = cuMemcpyDtoA_v2(dst_array->array, NUM2ULONG(dst_offset), NUM2ULONG(src_device), NUM2ULONG(byte_count));
+  return Qtrue;
+}
+
+// CUresult cuMemcpyAtoD ( CUdeviceptr dstDevice, CUarray srcArray, size_t srcOffset, size_t ByteCount )
+// Copies memory from Array to Device.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// srcArray
+// - Source array
+// srcOffset
+// - Offset in bytes of source array
+// ByteCount
+// - Size of memory copy in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpyAtoD_v2(VALUE self, VALUE dst_device, VALUE src_array_val, VALUE src_offset, VALUE byte_count){
+  cuarray_ptr* src_array;
+  Data_Get_Struct(src_array_val, cuarray_ptr, src_array);
+  CUresult result = cuMemcpyAtoD_v2(NUM2ULONG(dst_device), src_array->array, NUM2ULONG(src_offset), NUM2ULONG(byte_count));
+  return Qtrue;
+}
+
+// CUresult cuMemcpyHtoA ( CUarray dstArray, size_t dstOffset, const void* srcHost, size_t ByteCount )
+// Copies memory from Host to Array.
+// Parameters
+// dstArray
+// - Destination array
+// dstOffset
+// - Offset in bytes of destination array
+// srcHost
+// - Source host pointer
+// ByteCount
+// - Size of memory copy in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpyHtoA_v2(VALUE self, VALUE dst_array_val, VALUE dst_offset, VALUE src_host, VALUE byte_count ){
+  cuarray_ptr* dst_array;
+  Data_Get_Struct(dst_array_val, cuarray_ptr, dst_array);
+  CUresult result = cuMemcpyHtoA_v2(dst_array->array, NUM2ULONG(dst_offset), (void*)src_host, NUM2ULONG(byte_count));
+  return Qtrue;
+}
+
+// CUresult cuMemcpyAtoH ( void* dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount )
+// Copies memory from Array to Host.
+// Parameters
+// dstHost
+// - Destination device pointer
+// srcArray
+// - Source array
+// srcOffset
+// - Offset in bytes of source array
+// ByteCount
+// - Size of memory copy in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpyAtoH_v2(VALUE self, VALUE dst_host, VALUE src_array_val, VALUE src_offset, VALUE byte_count){
+  cuarray_ptr* src_array;
+  Data_Get_Struct(src_array_val, cuarray_ptr, src_array);
+  CUresult result = cuMemcpyAtoH_v2((void*)dst_host, src_array->array, NUM2ULONG(src_offset), NUM2ULONG(byte_count));
   return Qnil;
 }
 
-static VALUE rb_cuMemcpyDtoH_v2(VALUE self){
-  CUresult result = cuMemcpyDtoH_v2 (void* dstHost, CUdeviceptr srcDevice, size_t ByteCount);
+// CUresult cuMemcpyAtoA ( CUarray dstArray, size_t dstOffset, CUarray srcArray, size_t srcOffset, size_t ByteCount )
+// Copies memory from Array to Array.
+// Parameters
+// dstArray
+// - Destination array
+// dstOffset
+// - Offset in bytes of destination array
+// srcArray
+// - Source array
+// srcOffset
+// - Offset in bytes of source array
+// ByteCount
+// - Size of memory copy in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpyAtoA_v2(VALUE self, VALUE dst_array_val, VALUE dst_offset, VALUE src_array_val, VALUE src_offset, VALUE byte_count){
+  cuarray_ptr* dst_array;
+  cuarray_ptr* src_array;
+  Data_Get_Struct(dst_array_val, cuarray_ptr, dst_array);
+  Data_Get_Struct(src_array_val, cuarray_ptr, src_array);
+  CUresult result = cuMemcpyAtoA_v2(dst_array->array, NUM2ULONG(dst_offset), src_array->array, NUM2ULONG(src_offset), NUM2ULONG(byte_count));
   return Qnil;
 }
 
-static VALUE rb_cuMemcpyDtoD_v2(VALUE self){
-  CUresult result = cuMemcpyDtoD_v2 (CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount);
-  return Qnil;
+// CUresult cuMemcpy2D ( const CUDA_MEMCPY2D* pCopy )
+// Copies memory for 2D arrays.
+// Parameters
+// pCopy
+// - Parameters for the memory copy
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpy2D_v2(VALUE self, VALUE p_copy){
+  CUresult result = cuMemcpy2D_v2((CUDA_MEMCPY2D*)p_copy);
+  return Qtrue;
 }
 
-static VALUE rb_cuMemcpyDtoA_v2(VALUE self){
-  CUresult result = cuMemcpyDtoA_v2 (CUarray dstArray, size_t dstOffset, CUdeviceptr srcDevice, size_t ByteCount);
-  return Qnil;
+// CUresult cuMemcpy2DUnaligned ( const CUDA_MEMCPY2D* pCopy )
+// Copies memory for 2D arrays.
+// Parameters
+// pCopy
+// - Parameters for the memory copy
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpy2DUnaligned_v2(VALUE self, VALUE p_copy){
+  CUresult result = cuMemcpy2DUnaligned_v2((CUDA_MEMCPY2D*)p_copy);
+  return Qtrue;
 }
 
-static VALUE rb_cuMemcpyAtoD_v2(VALUE self){
-  CUresult result = cuMemcpyAtoD_v2 (CUdeviceptr dstDevice, CUarray srcArray, size_t srcOffset, size_t ByteCount);
-  return Qnil;
+// CUresult cuMemcpy3D ( const CUDA_MEMCPY3D* pCopy )
+// Copies memory for 3D arrays.
+// Parameters
+// pCopy
+// - Parameters for the memory copy
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpy3D_v2(VALUE self, VALUE p_copy){
+  CUresult result = cuMemcpy3D_v2((CUDA_MEMCPY3D*)p_copy);
+  return Qtrue;
 }
 
-static VALUE rb_cuMemcpyHtoA_v2(VALUE self){
-  CUresult result = cuMemcpyHtoA_v2 (CUarray dstArray, size_t dstOffset, const(void)* srcHost, size_t ByteCount);
-  return Qnil;
+// CUresult cuMemcpy3DPeer ( const CUDA_MEMCPY3D_PEER* pCopy )
+// Copies memory between contexts.
+// Parameters
+// pCopy
+// - Parameters for the memory copy
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpy3DPeer(VALUE self, VALUE p_copy){
+  CUresult result = cuMemcpy3DPeer((CUDA_MEMCPY3D_PEER*) p_copy);
+  return Qtrue;
 }
 
-static VALUE rb_cuMemcpyAtoH_v2(VALUE self){
-  CUresult result = cuMemcpyAtoH_v2 (void* dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount);
-  return Qnil;
+// CUresult cuMemcpyAsync ( CUdeviceptr dst, CUdeviceptr src, size_t ByteCount, CUstream hStream )
+// Copies memory asynchronously.
+// Parameters
+// dst
+// - Destination unified virtual address space pointer
+// src
+// - Source unified virtual address space pointer
+// ByteCount
+// - Size of memory copy in bytes
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpyAsync(VALUE self, VALUE dst, VALUE src, VALUE byte_count, VALUE h_stream_val){
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  CUresult result = cuMemcpyAsync(NUM2ULONG(dst), NUM2ULONG(src), NUM2ULONG(byte_count), h_stream->stream);
+  return Qtrue;
 }
 
-static VALUE rb_cuMemcpyAtoA_v2(VALUE self){
-  CUresult result = cuMemcpyAtoA_v2 (CUarray dstArray, size_t dstOffset, CUarray srcArray, size_t srcOffset, size_t ByteCount);
-  return Qnil;
-}
+// CUresult cuMemcpyPeerAsync ( CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount, CUstream hStream )
+// Copies device memory between two contexts asynchronously.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// dstContext
+// - Destination context
+// srcDevice
+// - Source device pointer
+// srcContext
+// - Source context
+// ByteCount
+// - Size of memory copy in bytes
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemcpy2D_v2(VALUE self){
-  CUresult cuMemcpy2D_v2 (const(CUDA_MEMCPY2D)* pCopy);
-  return Qnil;
-}
-
-
-static VALUE rb_cuMemcpy2DUnaligned_v2(VALUE self){
-  CUresult cuMemcpy2DUnaligned_v2 (const(CUDA_MEMCPY2D)* pCopy);
-  return Qnil;
-}
-
-
-static VALUE rb_cuMemcpy3D_v2(VALUE self){
-  CUresult cuMemcpy3D_v2 (const(CUDA_MEMCPY3D)* pCopy);
-  return Qnil;
-}
-
-static VALUE rb_cuMemcpy3DPeer(VALUE self){
-  CUresult cuMemcpy3DPeer (const(CUDA_MEMCPY3D_PEER)* pCopy);
-  return Qnil;
-}
-
-static VALUE rb_cuMemcpyAsync(VALUE self){
-  CUresult cuMemcpyAsync (CUdeviceptr dst, CUdeviceptr src, size_t ByteCount, CUstream hStream);
-  return Qnil;
-}
-
-static VALUE rb_cuMemcpyPeerAsync(VALUE self){
-  CUresult cuMemcpyPeerAsync (CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount, CUstream hStream);
-  return Qnil;
+static VALUE rb_cuMemcpyPeerAsync(VALUE self, VALUE dst_device, VALUE dst_context_val, VALUE src_device, VALUE src_context_val, VALUE byte_count, VALUE h_stream_val){
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  ctx_ptr* dst_ctx;
+  Data_Get_Struct(dst_context_val, ctx_ptr, dst_ctx);
+  ctx_ptr* src_ctx;
+  Data_Get_Struct(src_context_val, ctx_ptr, src_ctx);
+  CUresult result = cuMemcpyPeerAsync(NUM2ULONG(dst_device), dst_ctx->ctx, NUM2ULONG(src_device), src_ctx->ctx, NUM2ULONG(byte_count), h_stream->stream);
+  return Qtrue;
 }
 
 // CUresult cuMemcpyHtoDAsync ( CUdeviceptr dstDevice, const void* srcHost, size_t ByteCount, CUstream hStream )
@@ -1325,103 +1503,393 @@ static VALUE rb_cuMemcpyPeerAsync(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemcpyHtoDAsync_v2(VALUE self){
-  // CUresult cuMemcpyHtoDAsync_v2 (CUdeviceptr dstDevice, const(void)* srcHost, size_t ByteCount, CUstream hStream);
-  return Qnil;
+static VALUE rb_cuMemcpyHtoDAsync_v2(VALUE self, VALUE dst_device, VALUE src_host, VALUE byte_count, VALUE h_stream_val){
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  CUresult result = cuMemcpyHtoDAsync_v2(NUM2ULONG(dst_device), (void*)src_host,  NUM2ULONG(byte_count), h_stream->stream);
+  return Qtrue;
 }
 
-static VALUE rb_cuMemcpyDtoHAsync_v2(VALUE self){
-  // CUresult cuMemcpyDtoHAsync_v2 (void* dstHost, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream);
-  return Qnil;
+// CUresult cuMemcpyDtoHAsync ( void* dstHost, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream )
+// Copies memory from Device to Host.
+// Parameters
+// dstHost
+// - Destination host pointer
+// srcDevice
+// - Source device pointer
+// ByteCount
+// - Size of memory copy in bytes
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpyDtoHAsync_v2(VALUE self, VALUE dst_host, VALUE src_device, VALUE byte_count, VALUE h_stream_val){
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  CUresult result = cuMemcpyDtoHAsync_v2((void*)dst_host, NUM2ULONG(src_device),  NUM2ULONG(byte_count), h_stream->stream);
+  return Qtrue;
 }
 
-static VALUE rb_cuMemcpyDtoDAsync_v2(VALUE self){
-  // CUresult cuMemcpyDtoDAsync_v2 (CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream);
-  return Qnil;
+// CUresult cuMemcpyDtoDAsync ( CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream )
+// Copies memory from Device to Device.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// srcDevice
+// - Source device pointer
+// ByteCount
+// - Size of memory copy in bytes
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpyDtoDAsync_v2(VALUE self, VALUE dst_device, VALUE src_device, VALUE byte_count, VALUE h_stream_val){
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  CUresult result = cuMemcpyDtoDAsync_v2(NUM2ULONG(dst_device), NUM2ULONG(src_device), NUM2ULONG(byte_count), h_stream->stream);
+  return Qtrue;
 }
 
-static VALUE rb_cuMemcpyHtoAAsync_v2(VALUE self){
-  // CUresult cuMemcpyHtoAAsync_v2 (CUarray dstArray, size_t dstOffset, const(void)* srcHost, size_t ByteCount, CUstream hStream);
-  return Qnil;
+// CUresult cuMemcpyHtoAAsync ( CUarray dstArray, size_t dstOffset, const void* srcHost, size_t ByteCount, CUstream hStream )
+// Copies memory from Host to Array.
+// Parameters
+// dstArray
+// - Destination array
+// dstOffset
+// - Offset in bytes of destination array
+// srcHost
+// - Source host pointer
+// ByteCount
+// - Size of memory copy in bytes
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpyHtoAAsync_v2(VALUE self, VALUE dst_array_val, VALUE dst_offset, VALUE src_host, VALUE  byte_count, VALUE h_stream_val){
+  cuarray_ptr* dst_array;
+  Data_Get_Struct(dst_array_val, cuarray_ptr, dst_array);
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  CUresult result = cuMemcpyHtoAAsync_v2(dst_array->array, NUM2ULONG(dst_offset), (void*)src_host,  NUM2ULONG(byte_count), h_stream->stream);
+  return Qtrue;
 }
 
-static VALUE rb_cuMemcpyAtoHAsync_v2(VALUE self){
-  // CUresult cuMemcpyAtoHAsync_v2 (void* dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount, CUstream hStream);
-  return Qnil;
+// CUresult cuMemcpyAtoHAsync ( void* dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount, CUstream hStream )
+// Copies memory from Array to Host.
+// Parameters
+// dstHost
+// - Destination pointer
+// srcArray
+// - Source array
+// srcOffset
+// - Offset in bytes of source array
+// ByteCount
+// - Size of memory copy in bytes
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpyAtoHAsync_v2(VALUE self, VALUE  dst_host, VALUE src_array_val, VALUE src_offset, VALUE byte_count, VALUE h_stream_val){
+  cuarray_ptr* src_array;
+  Data_Get_Struct(src_array_val, cuarray_ptr, src_array);
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  CUresult result = cuMemcpyAtoHAsync_v2((void*)dst_host, src_array->array, NUM2ULONG(src_offset),  NUM2ULONG(byte_count), h_stream->stream);
+  return Qtrue;
 }
 
-static VALUE rb_cuMemcpy2DAsync_v2(VALUE self){
-  // CUresult cuMemcpy2DAsync_v2 (const(CUDA_MEMCPY2D)* pCopy, CUstream hStream);
-  return Qnil;
+// CUresult cuMemcpy2DAsync ( const CUDA_MEMCPY2D* pCopy, CUstream hStream )
+// Copies memory for 2D arrays.
+// Parameters
+// pCopy
+// - Parameters for the memory copy
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpy2DAsync_v2(VALUE self, VALUE p_copy, VALUE h_stream_val){
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  CUresult result = cuMemcpy2DAsync_v2((CUDA_MEMCPY2D*)p_copy, h_stream->stream);
+  return Qtrue;
 }
 
-static VALUE rb_cuMemcpy3DAsync_v2(VALUE self){
-  // CUresult cuMemcpy3DAsync_v2 (const(CUDA_MEMCPY3D)* pCopy, CUstream hStream);
-  return Qnil;
+// CUresult cuMemcpy3DAsync ( const CUDA_MEMCPY3D* pCopy, CUstream hStream )
+// Copies memory for 3D arrays.
+// Parameters
+// pCopy
+// - Parameters for the memory copy
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpy3DAsync_v2(VALUE self, VALUE p_copy, VALUE h_stream_val){
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  CUresult result = cuMemcpy3DAsync_v2 ((CUDA_MEMCPY3D*)p_copy, h_stream->stream);
+  return Qtrue;
 }
 
-static VALUE rb_cuMemcpy3DPeerAsync(VALUE self){
-  // CUresult cuMemcpy3DPeerAsync (const(CUDA_MEMCPY3D_PEER)* pCopy, CUstream hStream);
-  return Qnil;
+// CUresult cuMemcpy3DPeerAsync ( const CUDA_MEMCPY3D_PEER* pCopy, CUstream hStream )
+// Copies memory between contexts asynchronously.
+// Parameters
+// pCopy
+// - Parameters for the memory copy
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemcpy3DPeerAsync(VALUE sel, VALUE p_copy, VALUE h_stream_val){
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  CUresult result = cuMemcpy3DPeerAsync((CUDA_MEMCPY3D_PEER*)p_copy, h_stream->stream);
+  return Qtrue;
 }
+
+// CUresult cuMemsetD8 ( CUdeviceptr dstDevice, unsigned char  uc, size_t N )
+// Initializes device memory.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// uc
+// - Value to set
+// N
+// - Number of elements
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuMemsetD8_v2(VALUE self){
-  // CUresult cuMemsetD8_v2 (CUdeviceptr dstDevice, ubyte uc, size_t N);
+  CUresult result = cuMemsetD8_v2 (CUdeviceptr dstDevice, ubyte uc, size_t N);
   return Qnil;
 }
+
+// CUresult cuMemsetD16 ( CUdeviceptr dstDevice, unsigned short us, size_t N )
+// Initializes device memory.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// us
+// - Value to set
+// N
+// - Number of elements
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuMemsetD16_v2(VALUE self){
-  // CUresult cuMemsetD16_v2 (CUdeviceptr dstDevice, ushort us, size_t N);
+  CUresult result = cuMemsetD16_v2 (CUdeviceptr dstDevice, ushort us, size_t N);
   return Qnil;
 }
+
+// CUresult cuMemsetD32 ( CUdeviceptr dstDevice, unsigned int  ui, size_t N )
+// Initializes device memory.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// ui
+// - Value to set
+// N
+// - Number of elements
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuMemsetD32_v2(VALUE self){
-  // CUresult cuMemsetD32_v2 (CUdeviceptr dstDevice, uint ui, size_t N);
+  CUresult result = cuMemsetD32_v2 (CUdeviceptr dstDevice, uint ui, size_t N);
   return Qnil;
 }
+
+// CUresult cuMemsetD2D8 ( CUdeviceptr dstDevice, size_t dstPitch, unsigned char  uc, size_t Width, size_t Height )
+// Initializes device memory.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// dstPitch
+// - Pitch of destination device pointer
+// uc
+// - Value to set
+// Width
+// - Width of row
+// Height
+// - Number of rows
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuMemsetD2D8_v2(VALUE self){
-  // CUresult cuMemsetD2D8_v2 (CUdeviceptr dstDevice, size_t dstPitch, ubyte uc, size_t Width, size_t Height);
+  CUresult result = cuMemsetD2D8_v2 (CUdeviceptr dstDevice, size_t dstPitch, ubyte uc, size_t Width, size_t Height);
   return Qnil;
 }
+
+// CUresult cuMemsetD2D16 ( CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height )
+// Initializes device memory.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// dstPitch
+// - Pitch of destination device pointer
+// us
+// - Value to set
+// Width
+// - Width of row
+// Height
+// - Number of rows
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuMemsetD2D16_v2(VALUE self){
-  // CUresult cuMemsetD2D16_v2 (CUdeviceptr dstDevice, size_t dstPitch, ushort us, size_t Width, size_t Height);
+  CUresult result = cuMemsetD2D16_v2 (CUdeviceptr dstDevice, size_t dstPitch, ushort us, size_t Width, size_t Height);
   return Qnil;
 }
+
+// CUresult cuMemsetD2D32 ( CUdeviceptr dstDevice, size_t dstPitch, unsigned int  ui, size_t Width, size_t Height )
+// Initializes device memory.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// dstPitch
+// - Pitch of destination device pointer
+// ui
+// - Value to set
+// Width
+// - Width of row
+// Height
+// - Number of rows
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuMemsetD2D32_v2(VALUE self){
-  // CUresult cuMemsetD2D32_v2 (CUdeviceptr dstDevice, size_t dstPitch, uint ui, size_t Width, size_t Height);
+  CUresult result = cuMemsetD2D32_v2 (CUdeviceptr dstDevice, size_t dstPitch, uint ui, size_t Width, size_t Height);
   return Qnil;
 }
+
+// CUresult cuMemsetD8Async ( CUdeviceptr dstDevice, unsigned char  uc, size_t N, CUstream hStream )
+// Sets device memory.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// uc
+// - Value to set
+// N
+// - Number of elements
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuMemsetD8Async(VALUE self){
-  // CUresult cuMemsetD8Async (CUdeviceptr dstDevice, ubyte uc, size_t N, CUstream hStream);
+  CUresult result = cuMemsetD8Async (CUdeviceptr dstDevice, ubyte uc, size_t N, CUstream hStream);
   return Qnil;
 }
+
+// CUresult cuMemsetD16Async ( CUdeviceptr dstDevice, unsigned short us, size_t N, CUstream hStream )
+// Sets device memory.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// us
+// - Value to set
+// N
+// - Number of elements
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuMemsetD16Async(VALUE self){
-  // CUresult cuMemsetD16Async (CUdeviceptr dstDevice, ushort us, size_t N, CUstream hStream);
+  CUresult result = cuMemsetD16Async (CUdeviceptr dstDevice, ushort us, size_t N, CUstream hStream);
   return Qnil;
 }
+
+// CUresult cuMemsetD32Async ( CUdeviceptr dstDevice, unsigned int  ui, size_t N, CUstream hStream )
+// Sets device memory.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// ui
+// - Value to set
+// N
+// - Number of elements
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuMemsetD32Async(VALUE self){
-  // CUresult cuMemsetD32Async (CUdeviceptr dstDevice, uint ui, size_t N, CUstream hStream);
+  CUresult result = cuMemsetD32Async (CUdeviceptr dstDevice, uint ui, size_t N, CUstream hStream);
   return Qnil;
 }
+
+// CUresult cuMemsetD2D8Async ( CUdeviceptr dstDevice, size_t dstPitch, unsigned char  uc, size_t Width, size_t Height, CUstream hStream )
+// Sets device memory.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// dstPitch
+// - Pitch of destination device pointer
+// uc
+// - Value to set
+// Width
+// - Width of row
+// Height
+// - Number of rows
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuMemsetD2D8Async(VALUE self){
-  // CUresult cuMemsetD2D8Async (CUdeviceptr dstDevice, size_t dstPitch, ubyte uc, size_t Width, size_t Height, CUstream hStream);
+  CUresult result = cuMemsetD2D8Async (CUdeviceptr dstDevice, size_t dstPitch, ubyte uc, size_t Width, size_t Height, CUstream hStream);
   return Qnil;
 }
+
+// CUresult cuMemsetD2D16Async ( CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height, CUstream hStream )
+// Sets device memory.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// dstPitch
+// - Pitch of destination device pointer
+// us
+// - Value to set
+// Width
+// - Width of row
+// Height
+// - Number of rows
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuMemsetD2D16Async(VALUE self){
-  // CUresult cuMemsetD2D16Async (CUdeviceptr dstDevice, size_t dstPitch, ushort us, size_t Width, size_t Height, CUstream hStream);
+  CUresult result = cuMemsetD2D16Async (CUdeviceptr dstDevice, size_t dstPitch, ushort us, size_t Width, size_t Height, CUstream hStream);
   return Qnil;
 }
 
+// CUresult cuMemsetD2D32Async ( CUdeviceptr dstDevice, size_t dstPitch, unsigned int  ui, size_t Width, size_t Height, CUstream hStream )
+// Sets device memory.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// dstPitch
+// - Pitch of destination device pointer
+// ui
+// - Value to set
+// Width
+// - Width of row
+// Height
+// - Number of rows
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
 static VALUE rb_cuMemsetD2D32Async(VALUE self){
-  // CUresult cuMemsetD2D32Async (CUdeviceptr dstDevice, size_t dstPitch, uint ui, size_t Width, size_t Height, CUstream hStream);
+  CUresult result = cuMemsetD2D32Async (CUdeviceptr dstDevice, size_t dstPitch, uint ui, size_t Width, size_t Height, CUstream hStream);
   return Qnil;
 }
 
@@ -1450,6 +1918,19 @@ static VALUE rb_cuArray3DGetDescriptor_v2(VALUE self){
   return Qnil;
 }
 
+// CUresult cuMipmappedArrayCreate ( CUmipmappedArray* pHandle, const CUDA_ARRAY3D_DESCRIPTOR* pMipmappedArrayDesc, unsigned int  numMipmapLevels )
+// Creates a CUDA mipmapped array.
+// Parameters
+// pHandle
+// - Returned mipmapped array
+// pMipmappedArrayDesc
+// - mipmapped array descriptor
+// numMipmapLevels
+// - Number of mipmap levels
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_UNKNOWN
+
+
 static VALUE rb_cuMipmappedArrayCreate(VALUE self){
   // CUresult cuMipmappedArrayCreate (CUmipmappedArray* pHandle, const(CUDA_ARRAY3D_DESCRIPTOR)* pMipmappedArrayDesc, uint numMipmapLevels);
   return Qnil;
@@ -1459,6 +1940,14 @@ static VALUE rb_cuMipmappedArrayGetLevel(VALUE self){
   // CUresult cuMipmappedArrayGetLevel (CUarray* pLevelArray, CUmipmappedArray hMipmappedArray, uint level);
   return Qnil;
 }
+
+// CUresult cuMipmappedArrayDestroy ( CUmipmappedArray hMipmappedArray )
+// Destroys a CUDA mipmapped array.
+// Parameters
+// hMipmappedArray
+// - Mipmapped array to destroy
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_ARRAY_IS_MAPPED
 
 static VALUE rb_cuMipmappedArrayDestroy(VALUE self){
   // CUresult cuMipmappedArrayDestroy (CUmipmappedArray hMipmappedArray);

@@ -1,6 +1,3 @@
-typedef unsigned long CUdeviceptr;
-typedef int CUdevice;
-
 const char* const Cuda_MemcpyKind[5] = {
   "cudaMemcpyHostToHost",
   "cudaMemcpyHostToDevice",
@@ -376,4 +373,28 @@ CUevent_flags rb_cu_event_flags_from_rbsymbol(VALUE sym) {
 
 const char* get_event_flags_name(CUevent_flags option){
   return RbCUevent_flags_enum[option];
+}
+
+std::map<char*, size_t> RbCUarray_format_enum = {
+  {"CU_AD_FORMAT_UNSIGNED_INT8", 1}, /**< Unsigned 8-bit integers */
+  {"CU_AD_FORMAT_UNSIGNED_INT16", 2}, /**< Unsigned 16-bit integers */
+  {"CU_AD_FORMAT_UNSIGNED_INT32", 3}, /**< Unsigned 32-bit integers */
+  {"CU_AD_FORMAT_SIGNED_INT8", 8}, /**< Signed 8-bit integers */
+  {"CU_AD_FORMAT_SIGNED_INT16", 9}, /**< Signed 16-bit integers */
+  {"CU_AD_FORMAT_SIGNED_INT32", 10}, /**< Signed 32-bit integers */
+  {"CU_AD_FORMAT_HALF", 16}, /**< 16-bit floating point */
+  {"CU_AD_FORMAT_FLOAT", 32} /**< 32-bit floating point */
+};
+
+CUarray_format rb_cuarray_format_from_rbsymbol(VALUE sym) {
+  ID sym_id = SYM2ID(sym);
+
+  for(std::map<char*, size_t>::value_type& entry : RbCUarray_format_enum) {
+    if (sym_id == rb_intern(entry.first)) {
+      return static_cast<CUarray_format>(entry.second);
+    }
+  }
+
+  VALUE str = rb_any_to_s(sym);
+  rb_raise(rb_eArgError, "invalid CUresult type symbol (:%s) specified", RSTRING_PTR(str));
 }

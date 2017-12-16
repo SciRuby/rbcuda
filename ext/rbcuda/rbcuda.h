@@ -38,6 +38,16 @@ typedef struct LINK_STATE_PTR
   CUlinkState link_state;
 }link_state_ptr;
 
+typedef struct CUARRAY_PTR
+{
+  CUarray array;
+}cuarray_ptr;
+
+typedef struct CUSTREAM_PTR
+{
+  CUstream stream;
+}custream_ptr;
+
 typedef struct  RB_CU_EVENT
 {
   CUevent event;
