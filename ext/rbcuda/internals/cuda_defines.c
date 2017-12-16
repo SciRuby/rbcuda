@@ -1,4 +1,5 @@
 typedef unsigned long CUdeviceptr;
+typedef int CUdevice;
 
 const char* const Cuda_MemcpyKind[5] = {
   "cudaMemcpyHostToHost",

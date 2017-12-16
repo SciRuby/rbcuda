@@ -846,155 +846,422 @@ static VALUE rb_cuLinkDestroy(VALUE self, VALUE state_val){
   return Qnil;
 }
 
+// CUresult cuMemGetInfo ( size_t* free, size_t* total )
+// Gets free and total memory.
+// Parameters
+// free
+// - Returned free memory in bytes
+// total
+// - Returned total memory in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
 static VALUE rb_cuMemGetInfo_v2(VALUE self){
-  CUresult cuMemGetInfo_v2 (size_t* free, size_t* total);
+  size_t free, total;
+  CUresult result = cuMemGetInfo_v2 (&free, &total);
   return Qnil;
 }
 
-static VALUE rb_cuMemAlloc_v2(VALUE self){
-  CUresult cuMemAlloc_v2 (CUdeviceptr* dptr, size_t bytesize);
-  return Qnil;
+// CUresult cuMemAlloc ( CUdeviceptr* dptr, size_t bytesize )
+// Allocates device memory.
+// Parameters
+// dptr
+// - Returned device pointer
+// bytesize
+// - Requested allocation size in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_OUT_OF_MEMORY
+
+static VALUE rb_cuMemAlloc_v2(VALUE self, VALUE byte_size){
+  CUdeviceptr dptr;
+  CUresult result = cuMemAlloc_v2(&ptr, NUM2ULONG(byte_size));
+  return ULONG2NUM(ptr);
 }
 
-static VALUE rb_cuMemAllocPitch_v2(VALUE self){
-  CUresult cuMemAllocPitch_v2 (CUdeviceptr* dptr, size_t* pPitch, size_t WidthInBytes, size_t Height, uint ElementSizeBytes);
-  return Qnil;
+// CUresult cuMemAllocPitch ( CUdeviceptr* dptr, size_t* pPitch, size_t WidthInBytes, size_t Height, unsigned int  ElementSizeBytes )
+// Allocates pitched device memory.
+// Parameters
+// dptr
+// - Returned device pointer
+// pPitch
+// - Returned pitch of allocation in bytes
+// WidthInBytes
+// - Requested allocation width in bytes
+// Height
+// - Requested allocation height in rows
+// ElementSizeBytes
+// - Size of largest reads/writes for range
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_OUT_OF_MEMORY
+
+static VALUE rb_cuMemAllocPitch_v2(VALUE self, VALUE width_in_bytes, VALUE  height, VALUE element_size_bytes){
+  CUdeviceptr dptr;
+  size_t p_pitch;
+  CUresult result = cuMemAllocPitch_v2(&dptr, &p_pitch, NUM2ULONG(width_in_bytes), NUM2ULONG(height), NUM2UINT(element_size_bytes));
+  return ULONG2NUM(ptr);
 }
 
-static VALUE rb_cuMemFree_v2(VALUE self){
-  CUresult cuMemFree_v2 (CUdeviceptr dptr);
-  return Qnil;
+// CUresult cuMemFree ( CUdeviceptr dptr )
+// Frees device memory.
+// Parameters
+// dptr
+// - Pointer to memory to free
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemFree_v2(VALUE self, VALUE dptr){
+  CUresult result = cuMemFree_v2(NUM2ULONG(dptr));
+  return Qtrue;
 }
 
-static VALUE rb_cuMemGetAddressRange_v2(VALUE self){
-  CUresult cuMemGetAddressRange_v2 (CUdeviceptr* pbase, size_t* psize, CUdeviceptr dptr);
-  return Qnil;
+// CUresult cuMemGetAddressRange ( CUdeviceptr* pbase, size_t* psize, CUdeviceptr dptr )
+// Get information on memory allocations.
+// Parameters
+// pbase
+// - Returned base address
+// psize
+// - Returned size of device memory allocation
+// dptr
+// - Device pointer to query
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_NOT_FOUND, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemGetAddressRange_v2(VALUE self, VALUE dptr){
+  CUdeviceptr p_base;
+  size_t p_size;
+  CUresult result = cuMemGetAddressRange_v2(&p_base, &p_size, NUM2ULONG(dptr));
+  return ULONG2NUM(p_base);
 }
 
-static VALUE rb_cuMemAllocHost_v2(VALUE self){
-  CUresult cuMemAllocHost_v2 (void** pp, size_t bytesize);
-  return Qnil;
+// CUresult cuMemAllocHost ( void** pp, size_t bytesize )
+// Allocates page-locked host memory.
+// Parameters
+// pp
+// - Returned host pointer to page-locked memory
+// bytesize
+// - Requested allocation size in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_OUT_OF_MEMORY
+
+static VALUE rb_cuMemAllocHost_v2(VALUE self, VALUE byte_size){
+  void* pp;
+  CUresult result = cuMemAllocHost_v2 (&pp,  NUM2ULONG(byte_size));
+  return (VALUE)pp;
 }
 
-static VALUE rb_cuMemFreeHost(VALUE self){
-  CUresult cuMemFreeHost (void* p);
-  return Qnil;
+// CUresult cuMemFreeHost ( void* p )
+// Frees page-locked host memory.
+// Parameters
+// p
+// - Pointer to memory to free
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemFreeHost(VALUE self, VALUE p){
+  CUresult result = cuMemFreeHost((void*)p);
+  return Qtrue;
 }
 
-static VALUE rb_cuMemHostAlloc(VALUE self){
-  CUresult cuMemHostAlloc (void** pp, size_t bytesize, uint Flags);
-  return Qnil;
+// CUresult cuMemHostAlloc ( void** pp, size_t bytesize, unsigned int  Flags )
+// Allocates page-locked host memory.
+// Parameters
+// pp
+// - Returned host pointer to page-locked memory
+// bytesize
+// - Requested allocation size in bytes
+// Flags
+// - Flags for allocation request
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_OUT_OF_MEMORY
+
+static VALUE rb_cuMemHostAlloc(VALUE self, VALUE byte_size, VALUE flags){
+  void* pp;
+  CUresult result = cuMemHostAlloc(&pp, NUM2ULONG(byte_size), NUM2UINT(flags));
+  return (VALUE)pp;
 }
 
-static VALUE rb_cuMemHostGetDevicePointer_v2(VALUE self){
-  CUresult cuMemHostGetDevicePointer_v2 (CUdeviceptr* pdptr, void* p, uint Flags);
-  return Qnil;
+// CUresult cuMemHostGetDevicePointer ( CUdeviceptr* pdptr, void* p, unsigned int  Flags )
+// Passes back device pointer of mapped pinned memory.
+// Parameters
+// pdptr
+// - Returned device pointer
+// p
+// - Host pointer
+// Flags
+// - Options (must be 0)
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemHostGetDevicePointer_v2(VALUE self, VALUE p, VALUE flags){
+  CUdeviceptr p_dptr;
+  CUresult result = cuMemHostGetDevicePointer_v2(&p_dptr, (void*)p, NUM2UINT(flags));
+  return ULONG2NUM(p_dptr);
 }
 
-static VALUE rb_cuMemHostGetFlags(VALUE self){
-  CUresult cuMemHostGetFlags (uint* pFlags, void* p);
-  return Qnil;
+// CUresult cuMemHostGetFlags ( unsigned int* pFlags, void* p )
+// Passes back flags that were used for a pinned allocation.
+// Parameters
+// pFlags
+// - Returned flags word
+// p
+// - Host pointer
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuMemHostGetFlags(VALUE self, VALUE  p){
+  uint p_flags;
+  CUresult result = cuMemHostGetFlags(&p_flags, (void*)p);
+  return UINT2NUM(p_flags);
 }
 
-static VALUE rb_cuMemAllocManaged(VALUE self){
-  CUresult cuMemAllocManaged (CUdeviceptr* dptr, size_t bytesize, uint flags);
-  return Qnil;
+// CUresult cuMemAllocManaged ( CUdeviceptr* dptr, size_t bytesize, unsigned int  flags )
+// Allocates memory that will be automatically managed by the Unified Memory system.
+// Parameters
+// dptr
+// - Returned device pointer
+// bytesize
+// - Requested allocation size in bytes
+// flags
+// - Must be one of CU_MEM_ATTACH_GLOBAL or CU_MEM_ATTACH_HOST
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_NOT_SUPPORTED, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_OUT_OF_MEMORY
+
+static VALUE rb_cuMemAllocManaged(VALUE self, VALUE  byte_size, VALUE flags){
+  CUdeviceptr dptr;
+  CUresult result = cuMemAllocManaged(&dptr, NUM2ULONG(byte_size), NUM2UINT(flags));
+  return ULONG2NUM(dptr);
 }
 
-static VALUE rb_cuDeviceGetByPCIBusId(VALUE self){
-  CUresult cuDeviceGetByPCIBusId (CUdevice* dev, const(char)* pciBusId);
-  return Qnil;
+// CUresult cuDeviceGetByPCIBusId ( CUdevice* dev, const char* pciBusId )
+// Returns a handle to a compute device.
+// Parameters
+// dev
+// - Returned device handle
+// pciBusId
+// - String in one of the following forms: [domain]:[bus]:[device].[function] [domain]:[bus]:[device] [bus]:[device].[function] where domain, bus, device, and function are all hexadecimal values
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_INVALID_DEVICE
+
+
+static VALUE rb_cuDeviceGetByPCIBusId(VALUE self, VALUE pci_bus_id){
+  CUdevice dev;
+  CUresult result = cuDeviceGetByPCIBusId(&dev, StringValueCStr(pci_bus_id));
+  return INT2NUM(dev);
 }
 
-static VALUE rb_cuDeviceGetPCIBusId(VALUE self){
-  CUresult cuDeviceGetPCIBusId (char* pciBusId, int len, CUdevice dev);
-  return Qnil;
+// CUresult cuDeviceGetPCIBusId ( char* pciBusId, int  len, CUdevice dev )
+// Returns a PCI Bus Id string for the device.
+// Parameters
+// pciBusId
+// - Returned identifier string for the device in the following format [domain]:[bus]:[device].[function] where domain, bus, device, and function are all hexadecimal values. pciBusId should be large enough to store 13 characters including the NULL-terminator.
+// len
+// - Maximum length of string to store in name
+// dev
+// - Device to get identifier string for
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_INVALID_DEVICE
+
+static VALUE rb_cuDeviceGetPCIBusId(VALUE self, VALUE len, VALUE dev){
+  char* pci_bus_id;
+  CUresult result = cuDeviceGetPCIBusId(pci_bus_id, NUM2INT(len), NUM2INT(dev));
+  return rb_str_new_cstr(pci_bus_id);
 }
 
+// CUresult cuIpcGetEventHandle ( CUipcEventHandle* pHandle, CUevent event )
+// Gets an interprocess handle for a previously allocated event.
+// Parameters
+// pHandle
+// - Pointer to a user allocated CUipcEventHandle in which to return the opaque event handle
+// event
+// - Event allocated with CU_EVENT_INTERPROCESS and CU_EVENT_DISABLE_TIMING flags.
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_MAP_FAILED
 
 static VALUE rb_cuIpcGetEventHandle(VALUE self){
-  CUresult cuIpcGetEventHandle (CUipcEventHandle* pHandle, CUevent event);
+  CUresult result = cuIpcGetEventHandle (CUipcEventHandle* pHandle, CUevent event);
   return Qnil;
 }
 
+// CUresult cuIpcOpenEventHandle ( CUevent* phEvent, CUipcEventHandle handle )
+// Opens an interprocess event handle for use in the current process.
+// Parameters
+// phEvent
+// - Returns the imported event
+// handle
+// - Interprocess handle to open
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_MAP_FAILED, CUDA_ERROR_PEER_ACCESS_UNSUPPORTED, CUDA_ERROR_INVALID_HANDLE
 
 static VALUE rb_cuIpcOpenEventHandle(VALUE self){
-  CUresult cuIpcOpenEventHandle (CUevent* phEvent, CUipcEventHandle handle);
+  CUresult result = cuIpcOpenEventHandle (CUevent* phEvent, CUipcEventHandle handle);
   return Qnil;
 }
+
+// CUresult cuIpcGetMemHandle ( CUipcMemHandle* pHandle, CUdeviceptr dptr )
+// Gets an interprocess memory handle for an existing device memory allocation.
+// Parameters
+// pHandle
+// - Pointer to user allocated CUipcMemHandle to return the handle in.
+// dptr
+// - Base pointer to previously allocated device memory
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_MAP_FAILED,
 
 static VALUE rb_cuIpcGetMemHandle(VALUE self){
-  CUresult cuIpcGetMemHandle (CUipcMemHandle* pHandle, CUdeviceptr dptr);
+  CUresult result = cuIpcGetMemHandle (CUipcMemHandle* pHandle, CUdeviceptr dptr);
   return Qnil;
 }
+
+// CUresult cuIpcOpenMemHandle ( CUdeviceptr* pdptr, CUipcMemHandle handle, unsigned int  Flags )
+// Opens an interprocess memory handle exported from another process and returns a device pointer usable in the local process.
+// Parameters
+// pdptr
+// - Returned device pointer
+// handle
+// - CUipcMemHandle to open
+// Flags
+// - Flags for this operation. Must be specified as CU_IPC_MEM_LAZY_ENABLE_PEER_ACCESS
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_MAP_FAILED, CUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_TOO_MANY_PEERS
 
 static VALUE rb_cuIpcOpenMemHandle(VALUE self){
-  CUresult cuIpcOpenMemHandle (CUdeviceptr* pdptr, CUipcMemHandle handle, uint Flags);
+  CUresult result = cuIpcOpenMemHandle (CUdeviceptr* pdptr, CUipcMemHandle handle, uint Flags);
   return Qnil;
 }
+
+// CUresult cuIpcCloseMemHandle ( CUdeviceptr dptr )
+// Close memory mapped with cuIpcOpenMemHandle.
+// Parameters
+// dptr
+// - Device pointer returned by cuIpcOpenMemHandle
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_MAP_FAILED, CUDA_ERROR_INVALID_HANDLE,
 
 static VALUE rb_cuIpcCloseMemHandle(VALUE self){
-  CUresult cuIpcCloseMemHandle (CUdeviceptr dptr);
+  CUresult result = cuIpcCloseMemHandle (CUdeviceptr dptr);
   return Qnil;
 }
+
+// CUresult cuMemHostRegister ( void* p, size_t bytesize, unsigned int  Flags )
+// Registers an existing host memory range for use by CUDA.
+// Parameters
+// p
+// - Host pointer to memory to page-lock
+// bytesize
+// - Size in bytes of the address range to page-lock
+// Flags
+// - Flags for allocation request
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT,
+// CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_HOST_MEMORY_ALREADY_REGISTERED,
+// CUDA_ERROR_NOT_PERMITTED, CUDA_ERROR_NOT_SUPPORTED
 
 static VALUE rb_cuMemHostRegister_v2(VALUE self){
-  CUresult cuMemHostRegister_v2 (void* p, size_t bytesize, uint Flags);
+  CUresult result = cuMemHostRegister_v2 (void* p, size_t bytesize, uint Flags);
   return Qnil;
 }
+
+// CUresult cuMemHostUnregister ( void* p )
+// Unregisters a memory range that was registered with cuMemHostRegister.
+// Parameters
+// p
+// - Host pointer to memory to unregister
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT,
+// CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_OUT_OF_MEMORY, CUDA_ERROR_HOST_MEMORY_NOT_REGISTERED,
 
 static VALUE rb_cuMemHostUnregister(VALUE self){
-  CUresult cuMemHostUnregister (void* p);
+  CUresult result = cuMemHostUnregister (void* p);
   return Qnil;
 }
+
+// CUresult cuMemcpy ( CUdeviceptr dst, CUdeviceptr src, size_t ByteCount )
+// Copies memory.
+// Parameters
+// dst
+// - Destination unified virtual address space pointer
+// src
+// - Source unified virtual address space pointer
+// ByteCount
+// - Size of memory copy in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuMemcpy(VALUE self){
-  CUresult cuMemcpy (CUdeviceptr dst, CUdeviceptr src, size_t ByteCount);
+  CUresult result = cuMemcpy (CUdeviceptr dst, CUdeviceptr src, size_t ByteCount);
   return Qnil;
 }
+
+// CUresult cuMemcpyPeer ( CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount )
+// Copies device memory between two contexts.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// dstContext
+// - Destination context
+// srcDevice
+// - Source device pointer
+// srcContext
+// - Source context
+// ByteCount
+// - Size of memory copy in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuMemcpyPeer(VALUE self){
-  CUresult cuMemcpyPeer (CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount);
+  CUresult result = cuMemcpyPeer (CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount);
   return Qnil;
 }
 
+// CUresult cuMemcpyHtoD ( CUdeviceptr dstDevice, const void* srcHost, size_t ByteCount )
+// Copies memory from Host to Device.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// srcHost
+// - Source host pointer
+// ByteCount
+// - Size of memory copy in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
 static VALUE rb_cuMemcpyHtoD_v2(VALUE self){
-  CUresult cuMemcpyHtoD_v2 (CUdeviceptr dstDevice, const(void)* srcHost, size_t ByteCount);
+  CUresult result = cuMemcpyHtoD_v2 (CUdeviceptr dstDevice, const(void)* srcHost, size_t ByteCount);
   return Qnil;
 }
 
 static VALUE rb_cuMemcpyDtoH_v2(VALUE self){
-  CUresult cuMemcpyDtoH_v2 (void* dstHost, CUdeviceptr srcDevice, size_t ByteCount);
+  CUresult result = cuMemcpyDtoH_v2 (void* dstHost, CUdeviceptr srcDevice, size_t ByteCount);
   return Qnil;
 }
 
 static VALUE rb_cuMemcpyDtoD_v2(VALUE self){
-  CUresult cuMemcpyDtoD_v2 (CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount);
+  CUresult result = cuMemcpyDtoD_v2 (CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount);
   return Qnil;
 }
 
 static VALUE rb_cuMemcpyDtoA_v2(VALUE self){
-  CUresult cuMemcpyDtoA_v2 (CUarray dstArray, size_t dstOffset, CUdeviceptr srcDevice, size_t ByteCount);
+  CUresult result = cuMemcpyDtoA_v2 (CUarray dstArray, size_t dstOffset, CUdeviceptr srcDevice, size_t ByteCount);
   return Qnil;
 }
 
 static VALUE rb_cuMemcpyAtoD_v2(VALUE self){
-  CUresult cuMemcpyAtoD_v2 (CUdeviceptr dstDevice, CUarray srcArray, size_t srcOffset, size_t ByteCount);
+  CUresult result = cuMemcpyAtoD_v2 (CUdeviceptr dstDevice, CUarray srcArray, size_t srcOffset, size_t ByteCount);
   return Qnil;
 }
 
 static VALUE rb_cuMemcpyHtoA_v2(VALUE self){
-  CUresult cuMemcpyHtoA_v2 (CUarray dstArray, size_t dstOffset, const(void)* srcHost, size_t ByteCount);
+  CUresult result = cuMemcpyHtoA_v2 (CUarray dstArray, size_t dstOffset, const(void)* srcHost, size_t ByteCount);
   return Qnil;
 }
 
 static VALUE rb_cuMemcpyAtoH_v2(VALUE self){
-  CUresult cuMemcpyAtoH_v2 (void* dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount);
+  CUresult result = cuMemcpyAtoH_v2 (void* dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount);
   return Qnil;
 }
 
 static VALUE rb_cuMemcpyAtoA_v2(VALUE self){
-  CUresult cuMemcpyAtoA_v2 (CUarray dstArray, size_t dstOffset, CUarray srcArray, size_t srcOffset, size_t ByteCount);
+  CUresult result = cuMemcpyAtoA_v2 (CUarray dstArray, size_t dstOffset, CUarray srcArray, size_t srcOffset, size_t ByteCount);
   return Qnil;
 }
 
@@ -1029,6 +1296,20 @@ static VALUE rb_cuMemcpyPeerAsync(VALUE self){
   CUresult cuMemcpyPeerAsync (CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount, CUstream hStream);
   return Qnil;
 }
+
+// CUresult cuMemcpyHtoDAsync ( CUdeviceptr dstDevice, const void* srcHost, size_t ByteCount, CUstream hStream )
+// Copies memory from Host to Device.
+// Parameters
+// dstDevice
+// - Destination device pointer
+// srcHost
+// - Source host pointer
+// ByteCount
+// - Size of memory copy in bytes
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuMemcpyHtoDAsync_v2(VALUE self){
   CUresult cuMemcpyHtoDAsync_v2 (CUdeviceptr dstDevice, const(void)* srcHost, size_t ByteCount, CUstream hStream);
