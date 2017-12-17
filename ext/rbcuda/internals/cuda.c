@@ -2061,111 +2061,327 @@ static VALUE rb_cuEventElapsedTime(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cuFuncGetAttribute(VALUE self){
-  // CUresult cuFuncGetAttribute (int* pi, CUfunction_attribute attrib, CUfunction hfunc);
-  return Qnil;
+// CUresult cuFuncGetAttribute ( int* pi, CUfunction_attribute attrib, CUfunction hfunc )
+// Returns information about a function.
+// Parameters
+// pi
+// - Returned attribute value
+// attrib
+// - Attribute requested
+// hfunc
+// - Function to query attribute of
+
+static VALUE rb_cuFuncGetAttribute(VALUE self, VALUE function_attribute, VALUE hfunc_val){
+  int pi;
+  function_ptr* hfunc;
+  Data_Get_Struct(hfunc_val, function_ptr, hfunc);
+  CUresult result = cuFuncGetAttribute (&pi, rb_cu_function_attribute_from_rbsymbol(function_attribute), hfunc->function);
+  return INT2NUM(pi);
 }
 
-static VALUE rb_cuFuncSetCacheConfig(VALUE self){
-  // CUresult cuFuncSetCacheConfig (CUfunction hfunc, CUfunc_cache config);
-  return Qnil;
+// CUresult cuFuncSetCacheConfig ( CUfunction hfunc, CUfunc_cache config )
+// Sets the preferred cache configuration for a device function.
+// Parameters
+// hfunc
+// - Kernel to configure cache for
+// config
+// - Requested cache configuration
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT
+
+static VALUE rb_cuFuncSetCacheConfig(VALUE self, VALUE hfunc_val, VALUE  config){
+  function_ptr* hfunc;
+  Data_Get_Struct(hfunc_val, function_ptr, hfunc);
+  CUresult result = cuFuncSetCacheConfig(hfunc->function, rb_cu_func_cache_from_rbsymbol(config));
+  return Qtrue;
 }
 
-static VALUE rb_cuFuncSetSharedMemConfig(VALUE self){
-  // CUresult cuFuncSetSharedMemConfig (CUfunction hfunc, CUsharedconfig config);
-  return Qnil;
+// CUresult cuFuncSetSharedMemConfig ( CUfunction hfunc, CUsharedconfig config )
+// Sets the shared memory configuration for a device function.
+// Parameters
+// hfunc
+// - kernel to be given a shared memory config
+// config
+// - requested shared memory configuration
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT
+
+static VALUE rb_cuFuncSetSharedMemConfig(VALUE self, VALUE hfunc_val, VALUE  config){
+  function_ptr* hfunc;
+  Data_Get_Struct(hfunc_val, function_ptr, hfunc);
+  CUresult result =  cuFuncSetSharedMemConfig(hfunc->function, rb_cu_shared_config_from_rbsymbol(config));
+  return Qtrue;
 }
 
 // IMPORTANT
-static VALUE rb_cuLaunchKernel(VALUE self){
 
-  CUresult cuLaunchKernel (
-    CUfunction f,
-    uint gridDimX,
-    uint gridDimY,
-    uint gridDimZ,
-    uint blockDimX,
-    uint blockDimY,
-    uint blockDimZ,
-    uint sharedMemBytes,
-    CUstream hStream,
-    void** kernelParams,
-    void** extra);
+// CUresult cuLaunchKernel ( CUfunction f, unsigned int  gridDimX, unsigned int  gridDimY, unsigned int  gridDimZ,
+//                             unsigned int  blockDimX, unsigned int  blockDimY, unsigned int  blockDimZ,
+//                             unsigned int  sharedMemBytes, CUstream hStream, void** kernelParams, void** extra )
+// Launches a CUDA function.
+// Parameters
+// f
+// - Kernel to launch
+// gridDimX
+// - Width of grid in blocks
+// gridDimY
+// - Height of grid in blocks
+// gridDimZ
+// - Depth of grid in blocks
+// blockDimX
+// - X dimension of each thread block
+// blockDimY
+// - Y dimension of each thread block
+// blockDimZ
+// - Z dimension of each thread block
+// sharedMemBytes
+// - Dynamic shared-memory size per thread block in bytes
+// hStream
+// - Stream identifier
+// kernelParams
+// - Array of pointers to kernel parameters
+// extra
+// - Extra options
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT,
+// CUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_INVALID_IMAGE, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_LAUNCH_FAILED,
+// CUDA_ERROR_LAUNCH_OUT_OF_RESOURCES, CUDA_ERROR_LAUNCH_TIMEOUT, CUDA_ERROR_LAUNCH_INCOMPATIBLE_TEXTURING, CUDA_ERROR_SHARED_OBJECT_INIT_FAILED
 
-  return Qnil;
+static VALUE rb_cuLaunchKernel(VALUE self, VALUE f_val, VALUE gridDimX, VALUE gridDimY, VALUE gridDimZ, VALUE blockDimX, VALUE blockDimY, VALUE blockDimZ,
+  VALUE sharedMemBytes, VALUE h_stream_val, VALUE kernel_params, VALUE extra){
+  function_ptr* f;
+  Data_Get_Struct(f_val, function_ptr, f);
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+
+  CUresult result = cuLaunchKernel(
+    f->function,
+    NUM2UINT(gridDimX),
+    NUM2UINT(gridDimY),
+    NUM2UINT(gridDimZ),
+    NUM2UINT(blockDimX),
+    NUM2UINT(blockDimY),
+    NUM2UINT(blockDimZ),
+    NUM2UINT(sharedMemBytes),
+    h_stream->stream,
+    (void**)kernel_params,
+    (void**)extra
+  );
+
+  return Qtrue;
 }
 
-static VALUE rb_cuFuncSetBlockShape(VALUE self){
-  CUresult cuFuncSetBlockShape (CUfunction hfunc, int x, int y, int z);
-  return Qnil;
+// CUresult cuFuncSetBlockShape ( CUfunction hfunc, int  x, int  y, int  z )
+// Sets the block-dimensions for the function.
+// Parameters
+// hfunc
+// - Kernel to specify dimensions of
+// x
+// - X dimension
+// y
+// - Y dimension
+// z
+// - Z dimension
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuFuncSetBlockShape(VALUE self, VALUE  hfunc_val, VALUE x, VALUE y, VALUE z){
+  function_ptr* hfunc;
+  Data_Get_Struct(hfunc_val, function_ptr, hfunc);
+  CUresult result = cuFuncSetBlockShape(hfunc->function, NUM2INT(x), NUM2INT(y), NUM2INT(z));
+  return Qtrue;
 }
 
-static VALUE rb_cuFuncSetSharedSize(VALUE self){
-  CUresult cuFuncSetSharedSize (CUfunction hfunc, uint bytes);
-  return Qnil;
+// CUresult cuFuncSetSharedSize ( CUfunction hfunc, unsigned int  bytes )
+// Sets the dynamic shared-memory size for the function.
+// Parameters
+// hfunc
+// - Kernel to specify dynamic shared-memory size for
+// bytes
+// - Dynamic shared-memory size per thread in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuFuncSetSharedSize(VALUE self, VALUE hfunc_val, VALUE bytes){
+  function_ptr* hfunc;
+  Data_Get_Struct(hfunc_val, function_ptr, hfunc);
+  CUresult result = cuFuncSetSharedSize(hfunc->function, NUM2UINT(bytes));
+  return Qtrue;
 }
 
-static VALUE rb_cuParamSetSize(VALUE self){
-  CUresult cuParamSetSize (CUfunction hfunc, uint numbytes);
-  return Qnil;
+// CUresult cuParamSetSize ( CUfunction hfunc, unsigned int  numbytes )
+// Sets the parameter size for the function.
+// Parameters
+// hfunc
+// - Kernel to set parameter size for
+// numbytes
+// - Size of parameter list in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuParamSetSize(VALUE self, VALUE hfunc_val, VALUE num_bytes){
+  function_ptr* hfunc;
+  Data_Get_Struct(hfunc_val, function_ptr, hfunc);
+  CUresult result = cuParamSetSize(hfunc->function, NUM2UINT(num_bytes));
+  return Qtrue;
 }
 
-static VALUE rb_cuParamSeti(VALUE self){
-  CUresult cuParamSeti (CUfunction hfunc, int offset, uint value);
-  return Qnil;
+// CUresult cuParamSeti ( CUfunction hfunc, int  offset, unsigned int  value )
+// Adds an integer parameter to the function's argument list.
+// Parameters
+// hfunc
+// - Kernel to add parameter to
+// offset
+// - Offset to add parameter to argument list
+// value
+// - Value of parameter
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuParamSeti(VALUE self, VALUE hfunc_val, VALUE offset, VALUE param_value){
+  function_ptr* hfunc;
+  Data_Get_Struct(hfunc_val, function_ptr, hfunc);
+  CUresult result = cuParamSeti(hfunc->function, NUM2INT(offset), NUM2UINT(param_value));
+  return Qtrue;
 }
 
-static VALUE rb_cuParamSetf(VALUE self){
-  CUresult cuParamSetf (CUfunction hfunc, int offset, float value);
-  return Qnil;
+// CUresult cuParamSetf ( CUfunction hfunc, int  offset, float  value )
+// Adds a floating-point parameter to the function's argument list.
+// Parameters
+// hfunc
+// - Kernel to add parameter to
+// offset
+// - Offset to add parameter to argument list
+// value
+// - Value of parameter
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
+
+static VALUE rb_cuParamSetf(VALUE self, VALUE hfunc_val, VALUE offset, VALUE param_value){
+  function_ptr* hfunc;
+  Data_Get_Struct(hfunc_val, function_ptr, hfunc);
+  CUresult result = cuParamSetf(hfunc->function, NUM2INT(offset), NUM2FLOAT(param_value));
+  return Qtrue;
 }
 
+// CUresult cuParamSetv ( CUfunction hfunc, int  offset, void* ptr, unsigned int  numbytes )
+// Adds arbitrary data to the function's argument list.
+// Parameters
+// hfunc
+// - Kernel to add data to
+// offset
+// - Offset to add data to argument list
+// ptr
+// - Pointer to arbitrary data
+// numbytes
+// - Size of data to copy in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-
-
-
-static VALUE rb_cuParamSetv(VALUE self){
-  CUresult cuParamSetv (CUfunction hfunc, int offset, void* ptr, uint numbytes);
-  return Qnil;
+static VALUE rb_cuParamSetv(VALUE self, VALUE hfunc_val, VALUE offset, VALUE ptr, VALUE num_bytes){
+  function_ptr* hfunc;
+  Data_Get_Struct(hfunc_val, function_ptr, hfunc);
+  CUresult result = cuParamSetv(hfunc->function, NUM2INT(offset), (void*)ptr, NUM2UINT(num_bytes));
+  return Qtrue;
 }
 
-static VALUE rb_cuLaunch(VALUE self){
-  CUresult cuLaunch (CUfunction f);
-  return Qnil;
+// CUresult cuLaunch ( CUfunction f )
+// Launches a CUDA function.
+// Parameters
+// f
+// - Kernel to launch
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT,
+// CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_LAUNCH_FAILED, CUDA_ERROR_LAUNCH_OUT_OF_RESOURCES, CUDA_ERROR_LAUNCH_TIMEOUT,
+// CUDA_ERROR_LAUNCH_INCOMPATIBLE_TEXTURING, CUDA_ERROR_SHARED_OBJECT_INIT_FAILED
+
+static VALUE rb_cuLaunch(VALUE self, VALUE func_val){
+  function_ptr* func;
+  Data_Get_Struct(func_val, function_ptr, func);
+  CUresult result = cuLaunch(func->function);
+  return Qtrue;
 }
 
-static VALUE rb_cuLaunchGrid(VALUE self){
-  CUresult cuLaunchGrid (CUfunction f, int grid_width, int grid_height);
-  return Qnil;
+// CUresult cuLaunchGrid ( CUfunction f, int  grid_width, int  grid_height )
+// Launches a CUDA function.
+// Parameters
+// f
+// - Kernel to launch
+// grid_width
+// - Width of grid in blocks
+// grid_height
+// - Height of grid in blocks
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT,
+// CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_LAUNCH_FAILED, CUDA_ERROR_LAUNCH_OUT_OF_RESOURCES, CUDA_ERROR_LAUNCH_TIMEOUT,
+// CUDA_ERROR_LAUNCH_INCOMPATIBLE_TEXTURING, CUDA_ERROR_SHARED_OBJECT_INIT_FAILED
+
+static VALUE rb_cuLaunchGrid(VALUE self, VALUE func_val, VALUE grid_width, VALUE grid_height){
+  function_ptr* func;
+  Data_Get_Struct(func_val, function_ptr, func);
+  CUresult result = cuLaunchGrid(func->function, NUM2INT(grid_width), NUM2INT(grid_height));
+  return Qtrue;
 }
 
-static VALUE rb_cuLaunchGridAsync(VALUE self){
-  CUresult cuLaunchGridAsync (CUfunction f, int grid_width, int grid_height, CUstream hStream);
-  return Qnil;
+// CUresult cuLaunchGridAsync ( CUfunction f, int  grid_width, int  grid_height, CUstream hStream )
+// Launches a CUDA function.
+// Parameters
+// f
+// - Kernel to launch
+// grid_width
+// - Width of grid in blocks
+// grid_height
+// - Height of grid in blocks
+// hStream
+// - Stream identifier
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT,
+// CUDA_ERROR_INVALID_HANDLE, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_LAUNCH_FAILED, CUDA_ERROR_LAUNCH_OUT_OF_RESOURCES,
+// CUDA_ERROR_LAUNCH_TIMEOUT, CUDA_ERROR_LAUNCH_INCOMPATIBLE_TEXTURING, CUDA_ERROR_SHARED_OBJECT_INIT_FAILED
+
+static VALUE rb_cuLaunchGridAsync(VALUE self, VALUE func_val, VALUE grid_width, VALUE grid_height, VALUE h_stream_val){
+  function_ptr* func;
+  Data_Get_Struct(func_val, function_ptr, func);
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  CUresult result = cuLaunchGridAsync(func->function, NUM2INT(grid_width), NUM2INT(grid_height), h_stream->stream);
+  return Qtrue;
 }
+
+// CUresult cuParamSetTexRef ( CUfunction hfunc, int  texunit, CUtexref hTexRef )
+// Adds a texture-reference to the function's argument list.
+// Parameters
+// hfunc
+// - Kernel to add texture-reference to
+// texunit
+// - Texture unit (must be CU_PARAM_TR_DEFAULT)
+// hTexRef
+// - Texture-reference to add to argument list
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
 static VALUE rb_cuParamSetTexRef(VALUE self){
-  CUresult cuParamSetTexRef (CUfunction hfunc, int texunit, CUtexref hTexRef);
-  return Qnil;
+  CUresult result = cuParamSetTexRef (CUfunction hfunc, int texunit, CUtexref hTexRef);
+  return Qtrue;
 }
 
 static VALUE rb_cuOccupancyMaxActiveBlocksPerMultiprocessor(VALUE self){
-  CUresult cuOccupancyMaxActiveBlocksPerMultiprocessor (int* numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize);
+  CUresult result = cuOccupancyMaxActiveBlocksPerMultiprocessor (int* numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize);
   return Qnil;
 }
 
 static VALUE rb_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(VALUE self){
-  CUresult cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags (int* numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize, uint flags);
+  CUresult result = cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags (int* numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize, uint flags);
   return Qnil;
 }
 
 static VALUE rb_cuOccupancyMaxPotentialBlockSize(VALUE self){
-  CUresult cuOccupancyMaxPotentialBlockSize (int* minGridSize, int* blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int blockSizeLimit);
+  CUresult result = cuOccupancyMaxPotentialBlockSize (int* minGridSize, int* blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int blockSizeLimit);
   return Qnil;
 }
 
 static VALUE rb_cuOccupancyMaxPotentialBlockSizeWithFlags(VALUE self){
-  CUresult cuOccupancyMaxPotentialBlockSizeWithFlags (int* minGridSize, int* blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int blockSizeLimit, uint flags);
+  CUresult result = cuOccupancyMaxPotentialBlockSizeWithFlags (int* minGridSize, int* blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int blockSizeLimit, uint flags);
   return Qnil;
 }
 

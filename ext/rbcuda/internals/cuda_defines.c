@@ -321,7 +321,7 @@ CUjit_option rb_cu_jit_option_from_rbsymbol(VALUE sym) {
 }
 
 const char* get_jit_option_name(CUjit_option option){
-  return RbCUfunc_cache_enum[option];
+  return RbCUjit_option_enum[option];
 }
 
 const char* const RbCUjitInputType_enum[6] = {
@@ -397,4 +397,34 @@ CUarray_format rb_cuarray_format_from_rbsymbol(VALUE sym) {
 
   VALUE str = rb_any_to_s(sym);
   rb_raise(rb_eArgError, "invalid CUresult type symbol (:%s) specified", RSTRING_PTR(str));
+}
+
+
+const char* const RbCUfunction_attribute_enum[9] = {
+  "CU_FUNC_ATTRIBUTE_MAX_THREADS_PER_BLOCK",
+  "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES",
+  "CU_FUNC_ATTRIBUTE_CONST_SIZE_BYTES",
+  "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES",
+  "CU_FUNC_ATTRIBUTE_NUM_REGS",
+  "CU_FUNC_ATTRIBUTE_PTX_VERSION",
+  "CU_FUNC_ATTRIBUTE_BINARY_VERSION",
+  "CU_FUNC_ATTRIBUTE_CACHE_MODE_CA",
+  "CU_FUNC_ATTRIBUTE_MAX"
+};
+
+CUfunction_attribute rb_cu_function_attribute_from_rbsymbol(VALUE sym) {
+  ID sym_id = SYM2ID(sym);
+
+  for (size_t index = 0; index < 9; ++index) {
+    if (sym_id == rb_intern(RbCUfunction_attribute_enum[index])) {
+      return static_cast<CUfunction_attribute>(index);
+    }
+  }
+
+  VALUE str = rb_any_to_s(sym);
+  rb_raise(rb_eArgError, "invalid function attribute symbol (:%s) specified", RSTRING_PTR(str));
+}
+
+const char* get_function_attribute_name(CUfunction_attribute attribute){
+  return RbCUevent_flags_enum[attribute];
 }
