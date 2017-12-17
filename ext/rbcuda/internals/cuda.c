@@ -2260,7 +2260,7 @@ static VALUE rb_cuParamSeti(VALUE self, VALUE hfunc_val, VALUE offset, VALUE par
 static VALUE rb_cuParamSetf(VALUE self, VALUE hfunc_val, VALUE offset, VALUE param_value){
   function_ptr* hfunc;
   Data_Get_Struct(hfunc_val, function_ptr, hfunc);
-  CUresult result = cuParamSetf(hfunc->function, NUM2INT(offset), NUM2FLOAT(param_value));
+  CUresult result = cuParamSetf(hfunc->function, NUM2INT(offset), NUM2DBL(param_value));
   return Qtrue;
 }
 
@@ -2360,28 +2360,113 @@ static VALUE rb_cuLaunchGridAsync(VALUE self, VALUE func_val, VALUE grid_width, 
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuParamSetTexRef(VALUE self){
-  CUresult result = cuParamSetTexRef (CUfunction hfunc, int texunit, CUtexref hTexRef);
+static VALUE rb_cuParamSetTexRef(VALUE self, VALUE hfunc_val, VALUE tex_unit, VALUE tex_ref_val){
+  texture_ptr* tex_ref;
+  Data_Get_Struct(tex_ref_val, texture_ptr, tex_ref);
+  function_ptr* hfunc;
+  Data_Get_Struct(hfunc_val, function_ptr, hfunc);
+  CUresult result = cuParamSetTexRef(hfunc->function, NUM2INT(tex_unit), tex_ref->texture);
   return Qtrue;
 }
 
-static VALUE rb_cuOccupancyMaxActiveBlocksPerMultiprocessor(VALUE self){
-  CUresult result = cuOccupancyMaxActiveBlocksPerMultiprocessor (int* numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize);
+// CUresult cuOccupancyMaxActiveBlocksPerMultiprocessor ( int* numBlocks, CUfunction func, int  blockSize, size_t dynamicSMemSize )
+// Returns occupancy of a function.
+// Parameters
+// numBlocks
+// - Returned occupancy
+// func
+// - Kernel for which occupancy is calculated
+// blockSize
+// - Block size the kernel is intended to be launched with
+// dynamicSMemSize
+// - Per-block dynamic shared memory usage intended, in bytes
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_UNKNOWN
+
+static VALUE rb_cuOccupancyMaxActiveBlocksPerMultiprocessor(VALUE self, VALUE func_val, VALUE block_size, VALUE dynamic_shared_mem_size){
+  int num_blocks;
+  function_ptr* func;
+  Data_Get_Struct(func_val, function_ptr, func);
+  CUresult result = cuOccupancyMaxActiveBlocksPerMultiprocessor(&num_blocks, func->function, NUM2INT(block_size), NUM2ULONG(dynamic_shared_mem_size));
+  return INT2NUM(num_blocks);
+}
+
+// CUresult cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags ( int* numBlocks, CUfunction func, int  blockSize, size_t dynamicSMemSize, unsigned int  flags )
+// Returns occupancy of a function.
+// Parameters
+// numBlocks
+// - Returned occupancy
+// func
+// - Kernel for which occupancy is calculated
+// blockSize
+// - Block size the kernel is intended to be launched with
+// dynamicSMemSize
+// - Per-block dynamic shared memory usage intended, in bytes
+// flags
+// - Requested behavior for the occupancy calculator
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_UNKNOWN
+
+static VALUE rb_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(VALUE self, VALUE func_val, VALUE block_size, VALUE dynamic_shared_mem_size, VALUE flags){
+  int num_blocks;
+  function_ptr* func;
+  Data_Get_Struct(func_val, function_ptr, func);
+  CUresult result = cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(&num_blocks, func->function, NUM2INT(block_size) , NUM2ULONG(dynamic_shared_mem_size), NUM2UINT(flags));
   return Qnil;
 }
 
-static VALUE rb_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(VALUE self){
-  CUresult result = cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags (int* numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize, uint flags);
+// CUresult cuOccupancyMaxPotentialBlockSize ( int* minGridSize, int* blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int  blockSizeLimit )
+// Suggest a launch configuration with reasonable occupancy.
+// Parameters
+// minGridSize
+// - Returned minimum grid size needed to achieve the maximum occupancy
+// blockSize
+// - Returned maximum block size that can achieve the maximum occupancy
+// func
+// - Kernel for which launch configuration is calculated
+// blockSizeToDynamicSMemSize
+// - A function that calculates how much per-block dynamic shared memory func uses based on the block size
+// dynamicSMemSize
+// - Dynamic shared memory usage intended, in bytes
+// blockSizeLimit
+// - The maximum block size func is designed to handle
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_UNKNOWN
+
+static VALUE rb_cuOccupancyMaxPotentialBlockSize(VALUE self, VALUE func_val, VALUE block_size_to_dynamic_shared_mem_size, VALUE dynamic_shared_mem_size, VALUE block_size_limit){
+  int min_grid_size, block_size;
+  function_ptr* func;
+  Data_Get_Struct(func_val, function_ptr, func);
+  // TODO
+  // CUresult result = cuOccupancyMaxPotentialBlockSize (&min_grid_size, &block_size, func->function, CUoccupancyB2DSize block_size_to_dynamic_shared_mem_size, NUM2ULONG(dynamic_shared_mem_size), NUM2INT(block_size_limit));
   return Qnil;
 }
 
-static VALUE rb_cuOccupancyMaxPotentialBlockSize(VALUE self){
-  CUresult result = cuOccupancyMaxPotentialBlockSize (int* minGridSize, int* blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int blockSizeLimit);
-  return Qnil;
-}
+// CUresult cuOccupancyMaxPotentialBlockSizeWithFlags ( int* minGridSize, int* blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int  blockSizeLimit, unsigned int  flags )
+// Suggest a launch configuration with reasonable occupancy.
+// Parameters
+// minGridSize
+// - Returned minimum grid size needed to achieve the maximum occupancy
+// blockSize
+// - Returned maximum block size that can achieve the maximum occupancy
+// func
+// - Kernel for which launch configuration is calculated
+// blockSizeToDynamicSMemSize
+// - A function that calculates how much per-block dynamic shared memory func uses based on the block size
+// dynamicSMemSize
+// - Dynamic shared memory usage intended, in bytes
+// blockSizeLimit
+// - The maximum block size func is designed to handle
+// flags
+// - Options
+// Returns
+// CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_UNKNOWN
 
-static VALUE rb_cuOccupancyMaxPotentialBlockSizeWithFlags(VALUE self){
-  CUresult result = cuOccupancyMaxPotentialBlockSizeWithFlags (int* minGridSize, int* blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int blockSizeLimit, uint flags);
+static VALUE rb_cuOccupancyMaxPotentialBlockSizeWithFlags(VALUE self, VALUE func_val, VALUE block_size_to_dynamic_shared_mem_size, VALUE dynamic_shared_mem_size, VALUE block_size_limit, VALUE flags){
+  int min_grid_size, block_size;
+  function_ptr* func;
+  Data_Get_Struct(func_val, function_ptr, func);
+  // CUresult result = cuOccupancyMaxPotentialBlockSizeWithFlags(&min_grid_size, &block_size, func->function, CUoccupancyB2DSize block_size_to_dynamic_shared_mem_size, NUM2ULONG(dynamic_shared_mem_size), NUM2INT(block_size_limit), NUM2INT(Flags));
   return Qnil;
 }
 

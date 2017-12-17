@@ -655,12 +655,13 @@ static VALUE rb_cuParamSetf(VALUE self, VALUE hfunc_val, VALUE offset, VALUE par
 static VALUE rb_cuParamSetv(VALUE self, VALUE hfunc_val, VALUE offset, VALUE ptr, VALUE num_bytes);
 static VALUE rb_cuLaunch(VALUE self, VALUE func_val);
 static VALUE rb_cuLaunchGrid(VALUE self, VALUE func_val, VALUE grid_width, VALUE grid_height);
-static VALUE rb_cuLaunchGridAsync(VALUE self, VALUE func_val, VALUE grid_width, VALUE grid_height, VALUE h_stream_val);;
-static VALUE rb_cuParamSetTexRef(VALUE self);
-static VALUE rb_cuOccupancyMaxActiveBlocksPerMultiprocessor(VALUE self);
-static VALUE rb_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(VALUE self);
-static VALUE rb_cuOccupancyMaxPotentialBlockSize(VALUE self);
-static VALUE rb_cuOccupancyMaxPotentialBlockSizeWithFlags(VALUE self);
+static VALUE rb_cuLaunchGridAsync(VALUE self, VALUE func_val, VALUE grid_width, VALUE grid_height, VALUE h_stream_val);
+static VALUE rb_cuParamSetTexRef(VALUE self, VALUE hfunc_val, VALUE tex_unit, VALUE tex_ref_val);
+static VALUE rb_cuOccupancyMaxActiveBlocksPerMultiprocessor(VALUE self, VALUE func_val, VALUE block_size, VALUE dynamic_shared_mem_size);
+static VALUE rb_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(VALUE self, VALUE func_val, VALUE block_size, VALUE dynamic_shared_mem_size, VALUE flags);
+static VALUE rb_cuOccupancyMaxPotentialBlockSize(VALUE self, VALUE func_val, VALUE block_size_to_dynamic_shared_mem_size, VALUE dynamic_shared_mem_size, VALUE block_size_limit);
+static VALUE rb_cuOccupancyMaxPotentialBlockSizeWithFlags(VALUE self, VALUE func_val, VALUE block_size_to_dynamic_shared_mem_size, VALUE dynamic_shared_mem_size,
+                                                            VALUE block_size_limit, VALUE flags);
 static VALUE rb_cuTexRefSetArray(VALUE self);
 static VALUE rb_cuTexRefSetMipmappedArray(VALUE self);
 static VALUE rb_cuTexRefSetAddress_v2(VALUE self);
