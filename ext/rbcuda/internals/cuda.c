@@ -2170,232 +2170,232 @@ static VALUE rb_cuOccupancyMaxPotentialBlockSizeWithFlags(VALUE self){
 }
 
 static VALUE rb_cuTexRefSetArray(VALUE self){
-  CUresult cuTexRefSetArray (CUtexref hTexRef, CUarray hArray, uint Flags);
+  // CUresult result = cuTexRefSetArray (CUtexref hTexRef, CUarray hArray, uint Flags);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefSetMipmappedArray(VALUE self){
-  CUresult cuTexRefSetMipmappedArray (CUtexref hTexRef, CUmipmappedArray hMipmappedArray, uint Flags);
+  // CUresult result = cuTexRefSetMipmappedArray (CUtexref hTexRef, CUmipmappedArray hMipmappedArray, uint Flags);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefSetAddress_v2(VALUE self){
-  CUresult cuTexRefSetAddress_v2 (size_t* ByteOffset, CUtexref hTexRef, CUdeviceptr dptr, size_t bytes);
+  // CUresult result = cuTexRefSetAddress_v2 (size_t* ByteOffset, CUtexref hTexRef, CUdeviceptr dptr, size_t bytes);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefSetAddress2D_v3(VALUE self){
-  CUresult cuTexRefSetAddress2D_v3 (CUtexref hTexRef, const(CUDA_ARRAY_DESCRIPTOR)* desc, CUdeviceptr dptr, size_t Pitch);
+  // CUresult result = cuTexRefSetAddress2D_v3 (CUtexref hTexRef, const(CUDA_ARRAY_DESCRIPTOR)* desc, CUdeviceptr dptr, size_t Pitch);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefSetFormat(VALUE self){
-  CUresult cuTexRefSetFormat (CUtexref hTexRef, CUarray_format fmt, int NumPackedComponents);
+  // CUresult result = cuTexRefSetFormat (CUtexref hTexRef, CUarray_format fmt, int NumPackedComponents);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefSetAddressMode(VALUE self){
-  CUresult cuTexRefSetAddressMode (CUtexref hTexRef, int dim, CUaddress_mode am);
+  // CUresult result = cuTexRefSetAddressMode (CUtexref hTexRef, int dim, CUaddress_mode am);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefSetFilterMode(VALUE self){
-  CUresult cuTexRefSetFilterMode (CUtexref hTexRef, CUfilter_mode fm);
+  // CUresult result = cuTexRefSetFilterMode (CUtexref hTexRef, CUfilter_mode fm);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefSetMipmapFilterMode(VALUE self){
-  CUresult cuTexRefSetMipmapFilterMode (CUtexref hTexRef, CUfilter_mode fm);
+  // CUresult result = cuTexRefSetMipmapFilterMode (CUtexref hTexRef, CUfilter_mode fm);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefSetMipmapLevelBias(VALUE self){
-  CUresult cuTexRefSetMipmapLevelBias (CUtexref hTexRef, float bias);
+  // CUresult result = cuTexRefSetMipmapLevelBias (CUtexref hTexRef, float bias);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefSetMipmapLevelClamp(VALUE self){
-  CUresult cuTexRefSetMipmapLevelClamp (CUtexref hTexRef, float minMipmapLevelClamp, float maxMipmapLevelClamp);
+  // CUresult result = cuTexRefSetMipmapLevelClamp (CUtexref hTexRef, float minMipmapLevelClamp, float maxMipmapLevelClamp);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefSetMaxAnisotropy(VALUE self){
-  CUresult cuTexRefSetMaxAnisotropy (CUtexref hTexRef, uint maxAniso);
+  // CUresult result = cuTexRefSetMaxAnisotropy (CUtexref hTexRef, uint maxAniso);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefSetFlags(VALUE self){
-  CUresult cuTexRefSetFlags (CUtexref hTexRef, uint Flags);
+  // CUresult result = cuTexRefSetFlags (CUtexref hTexRef, uint Flags);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefGetAddress_v2(VALUE self){
-  CUresult cuTexRefGetAddress_v2 (CUdeviceptr* pdptr, CUtexref hTexRef);
+  // CUresult result = cuTexRefGetAddress_v2 (CUdeviceptr* pdptr, CUtexref hTexRef);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefGetArray(VALUE self){
-  CUresult cuTexRefGetArray (CUarray* phArray, CUtexref hTexRef);
+  // CUresult result = cuTexRefGetArray (CUarray* phArray, CUtexref hTexRef);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefGetMipmappedArray(VALUE self){
-  CUresult cuTexRefGetMipmappedArray (CUmipmappedArray* phMipmappedArray, CUtexref hTexRef);
+  // CUresult result = cuTexRefGetMipmappedArray (CUmipmappedArray* phMipmappedArray, CUtexref hTexRef);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefGetAddressMode(VALUE self){
-  CUresult cuTexRefGetAddressMode (CUaddress_mode* pam, CUtexref hTexRef, int dim);
+  // CUresult result = cuTexRefGetAddressMode (CUaddress_mode* pam, CUtexref hTexRef, int dim);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefGetFilterMode(VALUE self){
-  CUresult cuTexRefGetFilterMode (CUfilter_mode* pfm, CUtexref hTexRef);
+  // CUresult result = cuTexRefGetFilterMode (CUfilter_mode* pfm, CUtexref hTexRef);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefGetFormat(VALUE self){
-  CUresult cuTexRefGetFormat (CUarray_format* pFormat, int* pNumChannels, CUtexref hTexRef);
+  // CUresult result = cuTexRefGetFormat (CUarray_format* pFormat, int* pNumChannels, CUtexref hTexRef);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefGetMipmapFilterMode(VALUE self){
-  CUresult cuTexRefGetMipmapFilterMode (CUfilter_mode* pfm, CUtexref hTexRef);
+  // CUresult result = cuTexRefGetMipmapFilterMode (CUfilter_mode* pfm, CUtexref hTexRef);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefGetMipmapLevelBias(VALUE self){
-  CUresult cuTexRefGetMipmapLevelBias (float* pbias, CUtexref hTexRef);
+  // CUresult result = cuTexRefGetMipmapLevelBias (float* pbias, CUtexref hTexRef);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefGetMipmapLevelClamp(VALUE self){
-  CUresult cuTexRefGetMipmapLevelClamp (float* pminMipmapLevelClamp, float* pmaxMipmapLevelClamp, CUtexref hTexRef);
+  // CUresult result = cuTexRefGetMipmapLevelClamp (float* pminMipmapLevelClamp, float* pmaxMipmapLevelClamp, CUtexref hTexRef);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefGetMaxAnisotropy(VALUE self){
-  CUresult cuTexRefGetMaxAnisotropy (int* pmaxAniso, CUtexref hTexRef);
+  // CUresult result = cuTexRefGetMaxAnisotropy (int* pmaxAniso, CUtexref hTexRef);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefGetFlags(VALUE self){
-  CUresult cuTexRefGetFlags (uint* pFlags, CUtexref hTexRef);
+  // CUresult result = cuTexRefGetFlags (uint* pFlags, CUtexref hTexRef);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefCreate(VALUE self){
-  CUresult cuTexRefCreate (CUtexref* pTexRef);
+  // CUresult result = cuTexRefCreate (CUtexref* pTexRef);
   return Qnil;
 }
 
 static VALUE rb_cuTexRefDestroy(VALUE self){
-  CUresult cuTexRefDestroy (CUtexref hTexRef);
+  // CUresult result = cuTexRefDestroy (CUtexref hTexRef);
   return Qnil;
 }
 
 static VALUE rb_cuSurfRefSetArray(VALUE self){
-  CUresult cuSurfRefSetArray (CUsurfref hSurfRef, CUarray hArray, uint Flags);
+  // CUresult result = cuSurfRefSetArray (CUsurfref hSurfRef, CUarray hArray, uint Flags);
   return Qnil;
 }
 
 static VALUE rb_cuSurfRefGetArray(VALUE self){
-  CUresult cuSurfRefGetArray (CUarray* phArray, CUsurfref hSurfRef);
+  // CUresult result = cuSurfRefGetArray (CUarray* phArray, CUsurfref hSurfRef);
   return Qnil;
 }
 
 static VALUE rb_cuTexObjectCreate(VALUE self){
-  CUresult cuTexObjectCreate (CUtexObject* pTexObject, const(CUDA_RESOURCE_DESC)* pResDesc, const(CUDA_TEXTURE_DESC)* pTexDesc, const(CUDA_RESOURCE_VIEW_DESC)* pResViewDesc);
+  // CUresult result = cuTexObjectCreate (CUtexObject* pTexObject, const(CUDA_RESOURCE_DESC)* pResDesc, const(CUDA_TEXTURE_DESC)* pTexDesc, const(CUDA_RESOURCE_VIEW_DESC)* pResViewDesc);
   return Qnil;
 }
 
 static VALUE rb_cuTexObjectDestroy(VALUE self){
-  CUresult cuTexObjectDestroy (CUtexObject texObject);
+  // CUresult result = cuTexObjectDestroy (CUtexObject texObject);
   return Qnil;
 }
 
 static VALUE rb_cuTexObjectGetResourceDesc(VALUE self){
-  CUresult cuTexObjectGetResourceDesc (CUDA_RESOURCE_DESC* pResDesc, CUtexObject texObject);
+  // CUresult result = cuTexObjectGetResourceDesc (CUDA_RESOURCE_DESC* pResDesc, CUtexObject texObject);
   return Qnil;
 }
 
 static VALUE rb_cuTexObjectGetTextureDesc(VALUE self){
-  CUresult cuTexObjectGetTextureDesc (CUDA_TEXTURE_DESC* pTexDesc, CUtexObject texObject);
+  // CUresult result = cuTexObjectGetTextureDesc (CUDA_TEXTURE_DESC* pTexDesc, CUtexObject texObject);
   return Qnil;
 }
 
 static VALUE rb_cuTexObjectGetResourceViewDesc(VALUE self){
-  CUresult cuTexObjectGetResourceViewDesc (CUDA_RESOURCE_VIEW_DESC* pResViewDesc, CUtexObject texObject);
+  // CUresult result = cuTexObjectGetResourceViewDesc (CUDA_RESOURCE_VIEW_DESC* pResViewDesc, CUtexObject texObject);
   return Qnil;
 }
 
 static VALUE rb_cuSurfObjectCreate(VALUE self){
-  CUresult cuSurfObjectCreate (CUsurfObject* pSurfObject, const(CUDA_RESOURCE_DESC)* pResDesc);
+  // CUresult result = cuSurfObjectCreate (CUsurfObject* pSurfObject, const(CUDA_RESOURCE_DESC)* pResDesc);
   return Qnil;
 }
 
 static VALUE rb_cuSurfObjectDestroy(VALUE self){
-  CUresult cuSurfObjectDestroy (CUsurfObject surfObject);
+  // CUresult result = cuSurfObjectDestroy (CUsurfObject surfObject);
   return Qnil;
 }
 
 static VALUE rb_cuSurfObjectGetResourceDesc(VALUE self){
-  CUresult cuSurfObjectGetResourceDesc (CUDA_RESOURCE_DESC* pResDesc, CUsurfObject surfObject);
+  // CUresult result = cuSurfObjectGetResourceDesc (CUDA_RESOURCE_DESC* pResDesc, CUsurfObject surfObject);
   return Qnil;
 }
 
 static VALUE rb_cuDeviceCanAccessPeer(VALUE self){
-  CUresult cuDeviceCanAccessPeer (int* canAccessPeer, CUdevice dev, CUdevice peerDev);
+  // CUresult result = cuDeviceCanAccessPeer (int* canAccessPeer, CUdevice dev, CUdevice peerDev);
   return Qnil;
 }
 
 static VALUE rb_cuCtxEnablePeerAccess(VALUE self){
-  CUresult cuCtxEnablePeerAccess (CUcontext peerContext, uint Flags);
+  // CUresult result = cuCtxEnablePeerAccess (CUcontext peerContext, uint Flags);
   return Qnil;
 }
 
 static VALUE rb_cuCtxDisablePeerAccess(VALUE self){
-  CUresult cuCtxDisablePeerAccess (CUcontext peerContext);
+  // CUresult result = cuCtxDisablePeerAccess (CUcontext peerContext);
   return Qnil;
 }
 
 static VALUE rb_cuGraphicsUnregisterResource(VALUE self){
-  CUresult cuGraphicsUnregisterResource (CUgraphicsResource resource);
+  // CUresult result = cuGraphicsUnregisterResource (CUgraphicsResource resource);
   return Qnil;
 }
 
 static VALUE rb_cuGraphicsSubResourceGetMappedArray(VALUE self){
-  CUresult cuGraphicsSubResourceGetMappedArray (CUarray* pArray, CUgraphicsResource resource, uint arrayIndex, uint mipLevel);
+  // CUresult result = cuGraphicsSubResourceGetMappedArray (CUarray* pArray, CUgraphicsResource resource, uint arrayIndex, uint mipLevel);
   return Qnil;
 }
 
 static VALUE rb_cuGraphicsResourceGetMappedMipmappedArray(VALUE self){
-  CUresult cuGraphicsResourceGetMappedMipmappedArray (CUmipmappedArray* pMipmappedArray, CUgraphicsResource resource);
+  // CUresult result = cuGraphicsResourceGetMappedMipmappedArray (CUmipmappedArray* pMipmappedArray, CUgraphicsResource resource);
   return Qnil;
 }
 
 static VALUE rb_cuGraphicsResourceGetMappedPointer_v2(VALUE self){
-  CUresult cuGraphicsResourceGetMappedPointer_v2 (CUdeviceptr* pDevPtr, size_t* pSize, CUgraphicsResource resource);
+  // CUresult result = cuGraphicsResourceGetMappedPointer_v2 (CUdeviceptr* pDevPtr, size_t* pSize, CUgraphicsResource resource);
   return Qnil;
 }
 
 static VALUE rb_cuGraphicsResourceSetMapFlags_v2(VALUE self){
-  CUresult cuGraphicsResourceSetMapFlags_v2 (CUgraphicsResource resource, uint flags);
+  // CUresult result = cuGraphicsResourceSetMapFlags_v2 (CUgraphicsResource resource, uint flags);
   return Qnil;
 }
 
 
 static VALUE rb_cuGraphicsMapResources(VALUE self){
-  CUresult cuGraphicsMapResources (uint count, CUgraphicsResource* resources, CUstream hStream);
+  // CUresult result = cuGraphicsMapResources (uint count, CUgraphicsResource* resources, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuGraphicsUnmapResources(VALUE self){
-  CUresult cuGraphicsUnmapResources (uint count, CUgraphicsResource* resources, CUstream hStream);
+  // CUresult result = cuGraphicsUnmapResources (uint count, CUgraphicsResource* resources, CUstream hStream);
   return Qnil;
 }
 
 static VALUE rb_cuGetExportTable(VALUE self){
-  CUresult cuGetExportTable (const(void*)* ppExportTable, const(CUuuid)* pExportTableId);
+  // CUresult result = cuGetExportTable (const(void*)* ppExportTable, const(CUuuid)* pExportTableId);
   return Qnil;
 }
