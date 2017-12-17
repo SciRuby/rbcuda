@@ -428,3 +428,68 @@ CUfunction_attribute rb_cu_function_attribute_from_rbsymbol(VALUE sym) {
 const char* get_function_attribute_name(CUfunction_attribute attribute){
   return RbCUevent_flags_enum[attribute];
 }
+
+std::map<char*, size_t> RbcudaLimit_enum = {
+  {"cudaLimitStackSize",  0x00},
+  {"cudaLimitPrintfFifoSize",  0x01},
+  {"cudaLimitMallocHeapSize",  0x02}
+};
+
+cudaLimit rb_cudaLimit_from_rbsymbol(VALUE sym) {
+  ID sym_id = SYM2ID(sym);
+
+  for(std::map<char*, size_t>::value_type& entry : RbcudaLimit_enum) {
+    if (sym_id == rb_intern(entry.first)) {
+      return static_cast<cudaLimit>(entry.second);
+    }
+  }
+
+  VALUE str = rb_any_to_s(sym);
+  rb_raise(rb_eArgError, "invalid cuda Limit type symbol (:%s) specified", RSTRING_PTR(str));
+}
+
+const char* const RbcudaFuncCache[3] = {
+  "cudaFuncCachePreferNone",
+  "cudaFuncCachePreferShared",
+  "cudaFuncCachePreferL1"
+};
+
+cudaFuncCache rb_cu_function_cache_from_rbsymbol(VALUE sym) {
+  ID sym_id = SYM2ID(sym);
+
+  for (size_t index = 0; index < 3; ++index) {
+    if (sym_id == rb_intern(RbcudaFuncCache[index])) {
+      return static_cast<cudaFuncCache>(index);
+    }
+  }
+
+  VALUE str = rb_any_to_s(sym);
+  rb_raise(rb_eArgError, "invalid function cache symbol (:%s) specified", RSTRING_PTR(str));
+}
+
+const char* get_function_cache_name(cudaFuncCache cache){
+  return RbcudaFuncCache[cache];
+}
+
+const char* const RbcudaSharedMemConfig_enum[3] = {
+  "cudaSharedMemBankSizeDefault",
+  "cudaSharedMemBankSizeFourByte",
+  "cudaSharedMemBankSizeEightByte"
+};
+
+cudaSharedMemConfig rb_cu_shared_mem_from_rbsymbol(VALUE sym) {
+  ID sym_id = SYM2ID(sym);
+
+  for (size_t index = 0; index < 9; ++index) {
+    if (sym_id == rb_intern(RbcudaSharedMemConfig_enum[index])) {
+      return static_cast<cudaSharedMemConfig>(index);
+    }
+  }
+
+  VALUE str = rb_any_to_s(sym);
+  rb_raise(rb_eArgError, "invalid shared memory config symbol (:%s) specified", RSTRING_PTR(str));
+}
+
+const char* get_shared_mem_name(cudaSharedMemConfig config){
+  return RbCUevent_flags_enum[config];
+}

@@ -47,6 +47,12 @@ const char* get_event_flags_name(CUevent_flags option);
 CUfunction_attribute rb_cu_function_attribute_from_rbsymbol(VALUE sym);
 const char* get_function_attribute_name(CUfunction_attribute attribute);
 
+cudaLimit rb_cudaLimit_from_rbsymbol(VALUE sym);
+cudaFuncCache rb_cu_function_cache_from_rbsymbol(VALUE sym);
+const char* get_function_cache_name(cudaFuncCache cache);
+cudaSharedMemConfig rb_cu_shared_mem_from_rbsymbol(VALUE sym);
+const char* get_shared_mem_name(cudaSharedMemConfig config);
+
 inline void __checkCudaErrors( CUresult err, const char *file, const int line );
 void initCUDA(char* module_file, char* kernel_name);
 void finalizeCUDA();
@@ -712,15 +718,15 @@ static VALUE rb_cuGetExportTable(VALUE self);
 //Cuda_Runtime_API
 static VALUE rb_cudaDeviceReset(VALUE self);
 static VALUE rb_cudaDeviceSynchronize(VALUE self);
-static VALUE rb_cudaDeviceSetLimit(VALUE self);
-static VALUE rb_cudaDeviceGetLimit(VALUE self);
+static VALUE rb_cudaDeviceSetLimit(VALUE self, VALUE limit, VALUE value);
+static VALUE rb_cudaDeviceGetLimit(VALUE self, VALUE pValue, VALUE limit);
 static VALUE rb_cudaDeviceGetCacheConfig(VALUE self);
 static VALUE rb_cudaDeviceGetStreamPriorityRange(VALUE self);
-static VALUE rb_cudaDeviceSetCacheConfig(VALUE self);
+static VALUE rb_cudaDeviceSetCacheConfig(VALUE self, VALUE cache_config);
 static VALUE rb_cudaDeviceGetSharedMemConfig(VALUE self);
-static VALUE rb_cudaDeviceSetSharedMemConfig(VALUE self);
-static VALUE rb_cudaDeviceGetByPCIBusId(VALUE self);
-static VALUE rb_cudaDeviceGetPCIBusId(VALUE self);
+static VALUE rb_cudaDeviceSetSharedMemConfig(VALUE self, VALUE config);
+static VALUE rb_cudaDeviceGetByPCIBusId(VALUE self, VALUE pci_bus_id);
+static VALUE rb_cudaDeviceGetPCIBusId(VALUE self, VALUE len, VALUE device);
 static VALUE rb_cudaIpcGetEventHandle(VALUE self);
 static VALUE rb_cudaIpcOpenEventHandle(VALUE self);
 static VALUE rb_cudaIpcGetMemHandle(VALUE self);
