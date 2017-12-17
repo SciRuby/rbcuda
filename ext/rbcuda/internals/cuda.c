@@ -1646,7 +1646,7 @@ static VALUE rb_cuMemcpy3DAsync_v2(VALUE self, VALUE p_copy, VALUE h_stream_val)
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemcpy3DPeerAsync(VALUE sel, VALUE p_copy, VALUE h_stream_val){
+static VALUE rb_cuMemcpy3DPeerAsync(VALUE self, VALUE p_copy, VALUE h_stream_val){
   custream_ptr* h_stream;
   Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
   CUresult result = cuMemcpy3DPeerAsync((CUDA_MEMCPY3D_PEER*)p_copy, h_stream->stream);
@@ -1665,9 +1665,9 @@ static VALUE rb_cuMemcpy3DPeerAsync(VALUE sel, VALUE p_copy, VALUE h_stream_val)
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemsetD8_v2(VALUE self){
-  CUresult result = cuMemsetD8_v2 (CUdeviceptr dstDevice, ubyte uc, size_t N);
-  return Qnil;
+static VALUE rb_cuMemsetD8_v2(VALUE self, VALUE dst_device, VALUE uc, VALUE n){
+  CUresult result = cuMemsetD8_v2(NUM2ULONG(dst_device), NUM2CHR(uc), NUM2ULONG(n));
+  return Qtrue;
 }
 
 // CUresult cuMemsetD16 ( CUdeviceptr dstDevice, unsigned short us, size_t N )
@@ -1682,9 +1682,9 @@ static VALUE rb_cuMemsetD8_v2(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemsetD16_v2(VALUE self){
-  CUresult result = cuMemsetD16_v2 (CUdeviceptr dstDevice, ushort us, size_t N);
-  return Qnil;
+static VALUE rb_cuMemsetD16_v2(VALUE self, VALUE dst_device, VALUE us, VALUE n){
+  CUresult result = cuMemsetD16_v2(NUM2ULONG(dst_device), NUM2USHORT(us), NUM2ULONG(n));
+  return Qtrue;
 }
 
 // CUresult cuMemsetD32 ( CUdeviceptr dstDevice, unsigned int  ui, size_t N )
@@ -1699,8 +1699,8 @@ static VALUE rb_cuMemsetD16_v2(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemsetD32_v2(VALUE self){
-  CUresult result = cuMemsetD32_v2 (CUdeviceptr dstDevice, uint ui, size_t N);
+static VALUE rb_cuMemsetD32_v2(VALUE self, VALUE dst_device, VALUE ui, VALUE n){
+  CUresult result = cuMemsetD32_v2(NUM2ULONG(dst_device), NUM2UINT(ui), NUM2ULONG(n));
   return Qnil;
 }
 
@@ -1720,9 +1720,9 @@ static VALUE rb_cuMemsetD32_v2(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemsetD2D8_v2(VALUE self){
-  CUresult result = cuMemsetD2D8_v2 (CUdeviceptr dstDevice, size_t dstPitch, ubyte uc, size_t Width, size_t Height);
-  return Qnil;
+static VALUE rb_cuMemsetD2D8_v2(VALUE self, VALUE dst_device, VALUE dst_pitch, VALUE uc, VALUE width, VALUE height){
+  CUresult result = cuMemsetD2D8_v2(NUM2ULONG(dst_device), NUM2ULONG(dst_pitch), NUM2CHR(uc), NUM2ULONG(width), NUM2ULONG(height));
+  return Qtrue;
 }
 
 // CUresult cuMemsetD2D16 ( CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height )
@@ -1741,9 +1741,9 @@ static VALUE rb_cuMemsetD2D8_v2(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemsetD2D16_v2(VALUE self){
-  CUresult result = cuMemsetD2D16_v2 (CUdeviceptr dstDevice, size_t dstPitch, ushort us, size_t Width, size_t Height);
-  return Qnil;
+static VALUE rb_cuMemsetD2D16_v2(VALUE self, VALUE dst_device, VALUE dst_pitch, VALUE us, VALUE width, VALUE height){
+  CUresult result = cuMemsetD2D16_v2(NUM2ULONG(dst_device), NUM2ULONG(dst_pitch), NUM2USHORT(us), NUM2ULONG(width), NUM2ULONG(height));
+  return Qtrue;
 }
 
 // CUresult cuMemsetD2D32 ( CUdeviceptr dstDevice, size_t dstPitch, unsigned int  ui, size_t Width, size_t Height )
@@ -1762,9 +1762,9 @@ static VALUE rb_cuMemsetD2D16_v2(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemsetD2D32_v2(VALUE self){
-  CUresult result = cuMemsetD2D32_v2 (CUdeviceptr dstDevice, size_t dstPitch, uint ui, size_t Width, size_t Height);
-  return Qnil;
+static VALUE rb_cuMemsetD2D32_v2(VALUE self, VALUE dst_device, VALUE dst_pitch, VALUE ui, VALUE width, VALUE height){
+  CUresult result = cuMemsetD2D32_v2(NUM2ULONG(dst_device), NUM2ULONG(dst_pitch), NUM2UINT(ui), NUM2ULONG(width), NUM2ULONG(height));
+  return Qtrue;
 }
 
 // CUresult cuMemsetD8Async ( CUdeviceptr dstDevice, unsigned char  uc, size_t N, CUstream hStream )
@@ -1781,8 +1781,10 @@ static VALUE rb_cuMemsetD2D32_v2(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemsetD8Async(VALUE self){
-  CUresult result = cuMemsetD8Async (CUdeviceptr dstDevice, ubyte uc, size_t N, CUstream hStream);
+static VALUE rb_cuMemsetD8Async(VALUE self, VALUE dst_device, VALUE uc, VALUE n, VALUE h_stream_val){
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  CUresult result = cuMemsetD8Async(NUM2ULONG(dst_device), NUM2CHR(uc), NUM2ULONG(n), h_stream->stream);
   return Qnil;
 }
 
@@ -1800,9 +1802,11 @@ static VALUE rb_cuMemsetD8Async(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemsetD16Async(VALUE self){
-  CUresult result = cuMemsetD16Async (CUdeviceptr dstDevice, ushort us, size_t N, CUstream hStream);
-  return Qnil;
+static VALUE rb_cuMemsetD16Async(VALUE self, VALUE dst_device, VALUE us, VALUE n, VALUE h_stream_val){
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  CUresult result = cuMemsetD16Async(NUM2ULONG(dst_device), NUM2USHORT(us), NUM2ULONG(n), h_stream->stream);
+  return Qtrue;
 }
 
 // CUresult cuMemsetD32Async ( CUdeviceptr dstDevice, unsigned int  ui, size_t N, CUstream hStream )
@@ -1819,9 +1823,11 @@ static VALUE rb_cuMemsetD16Async(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemsetD32Async(VALUE self){
-  CUresult result = cuMemsetD32Async (CUdeviceptr dstDevice, uint ui, size_t N, CUstream hStream);
-  return Qnil;
+static VALUE rb_cuMemsetD32Async(VALUE self, VALUE dst_device, VALUE ui, VALUE n, VALUE h_stream_val){
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  CUresult result = cuMemsetD32Async(NUM2ULONG(dst_device), NUM2UINT(ui), NUM2ULONG(n), h_stream->stream);
+  return Qtrue;
 }
 
 // CUresult cuMemsetD2D8Async ( CUdeviceptr dstDevice, size_t dstPitch, unsigned char  uc, size_t Width, size_t Height, CUstream hStream )
@@ -1842,9 +1848,11 @@ static VALUE rb_cuMemsetD32Async(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemsetD2D8Async(VALUE self){
-  CUresult result = cuMemsetD2D8Async (CUdeviceptr dstDevice, size_t dstPitch, ubyte uc, size_t Width, size_t Height, CUstream hStream);
-  return Qnil;
+static VALUE rb_cuMemsetD2D8Async(VALUE self, VALUE dst_device, VALUE dst_pitch, VALUE uc, VALUE width, VALUE height, VALUE h_stream_val){
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  CUresult result = cuMemsetD2D8Async(NUM2ULONG(dst_device), NUM2ULONG(dst_pitch), NUM2CHR(uc), NUM2ULONG(width), NUM2ULONG(height), h_stream->stream);
+  return Qtrue;
 }
 
 // CUresult cuMemsetD2D16Async ( CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height, CUstream hStream )
@@ -1865,9 +1873,11 @@ static VALUE rb_cuMemsetD2D8Async(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemsetD2D16Async(VALUE self){
-  CUresult result = cuMemsetD2D16Async (CUdeviceptr dstDevice, size_t dstPitch, ushort us, size_t Width, size_t Height, CUstream hStream);
-  return Qnil;
+static VALUE rb_cuMemsetD2D16Async(VALUE self, VALUE dst_device, VALUE dst_pitch, VALUE us, VALUE width, VALUE height, VALUE h_stream_val){
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  CUresult result = cuMemsetD2D16Async(NUM2ULONG(dst_device), NUM2ULONG(dst_pitch), NUM2USHORT(us), NUM2ULONG(width), NUM2ULONG(height), h_stream->stream);
+  return Qtrue;
 }
 
 // CUresult cuMemsetD2D32Async ( CUdeviceptr dstDevice, size_t dstPitch, unsigned int  ui, size_t Width, size_t Height, CUstream hStream )
@@ -1888,8 +1898,10 @@ static VALUE rb_cuMemsetD2D16Async(VALUE self){
 // Returns
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE
 
-static VALUE rb_cuMemsetD2D32Async(VALUE self){
-  CUresult result = cuMemsetD2D32Async (CUdeviceptr dstDevice, size_t dstPitch, uint ui, size_t Width, size_t Height, CUstream hStream);
+static VALUE rb_cuMemsetD2D32Async(VALUE self, VALUE dst_device, VALUE dst_pitch, VALUE ui, VALUE width, VALUE height, VALUE h_stream_val){
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  CUresult result = cuMemsetD2D32Async(NUM2ULONG(dst_device), NUM2ULONG(dst_pitch), NUM2UINT(ui), NUM2ULONG(width), NUM2ULONG(height), h_stream->stream);
   return Qnil;
 }
 
