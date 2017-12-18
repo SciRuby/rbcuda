@@ -1,164 +1,523 @@
+// __host__ ​cudaError_t cudaDeviceReset ( void )
+// Destroy all allocations and reset all state on the current device in the current process.
+// Returns
+// cudaSuccess
+
 static VALUE rb_cudaDeviceReset(VALUE self){
-  return Qnil;
+  cudaError error = cudaDeviceReset();
+  return Qtrue;
 }
+
+// __host__ ​cudaError_t cudaDeviceSetCacheConfig ( cudaFuncCache cacheConfig )
+// Sets the preferred cache configuration for the current device.
+// Parameters
+// cacheConfig
+// - Requested cache configuration
+// Returns
+// cudaSuccess, cudaErrorInitializationError
 
 static VALUE rb_cudaDeviceSynchronize(VALUE self){
-  return Qnil;
+  cudaError error = cudaDeviceSynchronize();
+  return Qtrue;
 }
 
-static VALUE rb_cudaDeviceSetLimit(VALUE self){
-  return Qnil;
+// __host__ ​cudaError_t cudaDeviceSetLimit ( cudaLimit limit, size_t value )
+// Set resource limits.
+// Parameters
+// limit
+// - Limit to set
+// value
+// - Size of limit
+// Returns
+// cudaSuccess, cudaErrorUnsupportedLimit, cudaErrorInvalidValue, cudaErrorMemoryAllocation
+
+static VALUE rb_cudaDeviceSetLimit(VALUE self, VALUE limit, VALUE value){
+  cudaError error = cudaDeviceSetLimit(rb_cudaLimit_from_rbsymbol(limit), NUM2UINT(value));
+  return Qtrue;
 }
 
-static VALUE rb_cudaDeviceGetLimit(VALUE self){
-  return Qnil;
+// __host__ ​ __device__ ​cudaError_t cudaDeviceGetLimit ( size_t* pValue, cudaLimit limit )
+// Returns resource limits.
+// Parameters
+// pValue
+// - Returned size of the limit
+// limit
+// - Limit to query
+// Returns
+// cudaSuccess, cudaErrorUnsupportedLimit, cudaErrorInvalidValue
+
+static VALUE rb_cudaDeviceGetLimit(VALUE self, VALUE pValue, VALUE limit){
+  size_t p_value;
+  cudaError error = cudaDeviceGetLimit(&p_value, rb_cudaLimit_from_rbsymbol(limit));
+  return Qtrue;
 }
+
+// __host__ ​ __device__ ​cudaError_t cudaDeviceGetCacheConfig ( cudaFuncCache ** pCacheConfig )
+// Returns the preferred cache configuration for the current device.
+// Parameters
+// pCacheConfig
+// - Returned cache configuration
+// Returns
+// cudaSuccess, cudaErrorInitializationError
 
 static VALUE rb_cudaDeviceGetCacheConfig(VALUE self){
-  return Qnil;
+  cudaFuncCache p_cache_config;
+  cudaError error = cudaDeviceGetCacheConfig(&p_cache_config);
+  return rb_str_new_cstr(get_function_cache_name(p_cache_config));
 }
+
+// __host__ ​cudaError_t cudaDeviceGetStreamPriorityRange ( int* leastPriority, int* greatestPriority )
+// Returns numerical values that correspond to the least and greatest stream priorities.
+// Parameters
+// leastPriority
+// - Pointer to an int in which the numerical value for least stream priority is returned
+// greatestPriority
+// - Pointer to an int in which the numerical value for greatest stream priority is returned
+// Returns
+// cudaSuccess, cudaErrorInitializationError
 
 static VALUE rb_cudaDeviceGetStreamPriorityRange(VALUE self){
-  return Qnil;
+  int least_priority, greatest_priority;
+  cudaError error = cudaDeviceGetStreamPriorityRange(&least_priority, &greatest_priority);
+  return Qtrue;
 }
 
-static VALUE rb_cudaDeviceSetCacheConfig(VALUE self){
-  return Qnil;
+// __host__ ​cudaError_t cudaDeviceSetCacheConfig ( cudaFuncCache cacheConfig )
+// Sets the preferred cache configuration for the current device.
+// Parameters
+// cacheConfig
+// - Requested cache configuration
+// Returns
+// cudaSuccess, cudaErrorInitializationError
+
+static VALUE rb_cudaDeviceSetCacheConfig(VALUE self, VALUE cache_config){
+  cudaError error = cudaDeviceSetCacheConfig(rb_cu_function_cache_from_rbsymbol(cache_config));
+  return Qtrue;
 }
+
+// __host__ ​cudaError_t cudaDeviceSetSharedMemConfig ( cudaSharedMemConfig config )
+// Sets the shared memory configuration for the current device.
+// Parameters
+// config
+// - Requested cache configuration
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInitializationError
 
 static VALUE rb_cudaDeviceGetSharedMemConfig(VALUE self){
+  cudaSharedMemConfig p_config;
+  cudaError error = cudaDeviceGetSharedMemConfig(&p_config);
+  const char* config = get_shared_mem_name(p_config);
+  return rb_str_new_cstr(config);
+}
+
+// __host__ ​cudaError_t cudaDeviceSetSharedMemConfig ( cudaSharedMemConfig config )
+// Sets the shared memory configuration for the current device.
+// Parameters
+// config
+// - Requested cache configuration
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInitializationError
+
+static VALUE rb_cudaDeviceSetSharedMemConfig(VALUE self, VALUE config){
+  cudaError error = cudaDeviceSetSharedMemConfig(rb_cu_shared_mem_from_rbsymbol(config));
+  return Qtrue;
+}
+
+// __host__ ​cudaError_t cudaDeviceGetByPCIBusId ( int* device, const char* pciBusId )
+// Returns a handle to a compute device.
+// Parameters
+// device
+// - Returned device ordinal
+// pciBusId
+// - String in one of the following forms: [domain]:[bus]:[device].[function] [domain]:[bus]:[device] [bus]:[device].[function] where domain, bus, device, and function are all hexadecimal values
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidDevice
+
+static VALUE rb_cudaDeviceGetByPCIBusId(VALUE self, VALUE pci_bus_id){
+  int device;
+  cudaError error = cudaDeviceGetByPCIBusId(&device, StringValueCStr(pci_bus_id));
+  return INT2NUM(device);
+}
+
+// __host__ ​cudaError_t cudaDeviceGetPCIBusId ( char* pciBusId, int  len, int  device )
+// Returns a PCI Bus Id string for the device.
+// Parameters
+// pciBusId
+// - Returned identifier string for the device in the following format [domain]:[bus]:[device].[function] where domain, bus, device, and function are all hexadecimal values. pciBusId should be large enough to store 13 characters including the NULL-terminator.
+// len
+// - Maximum length of string to store in name
+// device
+// - Device to get identifier string for
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidDevice
+
+static VALUE rb_cudaDeviceGetPCIBusId(VALUE self, VALUE len, VALUE device){
+  char* pci_bus_id;
+  cudaError error = cudaDeviceGetPCIBusId(pci_bus_id, len, device);
+  return rb_str_new_cstr(pci_bus_id);
+}
+
+// __host__ ​cudaError_t cudaIpcGetEventHandle ( cudaIpcEventHandle_t* handle, cudaEvent_t event )
+// Gets an interprocess handle for a previously allocated event.
+// Parameters
+// handle
+// - Pointer to a user allocated cudaIpcEventHandle in which to return the opaque event handle
+// event
+// - Event allocated with cudaEventInterprocess and cudaEventDisableTiming flags.
+// Returns
+// cudaSuccess, cudaErrorInvalidResourceHandle, cudaErrorMemoryAllocation, cudaErrorMapBufferObjectFailed, cudaErrorNotSupported
+
+static VALUE rb_cudaIpcGetEventHandle(VALUE self, VALUE handle, VALUE event){
+  cudaIpcGetEventHandle(cudaIpcEventHandle_t* handle, cudaEvent_t event);
   return Qnil;
 }
 
-static VALUE rb_cudaDeviceSetSharedMemConfig(VALUE self){
+// __host__ ​cudaError_t cudaIpcOpenEventHandle ( cudaEvent_t* event, cudaIpcEventHandle_t handle )
+// Opens an interprocess event handle for use in the current process.
+// Parameters
+// event
+// - Returns the imported event
+// handle
+// - Interprocess handle to open
+// Returns
+// cudaSuccess, cudaErrorMapBufferObjectFailed, cudaErrorInvalidResourceHandle, cudaErrorNotSupported
+
+static VALUE rb_cudaIpcOpenEventHandle(VALUE self, VALUE  event, VALUE handle){
+  cudaIpcOpenEventHandle(cudaEvent_t* event, cudaIpcEventHandle_t handle);
   return Qnil;
 }
 
-static VALUE rb_cudaDeviceGetByPCIBusId(VALUE self){
+static VALUE rb_cudaIpcGetMemHandle(VALUE self, VALUE handle, VALUE devPtr){
+  cudaIpcGetMemHandle(cudaIpcMemHandle_t* handle, void* devPtr);
   return Qnil;
 }
 
-static VALUE rb_cudaDeviceGetPCIBusId(VALUE self){
+// __host__ ​cudaError_t cudaIpcOpenMemHandle ( void** devPtr, cudaIpcMemHandle_t handle, unsigned int  flags )
+// Opens an interprocess memory handle exported from another process and returns a device pointer usable in the local process.
+// Parameters
+// devPtr
+// - Returned device pointer
+// handle
+// - cudaIpcMemHandle to open
+// flags
+// - Flags for this operation. Must be specified as cudaIpcMemLazyEnablePeerAccess
+// Returns
+// cudaSuccess, cudaErrorMapBufferObjectFailed, cudaErrorInvalidResourceHandle, cudaErrorTooManyPeers, cudaErrorNotSupported
+
+static VALUE rb_cudaIpcOpenMemHandle(VALUE self, VALUE devPtr, VALUE handle, VALUE flags){
+  cudaIpcOpenMemHandle(void** devPtr, cudaIpcMemHandle_t handle, uint flags);
   return Qnil;
 }
 
-static VALUE rb_cudaIpcGetEventHandle(VALUE self){
+// __host__ ​cudaError_t cudaIpcCloseMemHandle ( void* devPtr )
+// Close memory mapped with cudaIpcOpenMemHandle.
+// Parameters
+// devPtr
+// - Device pointer returned by cudaIpcOpenMemHandle
+// Returns
+// cudaSuccess, cudaErrorMapBufferObjectFailed, cudaErrorInvalidResourceHandle, cudaErrorNotSupported
+
+static VALUE rb_cudaIpcCloseMemHandle(VALUE self, VALUE devPtr){
+  cudaIpcCloseMemHandle(void* devPtr);
   return Qnil;
 }
 
-static VALUE rb_cudaIpcOpenEventHandle(VALUE self){
-  return Qnil;
-}
-
-static VALUE rb_cudaIpcGetMemHandle(VALUE self){
-  return Qnil;
-}
-
-static VALUE rb_cudaIpcOpenMemHandle(VALUE self){
-  return Qnil;
-}
-
-static VALUE rb_cudaIpcCloseMemHandle(VALUE self){
-  return Qnil;
-}
+// __host__ ​cudaError_t cudaThreadExit ( void )
+// Exit and clean up from CUDA launches.
+// Returns
+// cudaSuccess
 
 static VALUE rb_cudaThreadExit(VALUE self){
+  cudaThreadExit();
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaThreadSynchronize ( void )
+// Wait for compute device to finish.
+// Returns
+// cudaSuccess
 
 static VALUE rb_cudaThreadSynchronize(VALUE self){
+  cudaThreadSynchronize();
   return Qnil;
 }
 
-static VALUE rb_cudaThreadSetLimit(VALUE self){
+// __host__ ​cudaError_t cudaThreadSetLimit ( cudaLimit limit, size_t value )
+// Set resource limits.
+// Parameters
+// limit
+// - Limit to set
+// value
+// - Size in bytes of limit
+// Returns
+// cudaSuccess, cudaErrorUnsupportedLimit, cudaErrorInvalidValue
+
+static VALUE rb_cudaThreadSetLimit(VALUE self, VALUE limit, VALUE value){
+  cudaThreadSetLimit(cudaLimit limit, size_t value);
   return Qnil;
 }
 
-static VALUE rb_cudaThreadGetLimit(VALUE self){
+// __host__ ​cudaError_t cudaThreadGetLimit ( size_t* pValue, cudaLimit limit )
+// Returns resource limits.
+// Parameters
+// pValue
+// - Returned size in bytes of limit
+// limit
+// - Limit to query
+// Returns
+// cudaSuccess, cudaErrorUnsupportedLimit, cudaErrorInvalidValue
+
+static VALUE rb_cudaThreadGetLimit(VALUE self, VALUE pValue, VALUE limit){
+  cudaThreadGetLimit(size_t* pValue, cudaLimit limit);
   return Qnil;
 }
 
-static VALUE rb_cudaThreadGetCacheConfig(VALUE self){
+// __host__ ​cudaError_t cudaThreadGetCacheConfig ( cudaFuncCache ** pCacheConfig )
+// Returns the preferred cache configuration for the current device.
+// Parameters
+// pCacheConfig
+// - Returned cache configuration
+// Returns
+// cudaSuccess, cudaErrorInitializationError
+
+static VALUE rb_cudaThreadGetCacheConfig(VALUE self, VALUE pCacheConfig){
+  cudaThreadGetCacheConfig(cudaFuncCache* pCacheConfig);
   return Qnil;
 }
 
-static VALUE rb_cudaThreadSetCacheConfig(VALUE self){
+// __host__ ​cudaError_t cudaThreadSetCacheConfig ( cudaFuncCache cacheConfig )
+// Sets the preferred cache configuration for the current device.
+// Parameters
+// cacheConfig
+// - Requested cache configuration
+// Returns
+// cudaSuccess, cudaErrorInitializationError
+
+static VALUE rb_cudaThreadSetCacheConfig(VALUE self, VALUE cacheConfig){
+  cudaThreadSetCacheConfig(cudaFuncCache cacheConfig);
   return Qnil;
 }
+
+// __host__ ​ __device__ ​cudaError_t cudaGetLastError ( void )
+// Returns the last error from a runtime call.
+// Returns
+// cudaSuccess, cudaErrorMissingConfiguration, cudaErrorMemoryAllocation, cudaErrorInitializationError,
+// cudaErrorLaunchFailure, cudaErrorLaunchTimeout, cudaErrorLaunchOutOfResources, cudaErrorInvalidDeviceFunction,
+// cudaErrorInvalidConfiguration, cudaErrorInvalidDevice, cudaErrorInvalidValue, cudaErrorInvalidPitchValue,
+// cudaErrorInvalidSymbol, cudaErrorUnmapBufferObjectFailed, cudaErrorInvalidDevicePointer, cudaErrorInvalidTexture,
+// cudaErrorInvalidTextureBinding, cudaErrorInvalidChannelDescriptor, cudaErrorInvalidMemcpyDirection,
+// cudaErrorInvalidFilterSetting, cudaErrorInvalidNormSetting, cudaErrorUnknown, cudaErrorInvalidResourceHandle,
+// cudaErrorInsufficientDriver, cudaErrorSetOnActiveProcess, cudaErrorStartupFailure, cudaErrorInvalidPtx,
+// cudaErrorNoKernelImageForDevice, cudaErrorJitCompilerNotFound
 
 static VALUE rb_cudaGetLastError(VALUE self){
+  cudaGetLastError();
   return Qnil;
 }
+
+// _host__ ​ __device__ ​cudaError_t cudaPeekAtLastError ( void )
+// Returns the last error from a runtime call.
+// Returns
+// cudaSuccess, cudaErrorMissingConfiguration, cudaErrorMemoryAllocation, cudaErrorInitializationError,
+// cudaErrorLaunchFailure, cudaErrorLaunchTimeout, cudaErrorLaunchOutOfResources, cudaErrorInvalidDeviceFunction,
+// cudaErrorInvalidConfiguration, cudaErrorInvalidDevice, cudaErrorInvalidValue, cudaErrorInvalidPitchValue,
+// cudaErrorInvalidSymbol, cudaErrorUnmapBufferObjectFailed, cudaErrorInvalidDevicePointer, cudaErrorInvalidTexture,
+// cudaErrorInvalidTextureBinding, cudaErrorInvalidChannelDescriptor, cudaErrorInvalidMemcpyDirection, cudaErrorInvalidFilterSetting,
+// cudaErrorInvalidNormSetting, cudaErrorUnknown, cudaErrorInvalidResourceHandle, cudaErrorInsufficientDriver,
+// cudaErrorSetOnActiveProcess, cudaErrorStartupFailure, cudaErrorInvalidPtx, cudaErrorNoKernelImageForDevice, cudaErrorJitCompilerNotFound
 
 static VALUE rb_cudaPeekAtLastError(VALUE self){
+  cudaPeekAtLastError();
   return Qnil;
 }
 
+// __host__ ​ __device__ ​const char* cudaGetErrorName ( cudaError_t error )
+// Returns the string representation of an error code enum name.
+// Parameters
+// error
+// - Error code to convert to string
+// Returns
+// char* pointer to a NULL-terminated string
+
+static VALUE rb_cudaGetErrorName(VALUE self, VALUE error){
+  const char* error = cudaGetErrorName(cudaError_t error);
+  return Qnil;
+}
+
+// __host__ ​ __device__ ​const char* cudaGetErrorString ( cudaError_t error )
+// Returns the description string for an error code.
+// Parameters
+// error
+// - Error code to convert to string
+// Returns
+// char* pointer to a NULL-terminated string
+
+static VALUE rb_cudaGetErrorString(VALUE self, VALUE error){
+  const char* error = cudaGetErrorString(cudaError_t error);
+  return Qnil;
+}
+
+// __host__ ​ __device__ ​cudaError_t cudaGetDeviceCount ( int* count )
+// Returns the number of compute-capable devices.
+// Parameters
+// count
+// - Returns the number of devices with compute capability greater or equal to 2.0
+// Returns
+// cudaSuccess, cudaErrorNoDevice, cudaErrorInsufficientDriver
 
 static VALUE rb_cudaGetDeviceCount(VALUE self){
+  cudaGetDeviceCount(int* count);
   return Qnil;
 }
 
-static VALUE rb_cudaGetDeviceProperties(VALUE self){
+// __host__ ​cudaError_t cudaGetDeviceProperties ( cudaDeviceProp* prop, int  device )
+// Returns information about the compute-device.
+// Parameters
+// prop
+// - Properties for the specified device
+// device
+// - Device number to get properties for
+// Returns
+// cudaSuccess, cudaErrorInvalidDevice
+
+static VALUE rb_cudaGetDeviceProperties(VALUE self, VALUE device){
+  cudaGetDeviceProperties(cudaDeviceProp* prop, int device);
   return Qnil;
 }
 
-static VALUE rb_cudaDeviceGetAttribute(VALUE self){
+// __host__ ​ __device__ ​cudaError_t cudaDeviceGetAttribute ( int* value, cudaDeviceAttr attr, int  device )
+// Returns information about the device.
+// Parameters
+// value
+// - Returned device attribute value
+// attr
+// - Device attribute to query
+// device
+// - Device number to query
+// Returns
+// cudaSuccess, cudaErrorInvalidDevice, cudaErrorInvalidValue
+
+static VALUE rb_cudaDeviceGetAttribute(VALUE self, VALUE device){
+  cudaDeviceGetAttribute(int* value, cudaDeviceAttr attr, int device);
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaChooseDevice ( int* device, const cudaDeviceProp* prop )
+// Select compute-device which best matches criteria.
+// Parameters
+// device
+// - Device with best match
+// prop
+// - Desired device properties
+// Returns
+// cudaSuccess, cudaErrorInvalidValue
 
 static VALUE rb_cudaChooseDevice(VALUE self){
+  cudaChooseDevice(int* device, const(cudaDeviceProp)* prop);
   return Qnil;
 }
 
-static VALUE rb_cudaSetDevice(VALUE self){
+// __host__ ​cudaError_t cudaSetDevice ( int  device )
+// Set device to be used for GPU executions.
+// Parameters
+// device
+// - Device on which the active host thread should execute the device code.
+// Returns
+// cudaSuccess, cudaErrorInvalidDevice, cudaErrorDeviceAlreadyInUse
+
+static VALUE rb_cudaSetDevice(VALUE self, VALUE device){
+  cudaSetDevice(int device);
   return Qnil;
 }
+
+// __host__ ​ __device__ ​cudaError_t cudaGetDevice ( int* device )
+// Returns which device is currently being used.
+// Parameters
+// device
+// - Returns the device on which the active host thread executes the device code.
+// Returns
+// cudaSuccess
 
 static VALUE rb_cudaGetDevice(VALUE self){
+  cudaGetDevice(int* device);
   return Qnil;
 }
 
-static VALUE rb_cudaSetValidDevices(VALUE self){
+// __host__ ​cudaError_t cudaSetValidDevices ( int* device_arr, int  len )
+// Set a list of devices that can be used for CUDA.
+// Parameters
+// device_arr
+// - List of devices to try
+// len
+// - Number of devices in specified list
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidDevice
+
+static VALUE rb_cudaSetValidDevices(VALUE self, VALUE len){
+  cudaSetValidDevices(int* device_arr, int len);
   return Qnil;
 }
 
-static VALUE rb_cudaSetDeviceFlags(VALUE self){
+// __host__ ​cudaError_t cudaGetDeviceFlags ( unsigned int* flags )
+// Gets the flags for the current device.
+// Parameters
+// flags
+// - Pointer to store the device flags
+// Returns
+// cudaSuccess, cudaErrorInvalidDevice
+
+static VALUE rb_cudaSetDeviceFlags(VALUE self, VALUE flags){
+  cudaSetDeviceFlags(uint flags);
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaGetDeviceFlags ( unsigned int* flags )
+// Gets the flags for the current device.
+// Parameters
+// flags
+// - Pointer to store the device flags
+// Returns
+// cudaSuccess, cudaErrorInvalidDevice
 
 static VALUE rb_cudaGetDeviceFlags(VALUE self){
+  cudaGetDeviceFlags(uint* flags);
   return Qnil;
 }
 
 static VALUE rb_cudaStreamCreate(VALUE self){
+  cudaStreamCreate(cudaStream_t* pStream);
   return Qnil;
 }
 
-static VALUE rb_cudaStreamCreateWithFlags(VALUE self){
+static VALUE rb_cudaStreamCreateWithFlags(VALUE self, VALUE flags){
+  cudaStreamCreateWithFlags(cudaStream_t* pStream, uint flags);
   return Qnil;
 }
 
 static VALUE rb_cudaStreamCreateWithPriority(VALUE self){
+  cudaStreamCreateWithPriority(cudaStream_t* pStream, uint flags, int priority);
   return Qnil;
 }
 
 static VALUE rb_cudaStreamGetPriority(VALUE self){
+  cudaStreamGetPriority(cudaStream_t hStream, int* priority);
   return Qnil;
 }
 
-static VALUE rb_cudaStreamGetFlags(VALUE self){
+static VALUE rb_cudaStreamGetFlags(VALUE self, VALUE hStream){
+  cudaStreamGetFlags(cudaStream_t hStream, uint* flags);
   return Qnil;
 }
 
-static VALUE rb_cudaStreamDestroy(VALUE self){
+static VALUE rb_cudaStreamDestroy(VALUE self, VALUE stream){
+  cudaStreamDestroy(cudaStream_t stream);
   return Qnil;
 }
 
-static VALUE rb_cudaStreamWaitEvent(VALUE self){
+static VALUE rb_cudaStreamWaitEvent(VALUE self, VALUE stream, VALUE event, VALUE flags){
+  cudaStreamWaitEvent(cudaStream_t stream, cudaEvent_t event, uint flags);
   return Qnil;
 }
-
 
 static VALUE rb_cudaStreamAddCallback(VALUE self){
   return Qnil;
