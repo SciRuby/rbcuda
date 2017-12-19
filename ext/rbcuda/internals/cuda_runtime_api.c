@@ -167,9 +167,12 @@ static VALUE rb_cudaDeviceGetPCIBusId(VALUE self, VALUE len, VALUE device){
 // Returns
 // cudaSuccess, cudaErrorInvalidResourceHandle, cudaErrorMemoryAllocation, cudaErrorMapBufferObjectFailed, cudaErrorNotSupported
 
-static VALUE rb_cudaIpcGetEventHandle(VALUE self, VALUE handle, VALUE event){
-  cudaIpcGetEventHandle(cudaIpcEventHandle_t* handle, cudaEvent_t event);
-  return Qnil;
+static VALUE rb_cudaIpcGetEventHandle(VALUE self, VALUE event_val){
+  cuda_ipc_event_handler* handler = ALLOC(cuda_ipc_event_handler);
+  cu_event* event_ptr;
+  Data_Get_Struct(event_val, cu_event, event_ptr);
+  cudaIpcGetEventHandle(&handler->handle, event_ptr->event);
+  return Data_Wrap_Struct(RbCuCUDAIPCEventHandler, NULL, rbcu_free, handler);
 }
 
 // __host__ ​cudaError_t cudaIpcOpenEventHandle ( cudaEvent_t* event, cudaIpcEventHandle_t handle )
@@ -182,14 +185,18 @@ static VALUE rb_cudaIpcGetEventHandle(VALUE self, VALUE handle, VALUE event){
 // Returns
 // cudaSuccess, cudaErrorMapBufferObjectFailed, cudaErrorInvalidResourceHandle, cudaErrorNotSupported
 
-static VALUE rb_cudaIpcOpenEventHandle(VALUE self, VALUE  event, VALUE handle){
-  cudaIpcOpenEventHandle(cudaEvent_t* event, cudaIpcEventHandle_t handle);
-  return Qnil;
+static VALUE rb_cudaIpcOpenEventHandle(VALUE self, VALUE handler_val){
+  cuda_ipc_event_handler* handler;
+  Data_Get_Struct(handler_val, cuda_ipc_event_handler, handler);
+  cu_event* event_ptr = ALLOC(cu_event);
+  cudaError error = cudaIpcOpenEventHandle(&event_ptr->event, handler->handle);
+  return Data_Wrap_Struct(RbCuEvent, NULL, rbcu_free, event_ptr);
 }
 
-static VALUE rb_cudaIpcGetMemHandle(VALUE self, VALUE handle, VALUE devPtr){
-  cudaIpcGetMemHandle(cudaIpcMemHandle_t* handle, void* devPtr);
-  return Qnil;
+static VALUE rb_cudaIpcGetMemHandle(VALUE self, VALUE handler_val, VALUE dev_ptr){
+  cuda_ipc_mem_handler* handler = ALLOC(cuda_ipc_mem_handler);
+  cudaError error = cudaIpcGetMemHandle(&handler->handle, (void*)dev_ptr);
+  return Data_Wrap_Struct(RbCuCUDAIPCMemHandler, NULL, rbcu_free, handler);
 }
 
 // __host__ ​cudaError_t cudaIpcOpenMemHandle ( void** devPtr, cudaIpcMemHandle_t handle, unsigned int  flags )
@@ -204,9 +211,12 @@ static VALUE rb_cudaIpcGetMemHandle(VALUE self, VALUE handle, VALUE devPtr){
 // Returns
 // cudaSuccess, cudaErrorMapBufferObjectFailed, cudaErrorInvalidResourceHandle, cudaErrorTooManyPeers, cudaErrorNotSupported
 
-static VALUE rb_cudaIpcOpenMemHandle(VALUE self, VALUE devPtr, VALUE handle, VALUE flags){
-  cudaIpcOpenMemHandle(void** devPtr, cudaIpcMemHandle_t handle, uint flags);
-  return Qnil;
+static VALUE rb_cudaIpcOpenMemHandle(VALUE self, VALUE handler_val, VALUE flags){
+  cuda_ipc_mem_handler* handler;
+  Data_Get_Struct(handler_val, cuda_ipc_mem_handler, handler);
+  void* dev_ptr;
+  cudaError error = cudaIpcOpenMemHandle(&dev_ptr, handler->handle, NUM2UINT(flags));
+  return VALUE(dev_ptr);
 }
 
 // __host__ ​cudaError_t cudaIpcCloseMemHandle ( void* devPtr )
@@ -217,9 +227,9 @@ static VALUE rb_cudaIpcOpenMemHandle(VALUE self, VALUE devPtr, VALUE handle, VAL
 // Returns
 // cudaSuccess, cudaErrorMapBufferObjectFailed, cudaErrorInvalidResourceHandle, cudaErrorNotSupported
 
-static VALUE rb_cudaIpcCloseMemHandle(VALUE self, VALUE devPtr){
-  cudaIpcCloseMemHandle(void* devPtr);
-  return Qnil;
+static VALUE rb_cudaIpcCloseMemHandle(VALUE self, VALUE dev_ptr){
+  cudaError error = cudaIpcCloseMemHandle( (void*)dev_ptr);
+  return Qtrue;
 }
 
 // __host__ ​cudaError_t cudaThreadExit ( void )
@@ -228,8 +238,8 @@ static VALUE rb_cudaIpcCloseMemHandle(VALUE self, VALUE devPtr){
 // cudaSuccess
 
 static VALUE rb_cudaThreadExit(VALUE self){
-  cudaThreadExit();
-  return Qnil;
+  cudaError error = cudaThreadExit();
+  return Qtrue;
 }
 
 // __host__ ​cudaError_t cudaThreadSynchronize ( void )
@@ -238,8 +248,8 @@ static VALUE rb_cudaThreadExit(VALUE self){
 // cudaSuccess
 
 static VALUE rb_cudaThreadSynchronize(VALUE self){
-  cudaThreadSynchronize();
-  return Qnil;
+  cudaError error = cudaThreadSynchronize();
+  return Qtrue;
 }
 
 // __host__ ​cudaError_t cudaThreadSetLimit ( cudaLimit limit, size_t value )
@@ -253,8 +263,8 @@ static VALUE rb_cudaThreadSynchronize(VALUE self){
 // cudaSuccess, cudaErrorUnsupportedLimit, cudaErrorInvalidValue
 
 static VALUE rb_cudaThreadSetLimit(VALUE self, VALUE limit, VALUE value){
-  cudaThreadSetLimit(cudaLimit limit, size_t value);
-  return Qnil;
+  cudaError error = cudaThreadSetLimit(rb_cudaLimit_from_rbsymbol(limit), NUM2LONG(value));
+  return Qtrue;
 }
 
 // __host__ ​cudaError_t cudaThreadGetLimit ( size_t* pValue, cudaLimit limit )
@@ -267,9 +277,10 @@ static VALUE rb_cudaThreadSetLimit(VALUE self, VALUE limit, VALUE value){
 // Returns
 // cudaSuccess, cudaErrorUnsupportedLimit, cudaErrorInvalidValue
 
-static VALUE rb_cudaThreadGetLimit(VALUE self, VALUE pValue, VALUE limit){
-  cudaThreadGetLimit(size_t* pValue, cudaLimit limit);
-  return Qnil;
+static VALUE rb_cudaThreadGetLimit(VALUE self, VALUE limit){
+  size_t p_value;
+  cudaError error = cudaThreadGetLimit(&p_value, rb_cudaLimit_from_rbsymbol(limit));
+  return ULONG2NUM(p_value);
 }
 
 // __host__ ​cudaError_t cudaThreadGetCacheConfig ( cudaFuncCache ** pCacheConfig )
@@ -281,8 +292,8 @@ static VALUE rb_cudaThreadGetLimit(VALUE self, VALUE pValue, VALUE limit){
 // cudaSuccess, cudaErrorInitializationError
 
 static VALUE rb_cudaThreadGetCacheConfig(VALUE self, VALUE pCacheConfig){
-  cudaThreadGetCacheConfig(cudaFuncCache* pCacheConfig);
-  return Qnil;
+  cudaError error = cudaThreadGetCacheConfig(cudaFuncCache* pCacheConfig);
+  return Qtrue;
 }
 
 // __host__ ​cudaError_t cudaThreadSetCacheConfig ( cudaFuncCache cacheConfig )
@@ -294,8 +305,8 @@ static VALUE rb_cudaThreadGetCacheConfig(VALUE self, VALUE pCacheConfig){
 // cudaSuccess, cudaErrorInitializationError
 
 static VALUE rb_cudaThreadSetCacheConfig(VALUE self, VALUE cacheConfig){
-  cudaThreadSetCacheConfig(cudaFuncCache cacheConfig);
-  return Qnil;
+  cudaError error = cudaThreadSetCacheConfig(cudaFuncCache cacheConfig);
+  return Qtrue;
 }
 
 // __host__ ​ __device__ ​cudaError_t cudaGetLastError ( void )
@@ -311,8 +322,8 @@ static VALUE rb_cudaThreadSetCacheConfig(VALUE self, VALUE cacheConfig){
 // cudaErrorNoKernelImageForDevice, cudaErrorJitCompilerNotFound
 
 static VALUE rb_cudaGetLastError(VALUE self){
-  cudaGetLastError();
-  return Qnil;
+  cudaError error = cudaGetLastError();
+  return Qtrue;
 }
 
 // _host__ ​ __device__ ​cudaError_t cudaPeekAtLastError ( void )
@@ -327,8 +338,8 @@ static VALUE rb_cudaGetLastError(VALUE self){
 // cudaErrorSetOnActiveProcess, cudaErrorStartupFailure, cudaErrorInvalidPtx, cudaErrorNoKernelImageForDevice, cudaErrorJitCompilerNotFound
 
 static VALUE rb_cudaPeekAtLastError(VALUE self){
-  cudaPeekAtLastError();
-  return Qnil;
+  cudaError error = cudaPeekAtLastError();
+  return Qtrue;
 }
 
 // __host__ ​ __device__ ​const char* cudaGetErrorName ( cudaError_t error )

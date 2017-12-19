@@ -21,7 +21,8 @@ VALUE RbCuIPCEventHandler = Qnil;
 VALUE RbCuIPCMemHandler = Qnil;
 VALUE Driver = Qnil;
 VALUE Arithmetic = Qnil;
-
+VALUE RbCuCUDAIPCEventHandler = Qnil;
+VALUE RbCuCUDAIPCMemHandler = Qnil;
 // prototypes
 void Init_rbcuda();
 
@@ -727,19 +728,20 @@ static VALUE rb_cudaDeviceGetSharedMemConfig(VALUE self);
 static VALUE rb_cudaDeviceSetSharedMemConfig(VALUE self, VALUE config);
 static VALUE rb_cudaDeviceGetByPCIBusId(VALUE self, VALUE pci_bus_id);
 static VALUE rb_cudaDeviceGetPCIBusId(VALUE self, VALUE len, VALUE device);
-static VALUE rb_cudaIpcGetEventHandle(VALUE self);
-static VALUE rb_cudaIpcOpenEventHandle(VALUE self);
-static VALUE rb_cudaIpcGetMemHandle(VALUE self);
-static VALUE rb_cudaIpcOpenMemHandle(VALUE self);
-static VALUE rb_cudaIpcCloseMemHandle(VALUE self);
+static VALUE rb_cudaIpcGetEventHandle(VALUE self, VALUE event_val);
+static VALUE rb_cudaIpcOpenEventHandle(VALUE self, VALUE handler_val);
+static VALUE rb_cudaIpcGetMemHandle(VALUE self, VALUE handler_val, VALUE dev_ptr);
+static VALUE rb_cudaIpcOpenMemHandle(VALUE self, VALUE handler_val, VALUE flags);
+static VALUE rb_cudaIpcCloseMemHandle(VALUE self, VALUE dev_ptr);
 static VALUE rb_cudaThreadExit(VALUE self);
 static VALUE rb_cudaThreadSynchronize(VALUE self);
-static VALUE rb_cudaThreadSetLimit(VALUE self);
-static VALUE rb_cudaThreadGetLimit(VALUE self);
-static VALUE rb_cudaThreadGetCacheConfig(VALUE self);
-static VALUE rb_cudaThreadSetCacheConfig(VALUE self);
+static VALUE rb_cudaThreadSetLimit(VALUE self, VALUE limit, VALUE value);
+static VALUE rb_cudaThreadGetLimit(VALUE self, VALUE limit);
+static VALUE rb_cudaThreadGetCacheConfig(VALUE self, VALUE pCacheConfig);
+static VALUE rb_cudaThreadSetCacheConfig(VALUE self, VALUE cacheConfig);
 static VALUE rb_cudaGetLastError(VALUE self);
 static VALUE rb_cudaPeekAtLastError(VALUE self);
+static VALUE rb_cudaGetErrorName(VALUE self, VALUE error);
 static VALUE rb_cudaGetDeviceCount(VALUE self);
 static VALUE rb_cudaGetDeviceProperties(VALUE self);
 static VALUE rb_cudaDeviceGetAttribute(VALUE self);
@@ -931,6 +933,8 @@ void Init_rbcuda() {
   RbCuEvent     = rb_define_class_under(RbCUDA, "RbCuEvent",     rb_cObject);
   RbCuIPCMemHandler   = rb_define_class_under(RbCUDA, "RbCuIPCMemHandler",   rb_cObject);
   RbCuIPCEventHandler = rb_define_class_under(RbCUDA, "RbCuIPCEventHandler", rb_cObject);
+  RbCuCUDAIPCMemHandler   = rb_define_class_under(RbCUDA, "RbCuCUDAIPCMemHandler", rb_cObject);
+  RbCuCUDAIPCEventHandler = rb_define_class_under(RbCUDA, "RbCuCUDAIPCEventHandler", rb_cObject);
 
   Driver = rb_define_class_under(RbCUDA, "Driver", rb_cObject);
   rb_define_singleton_method(Driver, "test_kernel", (METHOD)test_kernel, 1);

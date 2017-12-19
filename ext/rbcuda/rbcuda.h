@@ -53,12 +53,22 @@ typedef struct  RB_CU_EVENT
   CUevent event;
 }cu_event;
 
-typedef struct  RB_CU_IPC_EVENT_HANDLE
+typedef struct CUDA_IPC_EVENT_HANDLER
+{
+  cudaIpcEventHandle_t handle;
+}cuda_ipc_event_handler;
+
+typedef struct  RB_CU_IPC_EVENT_HANDLER
 {
   CUipcEventHandle handle;
 }ipc_event_handler;
 
-typedef struct  RB_CU_IPC_MEM_HANDLE
+typedef struct  CUDA_IPC_MEM_HANDLER
+{
+  cudaIpcMemHandle_t handle;
+}cuda_ipc_mem_handler;
+
+typedef struct  RB_CU_IPC_MEM_HANDLER
 {
   CUipcMemHandle handle;
 }ipc_mem_handler;
