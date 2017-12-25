@@ -807,8 +807,9 @@ static VALUE rb_cudaFuncSetCacheConfig(VALUE self){
 // Returns
 // cudaSuccess, cudaErrorInitializationError, cudaErrorInvalidDeviceFunction, cudaErrorInvalidValue,
 
-static VALUE rb_cudaFuncSetSharedMemConfig(VALUE self){
-  return Qnil;
+static VALUE rb_cudaFuncSetSharedMemConfig(VALUE self, VALUE func, VALUE config){
+  cudaError error = cudaFuncSetSharedMemConfig((void*)func, rb_cu_shared_mem_from_rbsymbol(config));
+  return Qtrue;
 }
 
 // __host__ ​ __device__ ​cudaError_t cudaFuncGetAttributes ( cudaFuncAttributes* attr, const void* func )
@@ -822,6 +823,7 @@ static VALUE rb_cudaFuncSetSharedMemConfig(VALUE self){
 // cudaSuccess, cudaErrorInitializationError, cudaErrorInvalidDeviceFunction
 
 static VALUE rb_cudaFuncGetAttributes(VALUE self){
+  cudaError error = cudaFuncGetAttributes(cudaFuncAttributes* attr, const void* func);
   return Qnil;
 }
 
@@ -834,7 +836,9 @@ static VALUE rb_cudaFuncGetAttributes(VALUE self){
 // cudaSuccess
 
 static VALUE rb_cudaSetDoubleForDevice(VALUE self){
-  return Qnil;
+  double d;
+  cudaError error = cudaSetDoubleForDevice(&d);
+  return DBL2NUM(d);
 }
 
 // __host__ ​cudaError_t cudaSetDoubleForHost ( double* d )
@@ -846,7 +850,9 @@ static VALUE rb_cudaSetDoubleForDevice(VALUE self){
 // cudaSuccess
 
 static VALUE rb_cudaSetDoubleForHost(VALUE self){
-  return Qnil;
+  double d;
+  cudaError error = cudaSetDoubleForHost(&d);
+  return DBL2NUM(d);
 }
 
 // __host__ ​ __device__ ​cudaError_t cudaOccupancyMaxActiveBlocksPerMultiprocessor ( int* numBlocks, const void* func, int  blockSize, size_t dynamicSMemSize )
@@ -864,6 +870,7 @@ static VALUE rb_cudaSetDoubleForHost(VALUE self){
 // cudaSuccess, cudaErrorCudartUnloading, cudaErrorInitializationError, cudaErrorInvalidDevice, cudaErrorInvalidDeviceFunction, cudaErrorInvalidValue, cudaErrorUnknown,
 
 static VALUE rb_cudaOccupancyMaxActiveBlocksPerMultiprocessor(VALUE self){
+  cudaError error = cudaOccupancyMaxActiveBlocksPerMultiprocessor ( int* numBlocks, const void* func, int  blockSize, size_t dynamicSMemSize );
   return Qnil;
 }
 
@@ -884,6 +891,7 @@ static VALUE rb_cudaOccupancyMaxActiveBlocksPerMultiprocessor(VALUE self){
 // cudaSuccess, cudaErrorCudartUnloading, cudaErrorInitializationError, cudaErrorInvalidDevice, cudaErrorInvalidDeviceFunction, cudaErrorInvalidValue, cudaErrorUnknown,
 
 static VALUE rb_cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(VALUE self){
+  ​cudaError error = cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags ( int* numBlocks, const void* func, int  blockSize, size_t dynamicSMemSize, unsigned int  flags );
   return Qnil;
 }
 
@@ -902,6 +910,7 @@ static VALUE rb_cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(VALUE sel
 // cudaSuccess, cudaErrorInvalidConfiguration
 
 static VALUE rb_cudaConfigureCall(VALUE self){
+  ​cudaError error = cudaConfigureCall ( dim3 gridDim, dim3 blockDim, size_t sharedMem = 0, cudaStream_t stream = 0 );
   return Qnil;
 }
 
@@ -918,6 +927,7 @@ static VALUE rb_cudaConfigureCall(VALUE self){
 // cudaSuccess
 
 static VALUE rb_cudaSetupArgument(VALUE self){
+  ​cudaError error = cudaSetupArgument ( const void* arg, size_t size, size_t offset );
   return Qnil;
 }
 
@@ -930,13 +940,34 @@ static VALUE rb_cudaSetupArgument(VALUE self){
 // cudaSuccess, cudaErrorInvalidDeviceFunction, cudaErrorInvalidConfiguration, cudaErrorLaunchFailure, cudaErrorLaunchTimeout,
 // cudaErrorLaunchOutOfResources, cudaErrorSharedObjectInitFailed, cudaErrorInvalidPtx, cudaErrorNoKernelImageForDevice, cudaErrorJitCompilerNotFound
 
-static VALUE rb_cudaLaunch(VALUE self){
-  return Qnil;
+static VALUE rb_cudaLaunch(VALUE self, VALUE func){
+  cudaError error = cudaSetDoubleForHost((void*)func);
+  return Qtrue;
 }
+
+// __host__ ​cudaError_t cudaMallocManaged ( void** devPtr, size_t size, unsigned int  flags = cudaMemAttachGlobal )
+// Allocates memory that will be automatically managed by the Unified Memory system.
+// Parameters
+// devPtr
+// - Pointer to allocated device memory
+// size
+// - Requested allocation size in bytes
+// flags
+// - Must be either cudaMemAttachGlobal or cudaMemAttachHost (defaults to cudaMemAttachGlobal)
 
 static VALUE rb_cudaMallocManaged(VALUE self){
   return Qnil;
 }
+
+// __host__ ​ __device__ ​cudaError_t cudaMalloc ( void** devPtr, size_t size )
+// Allocate memory on the device.
+// Parameters
+// devPtr
+// - Pointer to allocated device memory
+// size
+// - Requested allocation size in bytes
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation
 
 static VALUE rb_cudaMalloc(VALUE self, VALUE shape){
   dev_ptr* ptr = ALLOC(dev_ptr);
@@ -949,97 +980,368 @@ static VALUE rb_cudaMalloc(VALUE self, VALUE shape){
   return Data_Wrap_Struct(Dev_Array, NULL, rbcu_free, ptr);
 }
 
+// __host__ ​cudaError_t cudaMallocHost ( void** ptr, size_t size )
+// Allocates page-locked memory on the host.
+// Parameters
+// ptr
+// - Pointer to allocated host memory
+// size
+// - Requested allocation size in bytes
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation
+
 static VALUE rb_cudaMallocHost(VALUE self){
+  ​cudaError error = cudaMallocHost ( void** ptr, size_t size );
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaMallocManaged ( void** devPtr, size_t size, unsigned int  flags = cudaMemAttachGlobal )
+// Allocates memory that will be automatically managed by the Unified Memory system.
+// Parameters
+// devPtr
+// - Pointer to allocated device memory
+// size
+// - Requested allocation size in bytes
+// flags
+// - Must be either cudaMemAttachGlobal or cudaMemAttachHost (defaults to cudaMemAttachGlobal)
+// Returns
+// cudaSuccess, cudaErrorMemoryAllocation, cudaErrorNotSupported, cudaErrorInvalidValue
 
 static VALUE rb_cudaMallocPitch(VALUE self){
+  ​cudaError error = cudaMallocManaged( void** devPtr, size_t size, unsigned int  flags = cudaMemAttachGlobal);
   return Qnil;
 }
 
+// __host__ ​cudaError_t cudaMallocArray ( cudaArray_t* array, const cudaChannelFormatDesc* desc, size_t width, size_t height = 0, unsigned int  flags = 0 )
+// Allocate an array on the device.
+// Parameters
+// array
+// - Pointer to allocated array in device memory
+// desc
+// - Requested channel format
+// width
+// - Requested array allocation width
+// height
+// - Requested array allocation height
+// flags
+// - Requested properties of allocated array
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation
+
 static VALUE rb_cudaMallocArray(VALUE self){
+  ​cudaError error = cudaMallocArray ( cudaArray_t* array, const cudaChannelFormatDesc* desc, size_t width, size_t height = 0, unsigned int  flags = 0 );
   return Qnil;
 }
+
+// __host__ ​ __device__ ​cudaError_t cudaFree ( void* devPtr )
+// Frees memory on the device.
+// Parameters
+// devPtr
+// - Device pointer to memory to free
+// Returns
+// cudaSuccess, cudaErrorInvalidDevicePointer, cudaErrorInitializationError
 
 static VALUE rb_cudaFree(VALUE self, VALUE ptr_val){
   dev_ptr* ptr;
   Data_Get_Struct(ptr_val, dev_ptr, ptr);
-  cudaFree(ptr->carray);
+  ​cudaError error = cudaFree(ptr->carray);
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaFreeHost ( void* ptr )
+// Frees page-locked memory.
+// Parameters
+// ptr
+// - Pointer to memory to free
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInitializationError
 
 static VALUE rb_cudaFreeHost(VALUE self){
+  ​cudaError error = cudaFreeHost((void*)ptr);
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaFreeArray ( cudaArray_t array )
+// Frees an array on the device.
+// Parameters
+// array
+// - Pointer to array to free
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInitializationError
 
 static VALUE rb_cudaFreeArray(VALUE self){
+  ​cudaError error = cudaFreeArray ( cudaArray_t array );
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaFreeMipmappedArray ( cudaMipmappedArray_t mipmappedArray )
+// Frees a mipmapped array on the device.
+// Parameters
+// mipmappedArray
+// - Pointer to mipmapped array to free
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInitializationError
 
 static VALUE rb_cudaFreeMipmappedArray(VALUE self){
+  cudaError error = cudaFreeMipmappedArray(cudaMipmappedArray_t mipmappedArray);
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaHostAlloc ( void** pHost, size_t size, unsigned int  flags )
+// Allocates page-locked memory on the host.
+// Parameters
+// pHost
+// - Device pointer to allocated memory
+// size
+// - Requested allocation size in bytes
+// flags
+// - Requested properties of allocated memory
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation
 
 static VALUE rb_cudaHostAlloc(VALUE self){
+  ​cudaError error = cudaHostAlloc(void** pHost, size_t size, unsigned int flags);
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaHostRegister ( void* ptr, size_t size, unsigned int  flags )
+// Registers an existing host memory range for use by CUDA.
+// Parameters
+// ptr
+// - Host pointer to memory to page-lock
+// size
+// - Size in bytes of the address range to page-lock in bytes
+// flags
+// - Flags for allocation request
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation, cudaErrorHostMemoryAlreadyRegistered, cudaErrorNotSupported
 
 static VALUE rb_cudaHostRegister(VALUE self){
+  ​cudaError error = cudaHostRegister( void* ptr, size_t size, unsigned int  flags);
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaHostUnregister ( void* ptr )
+// Unregisters a memory range that was registered with cudaHostRegister.
+// Parameters
+// ptr
+// - Host pointer to memory to unregister
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorHostMemoryNotRegistered
 
 static VALUE rb_cudaHostUnregister(VALUE self){
+  ​cudaError error = cudaHostUnregister ( void* ptr );
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaHostGetDevicePointer ( void** pDevice, void* pHost, unsigned int  flags )
+// Passes back device pointer of mapped host memory allocated by cudaHostAlloc or registered by cudaHostRegister.
+// Parameters
+// pDevice
+// - Returned device pointer for mapped memory
+// pHost
+// - Requested host pointer mapping
+// flags
+// - Flags for extensions (must be 0 for now)
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation
 
 static VALUE rb_cudaHostGetDevicePointer(VALUE self){
+  ​cudaError error = cudaHostGetDevicePointer ( void** pDevice, void* pHost, unsigned int  flags );
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaHostGetFlags ( unsigned int* pFlags, void* pHost )
+// Passes back flags used to allocate pinned host memory allocated by cudaHostAlloc.
+// Parameters
+// pFlags
+// - Returned flags word
+// pHost
+// - Host pointer
+// Returns
+// cudaSuccess, cudaErrorInvalidValue
 
 static VALUE rb_cudaHostGetFlags(VALUE self){
+  ​cudaError_t error = cudaHostGetFlags ( unsigned int* pFlags, void* pHost )
   return Qnil;
 }
-//
+
+// __host__ ​cudaError_t cudaMalloc3D ( cudaPitchedPtr* pitchedDevPtr, cudaExtent extent )
+// Allocates logical 1D, 2D, or 3D memory objects on the device.
+// Parameters
+// pitchedDevPtr
+// - Pointer to allocated pitched device memory
+// extent
+// - Requested allocation size (width field in bytes)
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation
+
 static VALUE rb_cudaMalloc3D(VALUE self){
+/ ​cudaError error = cudaMalloc3D ( cudaPitchedPtr* pitchedDevPtr, cudaExtent extent )
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaMalloc3DArray ( cudaArray_t* array, const cudaChannelFormatDesc* desc, cudaExtent extent, unsigned int  flags = 0 )
+// Allocate an array on the device.
+// Parameters
+// array
+// - Pointer to allocated array in device memory
+// desc
+// - Requested channel format
+// extent
+// - Requested allocation size (width field in elements)
+// flags
+// - Flags for extensions
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation
 
 static VALUE rb_cudaMalloc3DArray(VALUE self){
+  ​cudaError error = cudaMalloc3DArray( cudaArray_t* array, const cudaChannelFormatDesc* desc, cudaExtent extent, unsigned int  flags = 0 )
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaMallocMipmappedArray ( cudaMipmappedArray_t* mipmappedArray, const cudaChannelFormatDesc* desc, cudaExtent extent, unsigned int  numLevels, unsigned int  flags = 0 )
+// Allocate a mipmapped array on the device.
+// Parameters
+// mipmappedArray
+// - Pointer to allocated mipmapped array in device memory
+// desc
+// - Requested channel format
+// extent
+// - Requested allocation size (width field in elements)
+// numLevels
+// - Number of mipmap levels to allocate
+// flags
+// - Flags for extensions
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation
+
 
 static VALUE rb_cudaMallocMipmappedArray(VALUE self){
+  ​cudaError error = cudaMallocMipmappedArray ( cudaMipmappedArray_t* mipmappedArray, const cudaChannelFormatDesc* desc, cudaExtent extent, unsigned int  numLevels, unsigned int  flags = 0 )
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaGetMipmappedArrayLevel ( cudaArray_t* levelArray, cudaMipmappedArray_const_t mipmappedArray, unsigned int  level )
+// Gets a mipmap level of a CUDA mipmapped array.
+// Parameters
+// levelArray
+// - Returned mipmap level CUDA array
+// mipmappedArray
+// - CUDA mipmapped array
+// level
+// - Mipmap level
+// Returns
+// cudaSuccess, cudaErrorInvalidValue
 
 static VALUE rb_cudaGetMipmappedArrayLevel(VALUE self){
+  ​cudaError_t error = cudaGetMipmappedArrayLevel ( cudaArray_t* levelArray, cudaMipmappedArray_const_t mipmappedArray, unsigned int  level );
   return Qnil;
 }
-// http://horacio9573.no-ip.org/cuda/structcudaMemcpy3DParms.html
+
+// __host__ ​cudaError_t cudaMemcpy3D ( const cudaMemcpy3DParms* p )
+// Copies data between 3D objects.
+// Parameters
+// p
+// - 3D memory copy parameters
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidPitchValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpy3D(VALUE self){
+  ​cudaError error = cudaMemcpy3D ( const cudaMemcpy3DParms* p );
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaMemcpy3DPeer ( const cudaMemcpy3DPeerParms* p )
+// Copies memory between devices.
+// Parameters
+// p
+// - Parameters for the memory copy
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidDevice
 
 static VALUE rb_cudaMemcpy3DPeer(VALUE self){
+  ​cudaError error = cudaMemcpy3DPeer ( const cudaMemcpy3DPeerParms* p );
   return Qnil;
 }
+
+// __host__ ​ __device__ ​cudaError_t cudaMemcpy3DAsync ( const cudaMemcpy3DParms* p, cudaStream_t stream = 0 )
+// Copies data between 3D objects.
+// Parameters
+// p
+// - 3D memory copy parameters
+// stream
+// - Stream identifier
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidPitchValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpy3DAsync(VALUE self){
+  ​cudaError error = cudaMemcpy3DAsync ( const cudaMemcpy3DParms* p, cudaStream_t stream = 0 );
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaMemcpy3DPeerAsync ( const cudaMemcpy3DPeerParms* p, cudaStream_t stream = 0 )
+// Copies memory between devices asynchronously.
+// Parameters
+// p
+// - Parameters for the memory copy
+// stream
+// - Stream identifier
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidDevice
 
 static VALUE rb_cudaMemcpy3DPeerAsync(VALUE self){
+  ​cudaError error = cudaMemcpy3DPeerAsync ( const cudaMemcpy3DPeerParms* p, cudaStream_t stream = 0 );
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaMemGetInfo ( size_t* free, size_t* total )
+// Gets free and total device memory.
+// Parameters
+// free
+// - Returned free memory in bytes
+// total
+// - Returned total memory in bytes
+// Returns
+// cudaSuccess, cudaErrorInitializationError, cudaErrorInvalidValue, cudaErrorLaunchFailure
 
 static VALUE rb_cudaMemGetInfo(VALUE self){
+  ​cudaError error = cudaMemGetInfo ( size_t* free, size_t* total );
   return Qnil;
 }
 
+// __host__ ​cudaError_t cudaArrayGetInfo ( cudaChannelFormatDesc* desc, cudaExtent* extent, unsigned int* flags, cudaArray_t array )
+// Gets info about the specified cudaArray.
+// Parameters
+// desc
+// - Returned array type
+// extent
+// - Returned array shape. 2D arrays will have depth of zero
+// flags
+// - Returned array flags
+// array
+// - The cudaArray to get info for
+// Returns
+// cudaSuccess, cudaErrorInvalidValue
+
 static VALUE rb_cudaArrayGetInfo(VALUE self){
+  ​cudaError error = cudaArrayGetInfo ( cudaChannelFormatDesc* desc, cudaExtent* extent, unsigned int* flags, cudaArray_t array );
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaMemcpy ( void* dst, const void* src, size_t count, cudaMemcpyKind kind )
+// Copies data between host and device.
+// Parameters
+// dst
+// - Destination memory address
+// src
+// - Source memory address
+// count
+// - Size in bytes to copy
+// kind
+// - Type of transfer
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpy(VALUE self, VALUE dest_array, VALUE source_ary, VALUE count_val, VALUE kind){
   cudaMemcpyKind flag = rbcu_memcopy_kind(kind);
@@ -1069,29 +1371,175 @@ static VALUE rb_cudaMemcpy(VALUE self, VALUE dest_array, VALUE source_ary, VALUE
   return Qnil;
 }
 
+// __host__ ​cudaError_t cudaMemcpyPeer ( void* dst, int  dstDevice, const void* src, int  srcDevice, size_t count )
+// Copies memory between two devices.
+// Parameters
+// dst
+// - Destination device pointer
+// dstDevice
+// - Destination device
+// src
+// - Source device pointer
+// srcDevice
+// - Source device
+// count
+// - Size of memory copy in bytes
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidDevice
+
 static VALUE rb_cudaMemcpyPeer(VALUE self){
+  ​cudaError error = cudaMemcpyPeer ( void* dst, int  dstDevice, const void* src, int  srcDevice, size_t count );
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaMemcpyToArray ( cudaArray_t dst, size_t wOffset, size_t hOffset, const void* src, size_t count, cudaMemcpyKind kind )
+// Copies data between host and device.
+// Parameters
+// dst
+// - Destination memory address
+// wOffset
+// - Destination starting X offset
+// hOffset
+// - Destination starting Y offset
+// src
+// - Source memory address
+// count
+// - Size in bytes to copy
+// kind
+// - Type of transfer
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpyToArray(VALUE self){
+  ​cudaError error = cudaMemcpyToArray ( cudaArray_t dst, size_t wOffset, size_t hOffset, const void* src, size_t count, cudaMemcpyKind kind );
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaMemcpyFromArray ( void* dst, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t count, cudaMemcpyKind kind )
+// Copies data between host and device.
+// Parameters
+// dst
+// - Destination memory address
+// src
+// - Source memory address
+// wOffset
+// - Source starting X offset
+// hOffset
+// - Source starting Y offset
+// count
+// - Size in bytes to copy
+// kind
+// - Type of transfer
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpyFromArray(VALUE self){
+  ​cudaError error = cudaMemcpyFromArray ( void* dst, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t count, cudaMemcpyKind kind );
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaMemcpyArrayToArray ( cudaArray_t dst, size_t wOffsetDst, size_t hOffsetDst, cudaArray_const_t src, size_t wOffsetSrc, size_t hOffsetSrc, size_t count, cudaMemcpyKind kind = cudaMemcpyDeviceToDevice )
+// Copies data between host and device.
+// Parameters
+// dst
+// - Destination memory address
+// wOffsetDst
+// - Destination starting X offset
+// hOffsetDst
+// - Destination starting Y offset
+// src
+// - Source memory address
+// wOffsetSrc
+// - Source starting X offset
+// hOffsetSrc
+// - Source starting Y offset
+// count
+// - Size in bytes to copy
+// kind
+// - Type of transfer
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpyArrayToArray(VALUE self){
+  ​cudaError error = cudaMemcpyArrayToArray ( cudaArray_t dst, size_t wOffsetDst, size_t hOffsetDst, cudaArray_const_t src, size_t wOffsetSrc, size_t hOffsetSrc, size_t count, cudaMemcpyKind kind = cudaMemcpyDeviceToDevice );
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaMemcpy2D ( void* dst, size_t dpitch, const void* src, size_t spitch, size_t width, size_t height, cudaMemcpyKind kind )
+// Copies data between host and device.
+// Parameters
+// dst
+// - Destination memory address
+// dpitch
+// - Pitch of destination memory
+// src
+// - Source memory address
+// spitch
+// - Pitch of source memory
+// width
+// - Width of matrix transfer (columns in bytes)
+// height
+// - Height of matrix transfer (rows)
+// kind
+// - Type of transfer
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidPitchValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpy2D(VALUE self){
+  ​cudaError_t error = cudaMemcpy2D ( void* dst, size_t dpitch, const void* src, size_t spitch, size_t width, size_t height, cudaMemcpyKind kind );
   return Qnil;
 }
 
+// __host__ ​cudaError_t cudaMemcpy2DArrayToArray ( cudaArray_t dst, size_t wOffsetDst, size_t hOffsetDst, cudaArray_const_t src, size_t wOffsetSrc, size_t hOffsetSrc, size_t width, size_t height, cudaMemcpyKind kind = cudaMemcpyDeviceToDevice )
+// Copies data between host and device.
+// Parameters
+// dst
+// - Destination memory address
+// wOffsetDst
+// - Destination starting X offset
+// hOffsetDst
+// - Destination starting Y offset
+// src
+// - Source memory address
+// wOffsetSrc
+// - Source starting X offset
+// hOffsetSrc
+// - Source starting Y offset
+// width
+// - Width of matrix transfer (columns in bytes)
+// height
+// - Height of matrix transfer (rows)
+// kind
+// - Type of transfer
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidMemcpyDirection
+
 static VALUE rb_cudaMemcpy2DToArray(VALUE self){
+  ​cudaError_t error = cudaMemcpy2DArrayToArray ( cudaArray_t dst, size_t wOffsetDst, size_t hOffsetDst, cudaArray_const_t src, size_t wOffsetSrc, size_t hOffsetSrc, size_t width, size_t height, cudaMemcpyKind kind = cudaMemcpyDeviceToDevice );
   return Qnil;
 }
+
+// __host__ ​cudaError_t cudaMemcpy2DFromArray ( void* dst, size_t dpitch, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t width, size_t height, cudaMemcpyKind kind )
+// Copies data between host and device.
+// Parameters
+// dst
+// - Destination memory address
+// dpitch
+// - Pitch of destination memory
+// src
+// - Source memory address
+// wOffset
+// - Source starting X offset
+// hOffset
+// - Source starting Y offset
+// width
+// - Width of matrix transfer (columns in bytes)
+// height
+// - Height of matrix transfer (rows)
+// kind
+// - Type of transfer
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidPitchValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpy2DFromArray(VALUE self){
   return Qnil;
@@ -1129,11 +1577,61 @@ static VALUE rb_cudaMemcpy2DAsync(VALUE self){
   return Qnil;
 }
 
+// __host__ ​cudaError_t cudaMemcpy2DToArrayAsync ( cudaArray_t dst, size_t wOffset, size_t hOffset, const void* src, size_t spitch, size_t width, size_t height, cudaMemcpyKind kind, cudaStream_t stream = 0 )
+// Copies data between host and device.
+// Parameters
+// dst
+// - Destination memory address
+// wOffset
+// - Destination starting X offset
+// hOffset
+// - Destination starting Y offset
+// src
+// - Source memory address
+// spitch
+// - Pitch of source memory
+// width
+// - Width of matrix transfer (columns in bytes)
+// height
+// - Height of matrix transfer (rows)
+// kind
+// - Type of transfer
+// stream
+// - Stream identifier
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidPitchValue, cudaErrorInvalidMemcpyDirection
+
 static VALUE rb_cudaMemcpy2DToArrayAsync(VALUE self){
+  ​cudaError error = cudaMemcpy2DToArrayAsync ( cudaArray_t dst, size_t wOffset, size_t hOffset, const void* src, size_t spitch, size_t width, size_t height, cudaMemcpyKind kind, cudaStream_t stream = 0 );
   return Qnil;
 }
 
+// __host__ ​cudaError_t cudaMemcpy2DFromArrayAsync ( void* dst, size_t dpitch, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t width, size_t height, cudaMemcpyKind kind, cudaStream_t stream = 0 )
+// Copies data between host and device.
+// Parameters
+// dst
+// - Destination memory address
+// dpitch
+// - Pitch of destination memory
+// src
+// - Source memory address
+// wOffset
+// - Source starting X offset
+// hOffset
+// - Source starting Y offset
+// width
+// - Width of matrix transfer (columns in bytes)
+// height
+// - Height of matrix transfer (rows)
+// kind
+// - Type of transfer
+// stream
+// - Stream identifier
+// Returns
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidPitchValue, cudaErrorInvalidMemcpyDirection
+
 static VALUE rb_cudaMemcpy2DFromArrayAsync(VALUE self){
+  ​cudaError error = cudaMemcpy2DFromArrayAsync ( void* dst, size_t dpitch, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t width, size_t height, cudaMemcpyKind kind, cudaStream_t stream = 0 );
   return Qnil;
 }
 
