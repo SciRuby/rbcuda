@@ -53,6 +53,7 @@ cudaFuncCache rb_cu_function_cache_from_rbsymbol(VALUE sym);
 const char* get_function_cache_name(cudaFuncCache cache);
 cudaSharedMemConfig rb_cu_shared_mem_from_rbsymbol(VALUE sym);
 const char* get_shared_mem_name(cudaSharedMemConfig config);
+cudaDeviceAttr rb_cudaDeviceAttr_from_rbsymbol(VALUE sym);
 
 inline void __checkCudaErrors( CUresult err, const char *file, const int line );
 void initCUDA(char* module_file, char* kernel_name);

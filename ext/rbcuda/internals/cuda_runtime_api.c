@@ -291,9 +291,10 @@ static VALUE rb_cudaThreadGetLimit(VALUE self, VALUE limit){
 // Returns
 // cudaSuccess, cudaErrorInitializationError
 
-static VALUE rb_cudaThreadGetCacheConfig(VALUE self, VALUE pCacheConfig){
-  cudaError error = cudaThreadGetCacheConfig(cudaFuncCache* pCacheConfig);
-  return Qtrue;
+static VALUE rb_cudaThreadGetCacheConfig(VALUE self, VALUE p_cache_config){
+  cudaFuncCache* p_cache_config;
+  cudaError error = cudaThreadGetCacheConfig(&p_cache_config);
+  return rb_str_new_cstr(get_function_cache_name);
 }
 
 // __host__ ​cudaError_t cudaThreadSetCacheConfig ( cudaFuncCache cacheConfig )
@@ -304,8 +305,8 @@ static VALUE rb_cudaThreadGetCacheConfig(VALUE self, VALUE pCacheConfig){
 // Returns
 // cudaSuccess, cudaErrorInitializationError
 
-static VALUE rb_cudaThreadSetCacheConfig(VALUE self, VALUE cacheConfig){
-  cudaError error = cudaThreadSetCacheConfig(cudaFuncCache cacheConfig);
+static VALUE rb_cudaThreadSetCacheConfig(VALUE self, VALUE p_cache_config){
+  cudaError error = cudaThreadSetCacheConfig(rb_cu_function_cache_from_rbsymbol(p_cache_config));
   return Qtrue;
 }
 
@@ -351,8 +352,8 @@ static VALUE rb_cudaPeekAtLastError(VALUE self){
 // char* pointer to a NULL-terminated string
 
 static VALUE rb_cudaGetErrorName(VALUE self, VALUE error){
-  const char* error = cudaGetErrorName(cudaError_t error);
-  return Qnil;
+  const char* error_string = cudaGetErrorName(rb_cuda_cu_result_from_rbsymbol(error));
+  return rb_str_new_cstr(error_string);
 }
 
 // __host__ ​ __device__ ​const char* cudaGetErrorString ( cudaError_t error )
@@ -364,8 +365,8 @@ static VALUE rb_cudaGetErrorName(VALUE self, VALUE error){
 // char* pointer to a NULL-terminated string
 
 static VALUE rb_cudaGetErrorString(VALUE self, VALUE error){
-  const char* error = cudaGetErrorString(cudaError_t error);
-  return Qnil;
+  const char* error_string = cudaGetErrorString(rb_cuda_cu_result_from_rbsymbol(error));
+  return rb_str_new_cstr(error_string);
 }
 
 // __host__ ​ __device__ ​cudaError_t cudaGetDeviceCount ( int* count )
@@ -393,7 +394,12 @@ static VALUE rb_cudaGetDeviceCount(VALUE self){
 // cudaSuccess, cudaErrorInvalidDevice
 
 static VALUE rb_cudaGetDeviceProperties(VALUE self, VALUE device){
-  cudaError error = cudaGetDeviceProperties(cudaDeviceProp* prop, INT2NUM(device));
+  ///////////////////////////////////////////////////////
+  //                                                   //
+  //                       TODO                        //
+  //                                                   //
+  ///////////////////////////////////////////////////////
+  // cudaError error = cudaGetDeviceProperties(cudaDeviceProp* prop, INT2NUM(device));
   return Qnil;
 }
 
@@ -427,7 +433,12 @@ static VALUE rb_cudaDeviceGetAttribute(VALUE self, VALUE device){
 
 static VALUE rb_cudaChooseDevice(VALUE self){
   int device;
-  cudaError error = cudaChooseDevice(&device, const(cudaDeviceProp)* prop);
+   ///////////////////////////////////////////////////////
+  //                                                   //
+  //                       TODO                        //
+  //                                                   //
+  ///////////////////////////////////////////////////////
+  // cudaError error = cudaChooseDevice(&device, const(cudaDeviceProp)* prop);
   return INT2NUM(device);
 }
 
