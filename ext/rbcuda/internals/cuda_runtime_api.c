@@ -291,8 +291,8 @@ static VALUE rb_cudaThreadGetLimit(VALUE self, VALUE limit){
 // Returns
 // cudaSuccess, cudaErrorInitializationError
 
-static VALUE rb_cudaThreadGetCacheConfig(VALUE self, VALUE p_cache_config){
-  cudaFuncCache* p_cache_config;
+static VALUE rb_cudaThreadGetCacheConfig(VALUE self){
+  cudaFuncCache p_cache_config;
   cudaError error = cudaThreadGetCacheConfig(&p_cache_config);
   return rb_str_new_cstr(get_function_cache_name);
 }
@@ -415,9 +415,9 @@ static VALUE rb_cudaGetDeviceProperties(VALUE self, VALUE device){
 // Returns
 // cudaSuccess, cudaErrorInvalidDevice, cudaErrorInvalidValue
 
-static VALUE rb_cudaDeviceGetAttribute(VALUE self, VALUE device){
-  int value, device;
-  cudaError error = cudaDeviceGetAttribute(&value, cudaDeviceAttr attr, NUM2INT(device));
+static VALUE rb_cudaDeviceGetAttribute(VALUE self, VALUE attr, VALUE device){
+  int value;
+  cudaError error = cudaDeviceGetAttribute(&value, rb_cudaDeviceAttr_from_rbsymbol(attr), NUM2INT(device));
   return Qnil;
 }
 
@@ -482,7 +482,7 @@ static VALUE rb_cudaGetDevice(VALUE self){
 static VALUE rb_cudaSetValidDevices(VALUE self, VALUE len){
   int device_arr;
   cudaError error = cudaSetValidDevices(&device_arr, NUM2INT(len));
-  return  INT2NUM(device);
+  return INT2NUM(device_arr);
 }
 
 // __host__ ​cudaError_t cudaGetDeviceFlags ( unsigned int* flags )
@@ -521,8 +521,9 @@ static VALUE rb_cudaGetDeviceFlags(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue
 
 static VALUE rb_cudaStreamCreate(VALUE self){
-  cudaError error = cudaStreamCreate(cudaStream_t* pStream);
-  return Qnil;
+  custream_ptr* p_stream = ALLOC(custream_ptr);
+  cudaError error = cudaStreamCreate(&p_stream->stream);
+  return Data_Wrap_Struct(RbCuStream, NULL, rbcu_free, p_stream);
 }
 
 // __host__ ​ __device__ ​cudaError_t cudaStreamCreateWithFlags ( cudaStream_t* pStream, unsigned int  flags )
@@ -536,8 +537,9 @@ static VALUE rb_cudaStreamCreate(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue
 
 static VALUE rb_cudaStreamCreateWithFlags(VALUE self, VALUE flags){
-  cudaError error = cudaStreamCreateWithFlags(cudaStream_t* pStream, NUM2UINT(flags));
-  return Qnil;
+  custream_ptr* p_stream = ALLOC(custream_ptr);
+  cudaError error = cudaStreamCreateWithFlags(&p_stream->stream, NUM2UINT(flags));
+  return Data_Wrap_Struct(RbCuStream, NULL, rbcu_free, p_stream);
 }
 
 // __host__ ​cudaError_t cudaStreamCreateWithPriority ( cudaStream_t* pStream, unsigned int  flags, int  priority )
@@ -552,9 +554,10 @@ static VALUE rb_cudaStreamCreateWithFlags(VALUE self, VALUE flags){
 // Returns
 // cudaSuccess, cudaErrorInvalidValue
 
-static VALUE rb_cudaStreamCreateWithPriority(VALUE self){
-  cudaError error = cudaStreamCreateWithPriority(cudaStream_t* pStream, NUM2UINT(flags), NUM2INT(priority));
-  return Qnil;
+static VALUE rb_cudaStreamCreateWithPriority(VALUE self, VALUE flags, VALUE priority){
+  custream_ptr* p_stream = ALLOC(custream_ptr);
+  cudaError error = cudaStreamCreateWithPriority(&p_stream->stream, NUM2UINT(flags), NUM2INT(priority));
+  return Data_Wrap_Struct(RbCuStream, NULL, rbcu_free, p_stream);
 }
 
 // __host__ ​cudaError_t cudaStreamGetPriority ( cudaStream_t hStream, int* priority )
@@ -567,9 +570,11 @@ static VALUE rb_cudaStreamCreateWithPriority(VALUE self){
 // Returns
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidResourceHandle
 
-static VALUE rb_cudaStreamGetPriority(VALUE self){
+static VALUE rb_cudaStreamGetPriority(VALUE self, VALUE h_stream_val){
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
   int priority;
-  cudaError error = cudaStreamGetPriority(cudaStream_t hStream, &priority);
+  cudaError error = cudaStreamGetPriority(h_stream->stream, &priority);
   return INT2NUM(priority);
 }
 
@@ -583,9 +588,11 @@ static VALUE rb_cudaStreamGetPriority(VALUE self){
 // Returns
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidResourceHandle
 
-static VALUE rb_cudaStreamGetFlags(VALUE self, VALUE hStream, VALUE flags){
+static VALUE rb_cudaStreamGetFlags(VALUE self, VALUE h_stream_val){
   uint flags;
-  cudaError error = cudaStreamGetFlags(cudaStream_t hStream, &flags);
+  custream_ptr* h_stream;
+  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  cudaError error = cudaStreamGetFlags(h_stream->stream, &flags);
   return UINT2NUM(flags);
 }
 
@@ -597,9 +604,11 @@ static VALUE rb_cudaStreamGetFlags(VALUE self, VALUE hStream, VALUE flags){
 // Returns
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidResourceHandle
 
-static VALUE rb_cudaStreamDestroy(VALUE self, VALUE stream){
-  cudaError error = cudaStreamDestroy(cudaStream_t stream);
-  return Qnil;
+static VALUE rb_cudaStreamDestroy(VALUE self, VALUE stream_val){
+  custream_ptr* stream;
+  Data_Get_Struct(stream_val, custream_ptr, stream);
+  cudaError error = cudaStreamDestroy(stream->stream);
+  return Qtrue;
 }
 
 // __host__ ​ __device__ ​cudaError_t cudaStreamWaitEvent ( cudaStream_t stream, cudaEvent_t event, unsigned int  flags )
@@ -614,8 +623,10 @@ static VALUE rb_cudaStreamDestroy(VALUE self, VALUE stream){
 // Returns
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidResourceHandle
 
-static VALUE rb_cudaStreamWaitEvent(VALUE self, VALUE stream, VALUE event, VALUE flags){
-  cudaError error = cudaStreamWaitEvent(cudaStream_t stream, cudaEvent_t event, NUM2UINT(flags));
+static VALUE rb_cudaStreamWaitEvent(VALUE self, VALUE stream_val, VALUE event, VALUE flags){
+  custream_ptr* stream;
+  Data_Get_Struct(stream_val, custream_ptr, stream);
+  cudaError error = cudaStreamWaitEvent(stream->stream, rb_cu_event_flags_from_rbsymbol(event), NUM2UINT(flags));
   return Qnil;
 }
 
@@ -633,7 +644,15 @@ static VALUE rb_cudaStreamWaitEvent(VALUE self, VALUE stream, VALUE event, VALUE
 // Returns
 // cudaSuccess, cudaErrorInvalidResourceHandle, cudaErrorNotSupported
 
-static VALUE rb_cudaStreamAddCallback(VALUE self){
+static VALUE rb_cudaStreamAddCallback(VALUE self, VALUE stream_val, VALUE call_back, VALUE user_data, VALUE flags){
+  custream_ptr* stream;
+  Data_Get_Struct(stream_val, custream_ptr, stream);
+  ////////////////////////////////////
+  //                                //
+  //              todo              //
+  //                                //
+  ////////////////////////////////////
+  // cudaError error = cudaStreamAddCallback( stream->stream, cudaStreamCallback_t callback, (void*)user_data, NUM2UINT(flags));
   return Qnil;
 }
 
@@ -645,8 +664,11 @@ static VALUE rb_cudaStreamAddCallback(VALUE self){
 // Returns
 // cudaSuccess, cudaErrorInvalidResourceHandle
 
-static VALUE rb_cudaStreamSynchronize(VALUE self){
-  return Qnil;
+static VALUE rb_cudaStreamSynchronize(VALUE self, VALUE stream_val){
+  custream_ptr* stream;
+  Data_Get_Struct(stream_val, custream_ptr, stream);
+  cudaError error = cudaStreamSynchronize(stream->stream);
+  return Qtrue;
 }
 
 // __host__ ​cudaError_t cudaStreamQuery ( cudaStream_t stream )
@@ -657,8 +679,11 @@ static VALUE rb_cudaStreamSynchronize(VALUE self){
 // Returns
 // cudaSuccess, cudaErrorNotReady, cudaErrorInvalidResourceHandle
 
-static VALUE rb_cudaStreamQuery(VALUE self){
-  return Qnil;
+static VALUE rb_cudaStreamQuery(VALUE self, VALUE stream_val){
+  custream_ptr* stream;
+  Data_Get_Struct(stream_val, custream_ptr, stream);
+  cudaError error = cudaStreamQuery(stream->stream);
+  return Qtrue;
 }
 
 // __host__ ​cudaError_t cudaStreamAttachMemAsync ( cudaStream_t stream, void* devPtr, size_t length = 0, unsigned int  flags = cudaMemAttachSingle )
@@ -675,8 +700,10 @@ static VALUE rb_cudaStreamQuery(VALUE self){
 // Returns
 // cudaSuccess, cudaErrorNotReady, cudaErrorInvalidValue, cudaErrorInvalidResourceHandle
 
-static VALUE rb_cudaStreamAttachMemAsync(VALUE self){
-  return Qnil;
+static VALUE rb_cudaStreamAttachMemAsync(VALUE self, VALUE stream_val){
+  custream_ptr* stream;
+  Data_Get_Struct(stream_val, custream_ptr, stream);
+  return Qtrue;
 }
 
 // __host__ ​cudaError_t cudaEventCreate ( cudaEvent_t* event )
@@ -901,8 +928,9 @@ static VALUE rb_cudaOccupancyMaxActiveBlocksPerMultiprocessor(VALUE self){
 // Returns
 // cudaSuccess, cudaErrorCudartUnloading, cudaErrorInitializationError, cudaErrorInvalidDevice, cudaErrorInvalidDeviceFunction, cudaErrorInvalidValue, cudaErrorUnknown,
 
-static VALUE rb_cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(VALUE self){
-  ​cudaError error = cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags ( int* numBlocks, const void* func, int  blockSize, size_t dynamicSMemSize, unsigned int  flags );
+static VALUE rb_cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(VALUE self, VALUE func, VALUE block_size, VALUE dynamic_smem_size, VALUE flags){
+  int num_blocks;
+  // cudaError error = cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(&num_blocks, (void*)func, NUM2INT(block_size), NUM2ULONG(dynamic_smem_size), NUM2UINT(flags) );
   return Qnil;
 }
 
@@ -921,7 +949,7 @@ static VALUE rb_cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(VALUE sel
 // cudaSuccess, cudaErrorInvalidConfiguration
 
 static VALUE rb_cudaConfigureCall(VALUE self){
-  ​cudaError error = cudaConfigureCall ( dim3 gridDim, dim3 blockDim, size_t sharedMem = 0, cudaStream_t stream = 0 );
+  // cudaError error = cudaConfigureCall(dim3 grid_dim, dim3 bloc_dim, NUM2ULONG(shared_mem), cudaStream_t stream);
   return Qnil;
 }
 
@@ -938,7 +966,7 @@ static VALUE rb_cudaConfigureCall(VALUE self){
 // cudaSuccess
 
 static VALUE rb_cudaSetupArgument(VALUE self){
-  ​cudaError error = cudaSetupArgument ( const void* arg, size_t size, size_t offset );
+  // ​cudaError error = cudaSetupArgument ( const void* arg, size_t size, size_t offset );
   return Qnil;
 }
 
@@ -952,7 +980,7 @@ static VALUE rb_cudaSetupArgument(VALUE self){
 // cudaErrorLaunchOutOfResources, cudaErrorSharedObjectInitFailed, cudaErrorInvalidPtx, cudaErrorNoKernelImageForDevice, cudaErrorJitCompilerNotFound
 
 static VALUE rb_cudaLaunch(VALUE self, VALUE func){
-  cudaError error = cudaSetDoubleForHost((void*)func);
+  // cudaError error = cudaSetDoubleForHost((void*)func);
   return Qtrue;
 }
 
@@ -1002,7 +1030,7 @@ static VALUE rb_cudaMalloc(VALUE self, VALUE shape){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation
 
 static VALUE rb_cudaMallocHost(VALUE self){
-  ​cudaError error = cudaMallocHost ( void** ptr, size_t size );
+  // ​cudaError error = cudaMallocHost ( void** ptr, size_t size );
   return Qnil;
 }
 
@@ -1019,7 +1047,7 @@ static VALUE rb_cudaMallocHost(VALUE self){
 // cudaSuccess, cudaErrorMemoryAllocation, cudaErrorNotSupported, cudaErrorInvalidValue
 
 static VALUE rb_cudaMallocPitch(VALUE self){
-  ​cudaError error = cudaMallocManaged( void** devPtr, size_t size, unsigned int  flags = cudaMemAttachGlobal);
+  // ​cudaError error = cudaMallocManaged( void** devPtr, size_t size, unsigned int  flags = cudaMemAttachGlobal);
   return Qnil;
 }
 
@@ -1040,7 +1068,7 @@ static VALUE rb_cudaMallocPitch(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation
 
 static VALUE rb_cudaMallocArray(VALUE self){
-  ​cudaError error = cudaMallocArray ( cudaArray_t* array, const cudaChannelFormatDesc* desc, size_t width, size_t height = 0, unsigned int  flags = 0 );
+  // ​cudaError error = cudaMallocArray ( cudaArray_t* array, const cudaChannelFormatDesc* desc, size_t width, size_t height = 0, unsigned int  flags = 0 );
   return Qnil;
 }
 
@@ -1055,7 +1083,7 @@ static VALUE rb_cudaMallocArray(VALUE self){
 static VALUE rb_cudaFree(VALUE self, VALUE ptr_val){
   dev_ptr* ptr;
   Data_Get_Struct(ptr_val, dev_ptr, ptr);
-  ​cudaError error = cudaFree(ptr->carray);
+  // ​cudaError error = cudaFree(ptr->carray);
   return Qnil;
 }
 
@@ -1068,7 +1096,7 @@ static VALUE rb_cudaFree(VALUE self, VALUE ptr_val){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInitializationError
 
 static VALUE rb_cudaFreeHost(VALUE self){
-  ​cudaError error = cudaFreeHost((void*)ptr);
+  // ​cudaError error = cudaFreeHost((void*)ptr);
   return Qnil;
 }
 
@@ -1081,7 +1109,7 @@ static VALUE rb_cudaFreeHost(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInitializationError
 
 static VALUE rb_cudaFreeArray(VALUE self){
-  ​cudaError error = cudaFreeArray ( cudaArray_t array );
+  // ​cudaError error = cudaFreeArray ( cudaArray_t array );
   return Qnil;
 }
 
@@ -1094,7 +1122,7 @@ static VALUE rb_cudaFreeArray(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInitializationError
 
 static VALUE rb_cudaFreeMipmappedArray(VALUE self){
-  cudaError error = cudaFreeMipmappedArray(cudaMipmappedArray_t mipmappedArray);
+  // cudaError error = cudaFreeMipmappedArray(cudaMipmappedArray_t mipmappedArray);
   return Qnil;
 }
 
@@ -1111,7 +1139,7 @@ static VALUE rb_cudaFreeMipmappedArray(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation
 
 static VALUE rb_cudaHostAlloc(VALUE self){
-  ​cudaError error = cudaHostAlloc(void** pHost, size_t size, unsigned int flags);
+  // ​cudaError error = cudaHostAlloc(void** pHost, size_t size, unsigned int flags);
   return Qnil;
 }
 
@@ -1128,7 +1156,7 @@ static VALUE rb_cudaHostAlloc(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation, cudaErrorHostMemoryAlreadyRegistered, cudaErrorNotSupported
 
 static VALUE rb_cudaHostRegister(VALUE self){
-  ​cudaError error = cudaHostRegister( void* ptr, size_t size, unsigned int  flags);
+  // ​cudaError error = cudaHostRegister( void* ptr, size_t size, unsigned int  flags);
   return Qnil;
 }
 
@@ -1141,7 +1169,7 @@ static VALUE rb_cudaHostRegister(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorHostMemoryNotRegistered
 
 static VALUE rb_cudaHostUnregister(VALUE self){
-  ​cudaError error = cudaHostUnregister ( void* ptr );
+  // ​cudaError error = cudaHostUnregister ( void* ptr );
   return Qnil;
 }
 
@@ -1158,7 +1186,7 @@ static VALUE rb_cudaHostUnregister(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation
 
 static VALUE rb_cudaHostGetDevicePointer(VALUE self){
-  ​cudaError error = cudaHostGetDevicePointer ( void** pDevice, void* pHost, unsigned int  flags );
+  // ​cudaError error = cudaHostGetDevicePointer ( void** pDevice, void* pHost, unsigned int  flags );
   return Qnil;
 }
 
@@ -1173,7 +1201,7 @@ static VALUE rb_cudaHostGetDevicePointer(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue
 
 static VALUE rb_cudaHostGetFlags(VALUE self){
-  ​cudaError_t error = cudaHostGetFlags ( unsigned int* pFlags, void* pHost )
+  // ​cudaError_t error = cudaHostGetFlags ( unsigned int* pFlags, void* pHost )
   return Qnil;
 }
 
@@ -1188,7 +1216,7 @@ static VALUE rb_cudaHostGetFlags(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation
 
 static VALUE rb_cudaMalloc3D(VALUE self){
-/ ​cudaError error = cudaMalloc3D ( cudaPitchedPtr* pitchedDevPtr, cudaExtent extent )
+// / ​cudaError error = cudaMalloc3D ( cudaPitchedPtr* pitchedDevPtr, cudaExtent extent )
   return Qnil;
 }
 
@@ -1207,7 +1235,7 @@ static VALUE rb_cudaMalloc3D(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation
 
 static VALUE rb_cudaMalloc3DArray(VALUE self){
-  ​cudaError error = cudaMalloc3DArray( cudaArray_t* array, const cudaChannelFormatDesc* desc, cudaExtent extent, unsigned int  flags = 0 )
+  // ​cudaError error = cudaMalloc3DArray( cudaArray_t* array, const cudaChannelFormatDesc* desc, cudaExtent extent, unsigned int  flags = 0 )
   return Qnil;
 }
 
@@ -1229,7 +1257,7 @@ static VALUE rb_cudaMalloc3DArray(VALUE self){
 
 
 static VALUE rb_cudaMallocMipmappedArray(VALUE self){
-  ​cudaError error = cudaMallocMipmappedArray ( cudaMipmappedArray_t* mipmappedArray, const cudaChannelFormatDesc* desc, cudaExtent extent, unsigned int  numLevels, unsigned int  flags = 0 )
+  // ​cudaError error = cudaMallocMipmappedArray ( cudaMipmappedArray_t* mipmappedArray, const cudaChannelFormatDesc* desc, cudaExtent extent, unsigned int  numLevels, unsigned int  flags = 0 )
   return Qnil;
 }
 
@@ -1246,7 +1274,7 @@ static VALUE rb_cudaMallocMipmappedArray(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue
 
 static VALUE rb_cudaGetMipmappedArrayLevel(VALUE self){
-  ​cudaError_t error = cudaGetMipmappedArrayLevel ( cudaArray_t* levelArray, cudaMipmappedArray_const_t mipmappedArray, unsigned int  level );
+  // ​cudaError_t error = cudaGetMipmappedArrayLevel ( cudaArray_t* levelArray, cudaMipmappedArray_const_t mipmappedArray, unsigned int  level );
   return Qnil;
 }
 
@@ -1259,7 +1287,7 @@ static VALUE rb_cudaGetMipmappedArrayLevel(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidPitchValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpy3D(VALUE self){
-  ​cudaError error = cudaMemcpy3D ( const cudaMemcpy3DParms* p );
+  // ​cudaError error = cudaMemcpy3D ( const cudaMemcpy3DParms* p );
   return Qnil;
 }
 
@@ -1272,7 +1300,7 @@ static VALUE rb_cudaMemcpy3D(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidDevice
 
 static VALUE rb_cudaMemcpy3DPeer(VALUE self){
-  ​cudaError error = cudaMemcpy3DPeer ( const cudaMemcpy3DPeerParms* p );
+  // ​cudaError error = cudaMemcpy3DPeer ( const cudaMemcpy3DPeerParms* p );
   return Qnil;
 }
 
@@ -1287,7 +1315,7 @@ static VALUE rb_cudaMemcpy3DPeer(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidPitchValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpy3DAsync(VALUE self){
-  ​cudaError error = cudaMemcpy3DAsync ( const cudaMemcpy3DParms* p, cudaStream_t stream = 0 );
+  // ​cudaError error = cudaMemcpy3DAsync ( const cudaMemcpy3DParms* p, cudaStream_t stream = 0 );
   return Qnil;
 }
 
@@ -1302,7 +1330,7 @@ static VALUE rb_cudaMemcpy3DAsync(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidDevice
 
 static VALUE rb_cudaMemcpy3DPeerAsync(VALUE self){
-  ​cudaError error = cudaMemcpy3DPeerAsync ( const cudaMemcpy3DPeerParms* p, cudaStream_t stream = 0 );
+  // ​cudaError error = cudaMemcpy3DPeerAsync ( const cudaMemcpy3DPeerParms* p, cudaStream_t stream = 0 );
   return Qnil;
 }
 
@@ -1317,7 +1345,7 @@ static VALUE rb_cudaMemcpy3DPeerAsync(VALUE self){
 // cudaSuccess, cudaErrorInitializationError, cudaErrorInvalidValue, cudaErrorLaunchFailure
 
 static VALUE rb_cudaMemGetInfo(VALUE self){
-  ​cudaError error = cudaMemGetInfo ( size_t* free, size_t* total );
+  // ​cudaError error = cudaMemGetInfo ( size_t* free, size_t* total );
   return Qnil;
 }
 
@@ -1336,7 +1364,7 @@ static VALUE rb_cudaMemGetInfo(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue
 
 static VALUE rb_cudaArrayGetInfo(VALUE self){
-  ​cudaError error = cudaArrayGetInfo ( cudaChannelFormatDesc* desc, cudaExtent* extent, unsigned int* flags, cudaArray_t array );
+  // ​cudaError error = cudaArrayGetInfo ( cudaChannelFormatDesc* desc, cudaExtent* extent, unsigned int* flags, cudaArray_t array );
   return Qnil;
 }
 
@@ -1399,7 +1427,7 @@ static VALUE rb_cudaMemcpy(VALUE self, VALUE dest_array, VALUE source_ary, VALUE
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidDevice
 
 static VALUE rb_cudaMemcpyPeer(VALUE self){
-  ​cudaError error = cudaMemcpyPeer ( void* dst, int  dstDevice, const void* src, int  srcDevice, size_t count );
+  // ​cudaError error = cudaMemcpyPeer ( void* dst, int  dstDevice, const void* src, int  srcDevice, size_t count );
   return Qnil;
 }
 
@@ -1422,7 +1450,7 @@ static VALUE rb_cudaMemcpyPeer(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpyToArray(VALUE self){
-  ​cudaError error = cudaMemcpyToArray ( cudaArray_t dst, size_t wOffset, size_t hOffset, const void* src, size_t count, cudaMemcpyKind kind );
+  // ​cudaError error = cudaMemcpyToArray ( cudaArray_t dst, size_t wOffset, size_t hOffset, const void* src, size_t count, cudaMemcpyKind kind );
   return Qnil;
 }
 
@@ -1445,7 +1473,7 @@ static VALUE rb_cudaMemcpyToArray(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpyFromArray(VALUE self){
-  ​cudaError error = cudaMemcpyFromArray ( void* dst, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t count, cudaMemcpyKind kind );
+  // ​cudaError error = cudaMemcpyFromArray ( void* dst, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t count, cudaMemcpyKind kind );
   return Qnil;
 }
 
@@ -1472,7 +1500,7 @@ static VALUE rb_cudaMemcpyFromArray(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpyArrayToArray(VALUE self){
-  ​cudaError error = cudaMemcpyArrayToArray ( cudaArray_t dst, size_t wOffsetDst, size_t hOffsetDst, cudaArray_const_t src, size_t wOffsetSrc, size_t hOffsetSrc, size_t count, cudaMemcpyKind kind = cudaMemcpyDeviceToDevice );
+  // ​cudaError error = cudaMemcpyArrayToArray ( cudaArray_t dst, size_t wOffsetDst, size_t hOffsetDst, cudaArray_const_t src, size_t wOffsetSrc, size_t hOffsetSrc, size_t count, cudaMemcpyKind kind = cudaMemcpyDeviceToDevice );
   return Qnil;
 }
 
@@ -1497,7 +1525,7 @@ static VALUE rb_cudaMemcpyArrayToArray(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidPitchValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpy2D(VALUE self){
-  ​cudaError_t error = cudaMemcpy2D ( void* dst, size_t dpitch, const void* src, size_t spitch, size_t width, size_t height, cudaMemcpyKind kind );
+  // ​cudaError_t error = cudaMemcpy2D ( void* dst, size_t dpitch, const void* src, size_t spitch, size_t width, size_t height, cudaMemcpyKind kind );
   return Qnil;
 }
 
@@ -1526,7 +1554,7 @@ static VALUE rb_cudaMemcpy2D(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpy2DToArray(VALUE self){
-  ​cudaError_t error = cudaMemcpy2DArrayToArray ( cudaArray_t dst, size_t wOffsetDst, size_t hOffsetDst, cudaArray_const_t src, size_t wOffsetSrc, size_t hOffsetSrc, size_t width, size_t height, cudaMemcpyKind kind = cudaMemcpyDeviceToDevice );
+  // ​cudaError_t error = cudaMemcpy2DArrayToArray ( cudaArray_t dst, size_t wOffsetDst, size_t hOffsetDst, cudaArray_const_t src, size_t wOffsetSrc, size_t hOffsetSrc, size_t width, size_t height, cudaMemcpyKind kind = cudaMemcpyDeviceToDevice );
   return Qnil;
 }
 
@@ -1613,7 +1641,7 @@ static VALUE rb_cudaMemcpy2DAsync(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidPitchValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpy2DToArrayAsync(VALUE self){
-  ​cudaError error = cudaMemcpy2DToArrayAsync ( cudaArray_t dst, size_t wOffset, size_t hOffset, const void* src, size_t spitch, size_t width, size_t height, cudaMemcpyKind kind, cudaStream_t stream = 0 );
+  // ​cudaError error = cudaMemcpy2DToArrayAsync ( cudaArray_t dst, size_t wOffset, size_t hOffset, const void* src, size_t spitch, size_t width, size_t height, cudaMemcpyKind kind, cudaStream_t stream = 0 );
   return Qnil;
 }
 
@@ -1642,7 +1670,7 @@ static VALUE rb_cudaMemcpy2DToArrayAsync(VALUE self){
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInvalidPitchValue, cudaErrorInvalidMemcpyDirection
 
 static VALUE rb_cudaMemcpy2DFromArrayAsync(VALUE self){
-  ​cudaError error = cudaMemcpy2DFromArrayAsync ( void* dst, size_t dpitch, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t width, size_t height, cudaMemcpyKind kind, cudaStream_t stream = 0 );
+  // ​cudaError error = cudaMemcpy2DFromArrayAsync ( void* dst, size_t dpitch, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t width, size_t height, cudaMemcpyKind kind, cudaStream_t stream = 0 );
   return Qnil;
 }
 
