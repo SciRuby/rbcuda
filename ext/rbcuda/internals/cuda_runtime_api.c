@@ -717,7 +717,9 @@ static VALUE rb_cudaStreamAttachMemAsync(VALUE self, VALUE stream_val){
 // cudaSuccess, cudaErrorInitializationError, cudaErrorInvalidValue, cudaErrorLaunchFailure, cudaErrorMemoryAllocation
 
 static VALUE rb_cudaEventCreate(VALUE self){
-  return Qnil;
+  cu_event* event = ALLOC(cu_event);
+  cudaError error = cudaEventCreate(&event->event);
+  return Data_Wrap_Struct(RbCuEvent, NULL, rbcu_free, event);
 }
 
 // __host__ ​ __device__ ​cudaError_t cudaEventCreateWithFlags ( cudaEvent_t* event, unsigned int  flags )
@@ -730,8 +732,10 @@ static VALUE rb_cudaEventCreate(VALUE self){
 // Returns
 // cudaSuccess, cudaErrorInitializationError, cudaErrorInvalidValue, cudaErrorLaunchFailure, cudaErrorMemoryAllocation
 
-static VALUE rb_cudaEventCreateWithFlags(VALUE self){
-  return Qnil;
+static VALUE rb_cudaEventCreateWithFlags(VALUE self, VALUE flags){
+  cu_event* event = ALLOC(cu_event);
+  cudaError error = cudaEventCreateWithFlags(&event->event, NUM2UINT(flags));
+  return Data_Wrap_Struct(RbCuEvent, NULL, rbcu_free, event);
 }
 
 // __host__ ​ __device__ ​cudaError_t cudaEventRecord ( cudaEvent_t event, cudaStream_t stream = 0 )
@@ -744,8 +748,13 @@ static VALUE rb_cudaEventCreateWithFlags(VALUE self){
 // Returns
 // cudaSuccess, cudaErrorInvalidValue, cudaErrorInitializationError, cudaErrorInvalidResourceHandle, cudaErrorLaunchFailure
 
-static VALUE rb_cudaEventRecord(VALUE self){
-  return Qnil;
+static VALUE rb_cudaEventRecord(VALUE self, VALUE event_val, VALUE stream_val){
+  cu_event* event;
+  Data_Get_Struct(event_val, cu_event, event);
+  custream_ptr* stream;
+  Data_Get_Struct(stream_val, custream_ptr, stream);
+  cudaError error = cudaEventRecord(event->event, stream->stream);
+  return Qtrue;
 }
 
 // __host__ ​cudaError_t cudaEventQuery ( cudaEvent_t event )
@@ -756,8 +765,11 @@ static VALUE rb_cudaEventRecord(VALUE self){
 // Returns
 // cudaSuccess, cudaErrorNotReady, cudaErrorInitializationError, cudaErrorInvalidValue, cudaErrorInvalidResourceHandle, cudaErrorLaunchFailure
 
-static VALUE rb_cudaEventQuery(VALUE self){
-  return Qnil;
+static VALUE rb_cudaEventQuery(VALUE self, VALUE event_val){
+  cu_event* event;
+  Data_Get_Struct(event_val, cu_event, event);
+  cudaError error = cudaEventQuery(event->event);
+  return Qtrue;
 }
 
 // __host__ ​cudaError_t cudaEventSynchronize ( cudaEvent_t event )
@@ -768,8 +780,11 @@ static VALUE rb_cudaEventQuery(VALUE self){
 // Returns
 // cudaSuccess, cudaErrorInitializationError, cudaErrorInvalidValue, cudaErrorInvalidResourceHandle, cudaErrorLaunchFailure
 
-static VALUE rb_cudaEventSynchronize(VALUE self){
-  return Qnil;
+static VALUE rb_cudaEventSynchronize(VALUE self, VALUE event_val){
+  cu_event* event;
+  Data_Get_Struct(event_val, cu_event, event);
+  cudaError error = cudaEventSynchronize(event->event);
+  return Qtrue;
 }
 
 // __host__ ​ __device__ ​cudaError_t cudaEventDestroy ( cudaEvent_t event )
@@ -780,8 +795,11 @@ static VALUE rb_cudaEventSynchronize(VALUE self){
 // Returns
 // cudaSuccess, cudaErrorInitializationError, cudaErrorInvalidValue, cudaErrorLaunchFailure
 
-static VALUE rb_cudaEventDestroy(VALUE self){
-  return Qnil;
+static VALUE rb_cudaEventDestroy(VALUE self, VALUE event_val){
+  cu_event* event;
+  Data_Get_Struct(event_val, cu_event, event);
+  cudaError error = cudaEventDestroy(event->event);
+  return Qtrue;
 }
 
 // __host__ ​cudaError_t cudaEventElapsedTime ( float* ms, cudaEvent_t start, cudaEvent_t end )
@@ -796,8 +814,14 @@ static VALUE rb_cudaEventDestroy(VALUE self){
 // Returns
 // cudaSuccess, cudaErrorNotReady, cudaErrorInvalidValue, cudaErrorInitializationError, cudaErrorInvalidResourceHandle, cudaErrorLaunchFailure
 
-static VALUE rb_cudaEventElapsedTime(VALUE self){
-  return Qnil;
+static VALUE rb_cudaEventElapsedTime(VALUE self, VALUE start_event_val, VALUE end_event_val){
+  cu_event* start_event;
+  Data_Get_Struct(start_event_val, cu_event, start_event);
+  cu_event* end_event;
+  Data_Get_Struct(end_event_val, cu_event, end_event);
+  float time;
+  cudaError error = cudaEventElapsedTime(&time ,start_event->event, end_event->event);
+  return DBL2NUM(time);
 }
 
 // __host__ ​cudaError_t cudaLaunchKernel ( const void* func, dim3 gridDim, dim3 blockDim, void** args, size_t sharedMem, cudaStream_t stream )
@@ -1040,20 +1064,24 @@ static VALUE rb_cudaMallocHost(VALUE self){
   return Qnil;
 }
 
-// __host__ ​cudaError_t cudaMallocManaged ( void** devPtr, size_t size, unsigned int  flags = cudaMemAttachGlobal )
-// Allocates memory that will be automatically managed by the Unified Memory system.
+// __host__ ​cudaError_t cudaMallocPitch ( void** devPtr, size_t* pitch, size_t width, size_t height )
+// Allocates pitched memory on the device.
 // Parameters
 // devPtr
-// - Pointer to allocated device memory
-// size
-// - Requested allocation size in bytes
-// flags
-// - Must be either cudaMemAttachGlobal or cudaMemAttachHost (defaults to cudaMemAttachGlobal)
+// - Pointer to allocated pitched device memory
+// pitch
+// - Pitch for allocation
+// width
+// - Requested pitched allocation width (in bytes)
+// height
+// - Requested pitched allocation height
 // Returns
-// cudaSuccess, cudaErrorMemoryAllocation, cudaErrorNotSupported, cudaErrorInvalidValue
+// cudaSuccess, cudaErrorInvalidValue, cudaErrorMemoryAllocation
 
-static VALUE rb_cudaMallocPitch(VALUE self){
-  // ​cudaError error = cudaMallocManaged( void** devPtr, size_t size, unsigned int  flags = cudaMemAttachGlobal);
+static VALUE rb_cudaMallocPitch(VALUE self, VALUE dev_ptr, VALUE width, VALUE height){
+  void* array = (void*)dev_ptr;
+  size_t pitch;
+  cudaError error = cudaMallocPitch(&array, &pitch, NUM2ULONG(width), NUM2ULONG(height));
   return Qnil;
 }
 

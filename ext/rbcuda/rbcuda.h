@@ -79,6 +79,19 @@ typedef struct RB_CUBLAS_HANDLE
 }rb_cublas_handle;
 
 
+
+// struct __device_builtin__ cudaFuncAttributes
+// {
+//   size_t sharedSizeBytes;
+//   size_t constSizeBytes;
+//   size_t localSizeBytes;
+//   int maxThreadsPerBlock;
+//   int numRegs;
+//   int ptxVersion;
+//   int binaryVersion;
+//   int cacheModeCA;
+// }
+
 #ifndef HAVE_RB_ARRAY_CONST_PTR
 static inline const VALUE *
 rb_array_const_ptr(VALUE a)
