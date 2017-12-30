@@ -294,7 +294,7 @@ static VALUE rb_cudaThreadGetLimit(VALUE self, VALUE limit){
 static VALUE rb_cudaThreadGetCacheConfig(VALUE self){
   cudaFuncCache p_cache_config;
   cudaError error = cudaThreadGetCacheConfig(&p_cache_config);
-  return rb_str_new_cstr(get_function_cache_name);
+  return rb_str_new_cstr(get_function_cache_name(p_cache_config));
 }
 
 // __host__ ​cudaError_t cudaThreadSetCacheConfig ( cudaFuncCache cacheConfig )
@@ -352,7 +352,7 @@ static VALUE rb_cudaPeekAtLastError(VALUE self){
 // char* pointer to a NULL-terminated string
 
 static VALUE rb_cudaGetErrorName(VALUE self, VALUE error){
-  const char* error_string = cudaGetErrorName(rb_cuda_cu_result_from_rbsymbol(error));
+  const char* error_string = cudaGetErrorName((cudaError)rb_cuda_cu_result_from_rbsymbol(error));
   return rb_str_new_cstr(error_string);
 }
 
@@ -365,7 +365,7 @@ static VALUE rb_cudaGetErrorName(VALUE self, VALUE error){
 // char* pointer to a NULL-terminated string
 
 static VALUE rb_cudaGetErrorString(VALUE self, VALUE error){
-  const char* error_string = cudaGetErrorString(rb_cuda_cu_result_from_rbsymbol(error));
+  const char* error_string = cudaGetErrorString((cudaError)rb_cuda_cu_result_from_rbsymbol(error));
   return rb_str_new_cstr(error_string);
 }
 
@@ -626,7 +626,9 @@ static VALUE rb_cudaStreamDestroy(VALUE self, VALUE stream_val){
 static VALUE rb_cudaStreamWaitEvent(VALUE self, VALUE stream_val, VALUE event, VALUE flags){
   custream_ptr* stream;
   Data_Get_Struct(stream_val, custream_ptr, stream);
-  cudaError error = cudaStreamWaitEvent(stream->stream, rb_cu_event_flags_from_rbsymbol(event), NUM2UINT(flags));
+  cu_event* event_ptr;
+  Data_Get_Struct(event, cu_event, event_ptr);
+  cudaError error = cudaStreamWaitEvent(stream->stream, event_ptr->event, NUM2UINT(flags));
   return Qnil;
 }
 
@@ -861,7 +863,10 @@ static VALUE rb_cudaFuncSetSharedMemConfig(VALUE self, VALUE func, VALUE config)
 // cudaSuccess, cudaErrorInitializationError, cudaErrorInvalidDeviceFunction
 
 static VALUE rb_cudaFuncGetAttributes(VALUE self){
-  cudaError error = cudaFuncGetAttributes(cudaFuncAttributes* attr, const void* func);
+  //////////////////////////////////
+  //             TODO             //
+  //////////////////////////////////
+  // cudaError error = cudaFuncGetAttributes(cudaFuncAttributes* attr, const void* func);
   return Qnil;
 }
 
@@ -907,9 +912,10 @@ static VALUE rb_cudaSetDoubleForHost(VALUE self){
 // Returns
 // cudaSuccess, cudaErrorCudartUnloading, cudaErrorInitializationError, cudaErrorInvalidDevice, cudaErrorInvalidDeviceFunction, cudaErrorInvalidValue, cudaErrorUnknown,
 
-static VALUE rb_cudaOccupancyMaxActiveBlocksPerMultiprocessor(VALUE self){
-  cudaError error = cudaOccupancyMaxActiveBlocksPerMultiprocessor ( int* numBlocks, const void* func, int  blockSize, size_t dynamicSMemSize );
-  return Qnil;
+static VALUE rb_cudaOccupancyMaxActiveBlocksPerMultiprocessor(VALUE self, VALUE func, VALUE block_size, VALUE dynamic_smem_size){
+  int num_blocks;
+  cudaError error = cudaOccupancyMaxActiveBlocksPerMultiprocessor(&num_blocks, (void*)func, NUM2UINT(block_size),  NUM2ULONG(dynamic_smem_size));
+  return INT2NUM(num_blocks);
 }
 
 // __host__ ​cudaError_t cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags ( int* numBlocks, const void* func, int  blockSize, size_t dynamicSMemSize, unsigned int  flags )
@@ -930,7 +936,7 @@ static VALUE rb_cudaOccupancyMaxActiveBlocksPerMultiprocessor(VALUE self){
 
 static VALUE rb_cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(VALUE self, VALUE func, VALUE block_size, VALUE dynamic_smem_size, VALUE flags){
   int num_blocks;
-  // cudaError error = cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(&num_blocks, (void*)func, NUM2INT(block_size), NUM2ULONG(dynamic_smem_size), NUM2UINT(flags) );
+  cudaError error = cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(&num_blocks, (void*)func, NUM2INT(block_size), NUM2ULONG(dynamic_smem_size), NUM2UINT(flags));
   return Qnil;
 }
 
@@ -980,7 +986,7 @@ static VALUE rb_cudaSetupArgument(VALUE self){
 // cudaErrorLaunchOutOfResources, cudaErrorSharedObjectInitFailed, cudaErrorInvalidPtx, cudaErrorNoKernelImageForDevice, cudaErrorJitCompilerNotFound
 
 static VALUE rb_cudaLaunch(VALUE self, VALUE func){
-  // cudaError error = cudaSetDoubleForHost((void*)func);
+  cudaError error = cudaLaunch((void*)func);
   return Qtrue;
 }
 
