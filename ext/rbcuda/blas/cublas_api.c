@@ -81,11 +81,17 @@ std::map<char*, size_t> CuBLAS_DataType_t = {
 // struct cublasContext;
 // alias cublasHandle_t = cublasContext*;
 
+// cublasStatus_t
+// cublasCreate(cublasHandle_t *handle)
+
 static VALUE rb_cublasCreate_v2(VALUE self){
   rb_cublas_handle* handler = ALLOC(rb_cublas_handle);;
   cublasCreate_v2(&handler->handle);
   return Data_Wrap_Struct(CuBLASHandler, NULL, rbcu_free, handler);
 }
+
+// cublasStatus_t
+// cublasDestroy(cublasHandle_t handle)
 
 static VALUE rb_cublasDestroy_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
@@ -94,65 +100,120 @@ static VALUE rb_cublasDestroy_v2(VALUE self, VALUE handler_val){
   return Qnil;
 }
 
-static VALUE rb_cublasGetVersion_v2(VALUE self){
+// cublasStatus_t
+// cublasGetVersion(cublasHandle_t handle, int *version)
+
+static VALUE rb_cublasGetVersion_v2(VALUE self, VALUE handler_val){
+  int version;
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
+  cublasGetVersion(handler->handle, &version);
   return Qnil;
 }
 
-static VALUE rb_cublasSetStream_v2(VALUE self){
+// cublasStatus_t
+// cublasGetProperty(libraryPropertyType type, int *value)
+
+// cublasStatus_t
+// cublasSetStream(cublasHandle_t handle, cudaStream_t streamId)
+
+static VALUE rb_cublasSetStream_v2(VALUE self, VALUE handler_val, VALUE stream_id){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
-static VALUE rb_cublasGetStream_v2(VALUE self){
+// cublasStatus_t
+// cublasGetStream(cublasHandle_t handle, cudaStream_t *streamId)
+
+static VALUE rb_cublasGetStream_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
+// cublasStatus_t
+// cublasGetPointerMode(cublasHandle_t handle, cublasPointerMode_t *mode)
 
-static VALUE rb_cublasGetPointerMode_v2(VALUE self){
+static VALUE rb_cublasGetPointerMode_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
-static VALUE rb_cublasSetPointerMode_v2(VALUE self){
+// cublasStatus_t
+// cublasSetPointerMode(cublasHandle_t handle, cublasPointerMode_t mode)
+
+static VALUE rb_cublasSetPointerMode_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
+// cublasStatus_t cublasGetAtomicsMode (cublasHandle_t handle, cublasAtomicsMode_t* mode);
 
-static VALUE rb_cublasGetAtomicsMode(VALUE self){
+static VALUE rb_cublasGetAtomicsMode(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
-static VALUE rb_cublasSetAtomicsMode(VALUE self){
+// cublasStatus_t cublasSetAtomicsMode (cublasHandle_t handle, cublasAtomicsMode_t mode);
+
+static VALUE rb_cublasSetAtomicsMode(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
+// cublasStatus_t
+// cublasSetVector(int n, int elemSize,
+//                 const void *x, int incx, void *y, int incy)
 
 
-static VALUE rb_cublasSetVector(VALUE self){
+static VALUE rb_cublasSetVector(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
+
+// cublasStatus_t cublasGetVector ( int n, int elemSize, const(void)* x, int incx, void* y, int incy);
 
 static VALUE rb_cublasGetVector(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasSetMatrix ( int rows, int cols, int elemSize, const(void)* A, int lda, void* B, int ldb);
+
 static VALUE rb_cublasSetMatrix(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasGetMatrix ( int rows, int cols, int elemSize, const(void)* A, int lda, void* B, int ldb);
 
 static VALUE rb_cublasGetMatrix(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasSetVectorAsync ( int n, int elemSize, const(void)* hostPtr, int incx, void* devicePtr, int incy, cudaStream_t stream);
+
 static VALUE rb_cublasSetVectorAsync(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasGetVectorAsync ( int n, int elemSize, const(void)* devicePtr, int incx, void* hostPtr, int incy, cudaStream_t stream);
 
 static VALUE rb_cublasGetVectorAsync(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasSetMatrixAsync ( int rows, int cols, int elemSize, const(void)* A, int lda, void* B, int ldb, cudaStream_t stream);
+
 static VALUE rb_cublasSetMatrixAsync(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasGetMatrixAsync ( int rows, int cols, int elemSize, const(void)* A, int lda, void* B, int ldb, cudaStream_t stream);
 
 static VALUE rb_cublasGetMatrixAsync(VALUE self){
   return Qnil;
@@ -164,10 +225,14 @@ static VALUE rb_cublasGetMatrixAsync(VALUE self){
 // void cublasXerbla (const(char)* srName, int info);
 /* ---------------- CUBLAS BLAS1 functions ---------------- */
 static VALUE rb_cublasSnrm2_v2(VALUE self){
-return Qnil;
+  return Qnil;
 }
 
-static VALUE rb_cublasDnrm2_v2(VALUE self){
+// cublasStatus_t cublasDnrm2_v2 (cublasHandle_t handle, int n, const(double)* x, int incx, double* result); /* host or device pointer */
+
+static VALUE rb_cublasDnrm2_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -179,11 +244,17 @@ static VALUE rb_cublasDznrm2_v2(VALUE self){
   return Qnil;
 }
 
+
+
 static VALUE rb_cublasSdot_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDdot_v2(VALUE self){
+// cublasStatus_t cublasDdot_v2 ( cublasHandle_t handle, int n, const(double)* x, int incx, const(double)* y, int incy, double* result); /* host or device pointer */
+
+static VALUE rb_cublasDdot_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -203,11 +274,16 @@ static VALUE rb_cublasZdotc_v2(VALUE self){
   return Qnil;
 }
 
+
+
+
 static VALUE rb_cublasSscal_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDscal_v2(VALUE self){
+static VALUE rb_cublasDscal_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -227,11 +303,15 @@ static VALUE rb_cublasZdscal_v2(VALUE self){
   return Qnil;
 }
 
+
+
 static VALUE rb_cublasSaxpy_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDaxpy_v2(VALUE self){
+static VALUE rb_cublasDaxpy_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -243,15 +323,17 @@ static VALUE rb_cublasZaxpy_v2(VALUE self){
   return Qnil;
 }
 
+
+
 static VALUE rb_cublasScopy_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDcopy_v2(VALUE self){
+static VALUE rb_cublasDcopy_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
-
-/**/
 
 static VALUE rb_cublasCcopy_v2(VALUE self){
   return Qnil;
@@ -261,11 +343,16 @@ static VALUE rb_cublasZcopy_v2(VALUE self){
   return Qnil;
 }
 
+
+
+
 static VALUE rb_cublasSswap_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDswap_v2(VALUE self){
+static VALUE rb_cublasDswap_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -277,11 +364,16 @@ static VALUE rb_cublasZswap_v2(VALUE self){
   return Qnil;
 }
 
+
+
+
 static VALUE rb_cublasIsamax_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasIdamax_v2(VALUE self){
+static VALUE rb_cublasIdamax_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -293,11 +385,16 @@ static VALUE rb_cublasIzamax_v2(VALUE self){
   return Qnil;
 }
 
+
+
+
 static VALUE rb_cublasIsamin_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasIdamin_v2(VALUE self){
+static VALUE rb_cublasIdamin_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -309,11 +406,16 @@ static VALUE rb_cublasIzamin_v2(VALUE self){
   return Qnil;
 }
 
+
+
+
 static VALUE rb_cublasSasum_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDasum_v2(VALUE self){
+static VALUE rb_cublasDasum_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -325,11 +427,16 @@ static VALUE rb_cublasDzasum_v2(VALUE self){
   return Qnil;
 }
 
+
+
+
 static VALUE rb_cublasSrot_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDrot_v2(VALUE self){
+static VALUE rb_cublasDrot_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -349,11 +456,16 @@ static VALUE rb_cublasZdrot_v2(VALUE self){
   return Qnil;
 }
 
+
+
+
 static VALUE rb_cublasSrotg_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDrotg_v2(VALUE self){
+static VALUE rb_cublasDrotg_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -365,11 +477,16 @@ static VALUE rb_cublasZrotg_v2(VALUE self){
   return Qnil;
 }
 
+
+
+
 static VALUE rb_cublasSrotm_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDrotm_v2(VALUE self){
+static VALUE rb_cublasDrotm_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -398,7 +515,9 @@ static VALUE rb_cublasSgemv_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDgemv_v2(VALUE self){
+static VALUE rb_cublasDgemv_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -417,7 +536,9 @@ static VALUE rb_cublasSgbmv_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDgbmv_v2(VALUE self){
+static VALUE rb_cublasDgbmv_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -434,7 +555,9 @@ static VALUE rb_cublasZgbmv_v2(VALUE self){
 static VALUE rb_cublasStrmv_v2(VALUE self){
   return Qnil;
 }
-static VALUE rb_cublasDtrmv_v2(VALUE self){
+static VALUE rb_cublasDtrmv_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -452,7 +575,9 @@ static VALUE rb_cublasStbmv_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDtbmv_v2(VALUE self){
+static VALUE rb_cublasDtbmv_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -470,7 +595,9 @@ static VALUE rb_cublasStpmv_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDtpmv_v2(VALUE self){
+static VALUE rb_cublasDtpmv_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -488,7 +615,9 @@ static VALUE rb_cublasStrsv_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDtrsv_v2(VALUE self){
+static VALUE rb_cublasDtrsv_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -506,7 +635,9 @@ static VALUE rb_cublasStpsv_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDtpsv_v2(VALUE self){
+static VALUE rb_cublasDtpsv_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -524,7 +655,9 @@ static VALUE rb_cublasStbsv_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDtbsv_v2(VALUE self){
+static VALUE rb_cublasDtbsv_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -543,7 +676,9 @@ static VALUE rb_cublasSsymv_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDsymv_v2(VALUE self){
+static VALUE rb_cublasDsymv_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -571,7 +706,9 @@ static VALUE rb_cublasSsbmv_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDsbmv_v2(VALUE self){
+static VALUE rb_cublasDsbmv_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -592,7 +729,9 @@ static VALUE rb_cublasSspmv_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDspmv_v2(VALUE self){
+static VALUE rb_cublasDspmv_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -611,7 +750,9 @@ static VALUE rb_cublasSger_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDger_v2(VALUE self){
+static VALUE rb_cublasDger_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -638,7 +779,9 @@ static VALUE rb_cublasSsyr_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDsyr_v2(VALUE self){
+static VALUE rb_cublasDsyr_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -665,7 +808,9 @@ static VALUE rb_cublasSspr_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDspr_v2(VALUE self){
+static VALUE rb_cublasDspr_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -684,7 +829,9 @@ static VALUE rb_cublasSsyr2_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDsyr2_v2(VALUE self){
+static VALUE rb_cublasDsyr2_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -711,7 +858,9 @@ static VALUE rb_cublasSspr2_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDspr2_v2(VALUE self){
+static VALUE rb_cublasDspr2_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -783,7 +932,9 @@ static VALUE rb_cublasSsyrk_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDsyrk_v2(VALUE self){
+static VALUE rb_cublasDsyrk_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -816,7 +967,9 @@ static VALUE rb_cublasSsyr2k_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDsyr2k_v2(VALUE self){
+static VALUE rb_cublasDsyr2k_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -851,7 +1004,9 @@ static VALUE rb_cublasSsyrkx(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDsyrkx(VALUE self){
+static VALUE rb_cublasDsyrkx(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -885,7 +1040,9 @@ static VALUE rb_cublasSsymm_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDsymm_v2(VALUE self){
+static VALUE rb_cublasDsymm_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -919,7 +1076,9 @@ static VALUE rb_cublasStrsm_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDtrsm_v2(VALUE self){
+static VALUE rb_cublasDtrsm_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -938,7 +1097,9 @@ static VALUE rb_cublasStrmm_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDtrmm_v2(VALUE self){
+static VALUE rb_cublasDtrmm_v2(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -959,7 +1120,9 @@ static VALUE rb_cublasSgemmBatched(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDgemmBatched(VALUE self){
+static VALUE rb_cublasDgemmBatched(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -981,7 +1144,9 @@ static VALUE rb_cublasSgeam(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDgeam(VALUE self){
+static VALUE rb_cublasDgeam(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -1003,7 +1168,9 @@ static VALUE rb_cublasSgetrfBatched(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDgetrfBatched(VALUE self){
+static VALUE rb_cublasDgetrfBatched(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -1024,7 +1191,9 @@ static VALUE rb_cublasSgetriBatched(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDgetriBatched(VALUE self){
+static VALUE rb_cublasDgetriBatched(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -1043,7 +1212,9 @@ static VALUE rb_cublasSgetrsBatched(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDgetrsBatched(VALUE self){
+static VALUE rb_cublasDgetrsBatched(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -1063,7 +1234,9 @@ static VALUE rb_cublasStrsmBatched(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDtrsmBatched(VALUE self){
+static VALUE rb_cublasDtrsmBatched(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -1085,7 +1258,9 @@ static VALUE rb_cublasSmatinvBatched(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDmatinvBatched(VALUE self){
+static VALUE rb_cublasDmatinvBatched(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -1106,7 +1281,9 @@ static VALUE rb_cublasSgeqrfBatched(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDgeqrfBatched(VALUE self){
+static VALUE rb_cublasDgeqrfBatched(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -1127,7 +1304,9 @@ static VALUE rb_cublasSgelsBatched(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDgelsBatched(VALUE self){
+static VALUE rb_cublasDgelsBatched(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -1146,7 +1325,9 @@ static VALUE rb_cublasSdgmm(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDdgmm(VALUE self){
+static VALUE rb_cublasDdgmm(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -1165,7 +1346,9 @@ static VALUE rb_cublasStpttr(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDtpttr(VALUE self){
+static VALUE rb_cublasDtpttr(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
@@ -1184,7 +1367,9 @@ static VALUE rb_cublasStrttp(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDtrttp(VALUE self){
+static VALUE rb_cublasDtrttp(VALUE self, VALUE handler_val){
+  rb_cublas_handle* handler;
+  Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   return Qnil;
 }
 
