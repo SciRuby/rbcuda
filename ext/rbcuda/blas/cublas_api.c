@@ -281,9 +281,17 @@ static VALUE rb_cublasSscal_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDscal_v2(VALUE self, VALUE handler_val){
+// cublasStatus_t cublasDscal_v2 ( cublasHandle_t handle, int n, const(double)* alpha, double* x, int incx);
+
+static VALUE rb_cublasDscal_v2(VALUE self, VALUE handler_val, VALUE n, VALUE alpha, VALUE x_val, VALUE incx){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
+  dev_ptr* ptr_x;
+  Data_Get_Struct(x_val, dev_ptr, ptr_x);
+  const double alpha2 = 1;
+  const double *alf = &alpha2;
+
+  cublasStatus_t status = cublasDscal_v2 (handler->handle, NUM2INT(n), alf, ptr_x->carray, NUM2INT(incx));
   return Qnil;
 }
 
@@ -309,9 +317,21 @@ static VALUE rb_cublasSaxpy_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDaxpy_v2(VALUE self, VALUE handler_val){
+// cublasStatus_t cublasDaxpy_v2 ( cublasHandle_t handle, int n, const(double)* alpha, const(double)* x, int incx, double* y, int incy);
+
+static VALUE rb_cublasDaxpy_v2(VALUE self, VALUE handler_val, VALUE n, VALUE alpha, VALUE x_val, VALUE incx, VALUE y_val, VALUE incy){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
+
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+  Data_Get_Struct(x_val, dev_ptr, ptr_x);
+  Data_Get_Struct(y_val, dev_ptr, ptr_y);
+
+  const double alpha2 = 1;
+  const double *alf = &alpha2;
+  cublasStatus_t status = cublasDaxpy_v2(handler->handle, NUM2INT(n), alf, ptr_x->carray, NUM2INT(incx), ptr_y->carray, NUM2INT(incy));
+
   return Qnil;
 }
 
@@ -323,15 +343,23 @@ static VALUE rb_cublasZaxpy_v2(VALUE self){
   return Qnil;
 }
 
-
-
 static VALUE rb_cublasScopy_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDcopy_v2(VALUE self, VALUE handler_val){
+// cublasStatus_t cublasDcopy_v2 ( cublasHandle_t handle, int n, const(double)* x, int incx, double* y, int incy);
+
+static VALUE rb_cublasDcopy_v2(VALUE self, VALUE handler_val, VALUE n, VALUE x_val, VALUE incx, VALUE y_val, VALUE incy){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
+
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+  Data_Get_Struct(x_val, dev_ptr, ptr_x);
+  Data_Get_Struct(y_val, dev_ptr, ptr_y);
+
+  cublasStatus_t status = cublasDcopy_v2(handler->handle, NUM2INT(n), ptr_x->carray, NUM2INT(incx), ptr_y->carray, NUM2INT(incy));
+
   return Qnil;
 }
 
@@ -350,10 +378,21 @@ static VALUE rb_cublasSswap_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDswap_v2(VALUE self, VALUE handler_val){
+
+// cublasStatus_t cublasDswap_v2 ( cublasHandle_t handle, int n, double* x, int incx, double* y, int incy);
+
+static VALUE rb_cublasDswap_v2(VALUE self, VALUE handler_val, VALUE n, VALUE x_val, VALUE incx, VALUE y_val, VALUE incy){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
-  return Qnil;
+
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+  Data_Get_Struct(x_val, dev_ptr, ptr_x);
+  Data_Get_Struct(y_val, dev_ptr, ptr_y);
+
+  cublasStatus_t status = cublasDswap_v2(handler->handle, NUM2INT(n), ptr_x->carray, NUM2INT(incx), ptr_y->carray, NUM2INT(incy));
+
+  return Qtrue;
 }
 
 static VALUE rb_cublasCswap_v2(VALUE self){
@@ -371,10 +410,20 @@ static VALUE rb_cublasIsamax_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasIdamax_v2(VALUE self, VALUE handler_val){
+// cublasStatus_t cublasIdamax_v2 ( cublasHandle_t handle, int n, const(double)* x, int incx, int* result);
+
+static VALUE rb_cublasIdamax_v2(VALUE self, VALUE handler_val, VALUE n, VALUE x_val, VALUE incx){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
-  return Qnil;
+
+  int result;
+
+  dev_ptr* ptr_x;
+  Data_Get_Struct(x_val, dev_ptr, ptr_x);
+
+  cublasStatus_t status = cublasIdamax_v2(handler->handle, NUM2INT(n), ptr_x->carray, NUM2INT(incx), &result);
+
+  return INT2NUM(result);
 }
 
 static VALUE rb_cublasIcamax_v2(VALUE self){
@@ -392,10 +441,20 @@ static VALUE rb_cublasIsamin_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasIdamin_v2(VALUE self, VALUE handler_val){
+// cublasStatus_t cublasIdamin_v2 ( cublasHandle_t handle, int n, const(double)* x, int incx, int* result); /* host or device pointer */
+
+static VALUE rb_cublasIdamin_v2(VALUE self, VALUE handler_val, VALUE n, VALUE x_val, VALUE incx){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
-  return Qnil;
+
+  dev_ptr* ptr_x;
+  Data_Get_Struct(x_val, dev_ptr, ptr_x);
+
+  int result;
+
+  cublasStatus_t status = cublasIdamax_v2(handler->handle, NUM2INT(n), ptr_x->carray, NUM2INT(incx), &result);
+
+  return INT2NUM(result);
 }
 
 static VALUE rb_cublasIcamin_v2(VALUE self){
@@ -413,10 +472,19 @@ static VALUE rb_cublasSasum_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDasum_v2(VALUE self, VALUE handler_val){
+// cublasStatus_t cublasDasum_v2 ( cublasHandle_t handle, int n, const(double)* x, int incx, double* result); /* host or device pointer */
+
+static VALUE rb_cublasDasum_v2(VALUE self, VALUE handler_val, VALUE n, VALUE x_val, VALUE incx){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
-  return Qnil;
+
+  dev_ptr* ptr_x;
+  Data_Get_Struct(x_val, dev_ptr, ptr_x);
+
+  double result;
+
+  cublasStatus_t status = cublasDasum_v2(handler->handle, NUM2INT(n), ptr_x->carray, NUM2INT(incx), &result);
+  return DBL2NUM(result);
 }
 
 static VALUE rb_cublasScasum_v2(VALUE self){
@@ -428,15 +496,28 @@ static VALUE rb_cublasDzasum_v2(VALUE self){
 }
 
 
-
-
 static VALUE rb_cublasSrot_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDrot_v2(VALUE self, VALUE handler_val){
+// cublasStatus_t cublasDrot_v2 ( cublasHandle_t handle, int n, double* x, int incx, double* y, int incy, const(double)* c, const(double)* s); /* host or device pointer */
+
+static VALUE rb_cublasDrot_v2(VALUE self, VALUE handler_val, VALUE n, VALUE x_val, VALUE incx, VALUE y_val, VALUE incy, VALUE c_val, VALUE c, VALUE s){
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+  dev_ptr* ptr_c;
+  dev_ptr* ptr_s;
+
+  Data_Get_Struct(x_val, dev_ptr, ptr_x);
+  Data_Get_Struct(y_val, dev_ptr, ptr_y);
+  Data_Get_Struct(c_val, dev_ptr, ptr_c);
+  Data_Get_Struct(c_val, dev_ptr, ptr_s);
+
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
+
+  cublasStatus_t status = cublasDrot_v2(handler->handle, NUM2INT(n), ptr_x->carray, NUM2INT(incx), ptr_y->carray, NUM2INT(incy), ptr_c->carray, ptr_s->carray);
+
   return Qnil;
 }
 
@@ -463,10 +544,23 @@ static VALUE rb_cublasSrotg_v2(VALUE self){
   return Qnil;
 }
 
-static VALUE rb_cublasDrotg_v2(VALUE self, VALUE handler_val){
+// cublasStatus_t cublasDrotg_v2 ( cublasHandle_t handle, double* a, double* b, double* c, double* s); /* host or device pointer */
+
+static VALUE rb_cublasDrotg_v2(VALUE self, VALUE handler_val, VALUE a_val, VALUE b_val, VALUE c_val, VALUE d_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
-  return Qnil;
+  dev_ptr* ptr_a;
+  dev_ptr* ptr_b;
+  dev_ptr* ptr_c;
+  dev_ptr* ptr_d;
+  Data_Get_Struct(a_val, dev_ptr, ptr_a);
+  Data_Get_Struct(b_val, dev_ptr, ptr_b);
+  Data_Get_Struct(c_val, dev_ptr, ptr_c);
+  Data_Get_Struct(d_val, dev_ptr, ptr_d);
+
+  cublasStatus_t status = cublasDrotg_v2(handler->handle, ptr_a->carray, ptr_b->carray, ptr_c->carray, ptr_d->carray);
+
+  return Qtrue;
 }
 
 static VALUE rb_cublasCrotg_v2(VALUE self){
@@ -484,6 +578,8 @@ static VALUE rb_cublasSrotm_v2(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDrotmg_v2 (cublasHandle_t handle, double* d1, double* d2, double* x1, const(double)* y1, double* param);
+
 static VALUE rb_cublasDrotm_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -494,12 +590,11 @@ static VALUE rb_cublasSrotmg_v2(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDrotmg_v2 ( cublasHandle_t handle, double* d1, double* d2, double* x1, const(double)* y1, double* param);
+
 static VALUE rb_cublasDrotmg_v2(VALUE self){
   return Qnil;
 }
-
-
-
 
 /* host or device pointer */
 
@@ -514,6 +609,8 @@ static VALUE rb_cublasDrotmg_v2(VALUE self){
 static VALUE rb_cublasSgemv_v2(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasDgemv_v2 ( cublasHandle_t handle, cublasOperation_t trans, int m, int n, const(double)* alpha, const(double)* A, int lda, const(double)* x, int incx, const(double)* beta, double* y, int incy);
 
 static VALUE rb_cublasDgemv_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
@@ -536,6 +633,8 @@ static VALUE rb_cublasSgbmv_v2(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDgbmv_v2 ( cublasHandle_t handle, cublasOperation_t trans, int m, int n, int kl, int ku, const(double)* alpha, const(double)* A, int lda, const(double)* x, int incx, const(double)* beta, double* y, int incy);
+
 static VALUE rb_cublasDgbmv_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -555,6 +654,9 @@ static VALUE rb_cublasZgbmv_v2(VALUE self){
 static VALUE rb_cublasStrmv_v2(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasDtrmv_v2 ( cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const(double)* A, int lda, double* x, int incx);
+
 static VALUE rb_cublasDtrmv_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -574,6 +676,9 @@ static VALUE rb_cublasZtrmv_v2(VALUE self){
 static VALUE rb_cublasStbmv_v2(VALUE self){
   return Qnil;
 }
+
+
+// cublasStatus_t cublasDtbmv_v2 ( cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const(double)* A, int lda, double* x, int incx);
 
 static VALUE rb_cublasDtbmv_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
@@ -595,6 +700,8 @@ static VALUE rb_cublasStpmv_v2(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDtpmv_v2 ( cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const(double)* AP, double* x, int incx);
+
 static VALUE rb_cublasDtpmv_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -614,6 +721,8 @@ static VALUE rb_cublasZtpmv_v2(VALUE self){
 static VALUE rb_cublasStrsv_v2(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasDtrsv_v2 ( cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const(double)* A, int lda, double* x, int incx);
 
 static VALUE rb_cublasDtrsv_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
@@ -635,6 +744,8 @@ static VALUE rb_cublasStpsv_v2(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDtpsv_v2 ( cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const(double)* AP, double* x, int incx);
+
 static VALUE rb_cublasDtpsv_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -654,6 +765,8 @@ static VALUE rb_cublasZtpsv_v2(VALUE self){
 static VALUE rb_cublasStbsv_v2(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasDtbsv_v2 ( cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const(double)* A, int lda, double* x, int incx);
 
 static VALUE rb_cublasDtbsv_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
@@ -675,6 +788,8 @@ static VALUE rb_cublasZtbsv_v2(VALUE self){
 static VALUE rb_cublasSsymv_v2(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasCsymv_v2 ( cublasHandle_t handle, cublasFillMode_t uplo, int n, const(cuComplex)* alpha, const(cuComplex)* A, int lda, const(cuComplex)* x, int incx, const(cuComplex)* beta, cuComplex* y, int incy);
 
 static VALUE rb_cublasDsymv_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
@@ -706,6 +821,8 @@ static VALUE rb_cublasSsbmv_v2(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDsbmv_v2 ( cublasHandle_t handle, cublasFillMode_t uplo, int n, int k, const(double)* alpha, const(double)* A, int lda, const(double)* x, int incx, const(double)* beta, double* y, int incy);
+
 static VALUE rb_cublasDsbmv_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -729,6 +846,8 @@ static VALUE rb_cublasSspmv_v2(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDspmv_v2 ( cublasHandle_t handle, cublasFillMode_t uplo, int n, const(double)* alpha, const(double)* AP, const(double)* x, int incx, const(double)* beta, double* y, int incy);
+
 static VALUE rb_cublasDspmv_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -749,6 +868,8 @@ static VALUE rb_cublasZhpmv_v2(VALUE self){
 static VALUE rb_cublasSger_v2(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasDger_v2 ( cublasHandle_t handle, int m, int n, const(double)* alpha, const(double)* x, int incx, const(double)* y, int incy, double* A, int lda);
 
 static VALUE rb_cublasDger_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
@@ -779,6 +900,8 @@ static VALUE rb_cublasSsyr_v2(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDsyr_v2 ( cublasHandle_t handle, cublasFillMode_t uplo, int n, const(double)* alpha, const(double)* x, int incx, double* A, int lda);
+
 static VALUE rb_cublasDsyr_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -808,6 +931,8 @@ static VALUE rb_cublasSspr_v2(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDspr_v2 ( cublasHandle_t handle, cublasFillMode_t uplo, int n, const(double)* alpha, const(double)* x, int incx, double* AP);
+
 static VALUE rb_cublasDspr_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -828,6 +953,8 @@ static VALUE rb_cublasZhpr_v2(VALUE self){
 static VALUE rb_cublasSsyr2_v2(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasDsyr2k_v2 ( cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const(double)* alpha, const(double)* A, int lda, const(double)* B, int ldb, const(double)* beta, double* C, int ldc);
 
 static VALUE rb_cublasDsyr2_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
@@ -858,6 +985,8 @@ static VALUE rb_cublasSspr2_v2(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDspr2_v2 ( cublasHandle_t handle, cublasFillMode_t uplo, int n, const(double)* alpha, const(double)* x, int incx, const(double)* y, int incy, double* AP);
+
 static VALUE rb_cublasDspr2_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -882,6 +1011,8 @@ static VALUE rb_cublasZhpr2_v2(VALUE self){
 static VALUE rb_cublasSgemm_v2(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasDgemm_v2 ( cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const(double)* alpha, const(double)* A, int lda, const(double)* B, int ldb, const(double)* beta, double* C, int ldc);
 
 static VALUE rb_cublasDgemm_v2(VALUE self, VALUE handler_val, VALUE transa, VALUE transb,
                                 VALUE m, VALUE n, VALUE k, VALUE alpha_val,
@@ -932,6 +1063,8 @@ static VALUE rb_cublasSsyrk_v2(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDsyrk_v2 ( cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const(double)* alpha, const(double)* A, int lda, const(double)* beta, double* C, int ldc);
+
 static VALUE rb_cublasDsyrk_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -966,6 +1099,8 @@ static VALUE rb_cublasZherk_v2(VALUE self){
 static VALUE rb_cublasSsyr2k_v2(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasDsyr2k_v2 ( cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const(double)* alpha, const(double)* A, int lda, const(double)* B, int ldb, const(double)* beta, double* C, int ldc);
 
 static VALUE rb_cublasDsyr2k_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
@@ -1004,6 +1139,8 @@ static VALUE rb_cublasSsyrkx(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDsyrkx ( cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const(double)* alpha, const(double)* A, int lda, const(double)* B, int ldb, const(double)* beta, double* C, int ldc);
+
 static VALUE rb_cublasDsyrkx(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -1039,6 +1176,8 @@ static VALUE rb_cublasZherkx(VALUE self){
 static VALUE rb_cublasSsymm_v2(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasCsymm_v2 (cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int m, int n, const(cuComplex)* alpha, const(cuComplex)* A, int lda, const(cuComplex)* B, int ldb, const(cuComplex)* beta, cuComplex* C, int ldc);
 
 static VALUE rb_cublasDsymm_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
@@ -1076,6 +1215,8 @@ static VALUE rb_cublasStrsm_v2(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDtrsm_v2 (cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const(double)* alpha, const(double)* A, int lda, double* B, int ldb);
+
 static VALUE rb_cublasDtrsm_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -1096,6 +1237,8 @@ static VALUE rb_cublasZtrsm_v2(VALUE self){
 static VALUE rb_cublasStrmm_v2(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasDtrmm_v2 (cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const(double)* alpha, const(double)* A, int lda, const(double)* B, int ldb, double* C, int ldc);
 
 static VALUE rb_cublasDtrmm_v2(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
@@ -1119,6 +1262,8 @@ static VALUE rb_cublasZtrmm_v2(VALUE self){
 static VALUE rb_cublasSgemmBatched(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasDgemmBatched ( cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const(double)* alpha, const(double)** Aarray, int lda, const(double)** Barray, int ldb, const(double)* beta, double** Carray, int ldc, int batchCount);
 
 static VALUE rb_cublasDgemmBatched(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
@@ -1144,6 +1289,8 @@ static VALUE rb_cublasSgeam(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDgeam ( cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, const(double)* alpha, const(double)* A, int lda, const(double)* beta, const(double)* B, int ldb, double* C, int ldc);
+
 static VALUE rb_cublasDgeam(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -1168,6 +1315,8 @@ static VALUE rb_cublasSgetrfBatched(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDgetrfBatched ( cublasHandle_t handle, int n, double** A, int lda, int* P, int* info, int batchSize);
+
 static VALUE rb_cublasDgetrfBatched(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -1191,6 +1340,9 @@ static VALUE rb_cublasSgetriBatched(VALUE self){
   return Qnil;
 }
 
+
+// cublasStatus_t cublasDgetriBatched ( cublasHandle_t handle, int n, const(double)** A, int lda, const(int)* P, double** C, int ldc, int* info, int batchSize);
+
 static VALUE rb_cublasDgetriBatched(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -1211,6 +1363,8 @@ static VALUE rb_cublasZgetriBatched(VALUE self){
 static VALUE rb_cublasSgetrsBatched(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasDgetrsBatched ( cublasHandle_t handle, cublasOperation_t trans, int n, int nrhs, const(double)** Aarray, int lda, const(int)* devIpiv, double** Barray, int ldb, int* info, int batchSize);
 
 static VALUE rb_cublasDgetrsBatched(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
@@ -1233,6 +1387,9 @@ static VALUE rb_cublasZgetrsBatched(VALUE self){
 static VALUE rb_cublasStrsmBatched(VALUE self){
   return Qnil;
 }
+
+
+// cublasStatus_t cublasDtrsmBatched (cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const(double)* alpha, const(double)** A, int lda, double** B, int ldb, int batchCount);
 
 static VALUE rb_cublasDtrsmBatched(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
@@ -1258,6 +1415,8 @@ static VALUE rb_cublasSmatinvBatched(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDmatinvBatched ( cublasHandle_t handle, int n, const(double)** A, int lda, double** Ainv, int lda_inv, int* info, int batchSize);
+
 static VALUE rb_cublasDmatinvBatched(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -1280,6 +1439,8 @@ static VALUE rb_cublasZmatinvBatched(VALUE self){
 static VALUE rb_cublasSgeqrfBatched(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasDgeqrfBatched ( cublasHandle_t handle, int m, int n, double** Aarray, int lda, double** TauArray, int* info, int batchSize);
 
 static VALUE rb_cublasDgeqrfBatched(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
@@ -1304,6 +1465,8 @@ static VALUE rb_cublasSgelsBatched(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDgelsBatched ( cublasHandle_t handle, cublasOperation_t trans, int m, int n, int nrhs, double** Aarray, int lda, double** Carray, int ldc, int* info, int* devInfoArray, int batchSize);
+
 static VALUE rb_cublasDgelsBatched(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -1324,6 +1487,8 @@ static VALUE rb_cublasZgelsBatched(VALUE self){
 static VALUE rb_cublasSdgmm(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasDdgmm ( cublasHandle_t handle, cublasSideMode_t mode, int m, int n, const(double)* A, int lda, const(double)* x, int incx, double* C, int ldc);
 
 static VALUE rb_cublasDdgmm(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
@@ -1346,6 +1511,8 @@ static VALUE rb_cublasStpttr(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasDtpttr ( cublasHandle_t handle, cublasFillMode_t uplo, int n, const(double)* AP, double* A, int lda);
+
 static VALUE rb_cublasDtpttr(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
@@ -1366,6 +1533,8 @@ static VALUE rb_cublasZtpttr(VALUE self){
 static VALUE rb_cublasStrttp(VALUE self){
   return Qnil;
 }
+
+// cublasStatus_t cublasDtrttp ( cublasHandle_t handle, cublasFillMode_t uplo, int n, const(double)* A, int lda, double* AP);
 
 static VALUE rb_cublasDtrttp(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
