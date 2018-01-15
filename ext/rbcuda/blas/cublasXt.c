@@ -1,30 +1,64 @@
+// cublasStatus_t cublasXtCreate(cublasXtHandle_t *handle)
+// This function initializes the cublasXt API and creates a handle to an opaque structure
+// holding the cublasXt API context. It allocates hardware resources on the host and device
+// and must be called prior to making any other cublasXt API calls.
+// Return Value Meaning
+// CUBLAS_STATUS_SUCCESS the initialization succeeded
+// CUBLAS_STATUS_ALLOC_FAILED the resources could not be allocated
+// CUBLAS_STATUS_NOT_SUPPORTED cublasXt API is only supported on 64-bit platform
+
 static VALUE rb_cublasXtCreate(VALUE self){
+  cublasStatus_t status = cublasXtCreate(cublasXtHandle_t *handle)
+
   return Qnil;
 }
+
+// cublasStatus_t cublasXtDestroy(cublasXtHandle_t handle)
+// This function releases hardware resources used by the cublasXt API context. The release
+// of GPU resources may be deferred until the application exits. This function is usually the
+// last call with a particular handle to the cublasXt API.
+// Return Value Meaning
+// CUBLAS_STATUS_SUCCESS the shut down succeeded
+// CUBLAS_STATUS_NOT_INITIALIZED the library was not initialized
 
 static VALUE rb_cublasXtDestroy(VALUE self){
+  cublasStatus_t status = cublasXtDestroy(cublasXtHandle_t handle)
+
   return Qnil;
 }
 
+// cublasStatus_t cublasXtGetNumBoards (int nbDevices, int* deviceId, int* nbBoards);
 static VALUE rb_cublasXtGetNumBoards(VALUE self){
+  cublasStatus_t status = cublasXtGetNumBoards (int nbDevices, int* deviceId, int* nbBoards);
+
   return Qnil;
 }
+
+// cublasStatus_t cublasXtMaxBoards (int* nbGpuBoards);
 
 static VALUE rb_cublasXtMaxBoards(VALUE self){
+  // cublasStatus_t cublasXtMaxBoards (int* nbGpuBoards);
   return Qnil;
 }
 
 /* This routine selects the Gpus that the user want to use for CUBLAS-XT */
+// cublasStatus_t cublasXtDeviceSelect (cublasXtHandle_t handle, int nbDevices, int* deviceId);
 static VALUE rb_cublasXtDeviceSelect(VALUE self){
+  cublasStatus_t status = cublasXtDeviceSelect (cublasXtHandle_t handle, int nbDevices, int* deviceId);
+
   return Qnil;
 }
 
 /* This routine allows to change the dimension of the tiles ( blockDim x blockDim ) */
+// cublasStatus_t cublasXtSetBlockDim (cublasXtHandle_t handle, int blockDim);
 static VALUE rb_cublasXtSetBlockDim(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasXtGetBlockDim (cublasXtHandle_t handle, int* blockDim);
 static VALUE rb_cublasXtGetBlockDim(VALUE self){
+  cublasStatus_t status = cublasXtGetBlockDim (cublasXtHandle_t handle, int* blockDim);
+
   return Qnil;
 }
 
@@ -33,11 +67,15 @@ const char* const CuBLASXtPinnedMemMode_t[2] = {
   "CUBLASXT_PINNING_ENABLED"
 };
 
+// cublasStatus_t cublasXtGetPinningMemMode (cublasXtHandle_t handle, cublasXtPinnedMemMode_t* mode);
 static VALUE rb_cublasXtGetPinningMemMode(VALUE self){
+  cublasStatus_t status = cublasXtGetPinningMemMode (cublasXtHandle_t handle, cublasXtPinnedMemMode_t* mode);
   return Qnil;
 }
 
+// cublasStatus_t cublasXtSetPinningMemMode (cublasXtHandle_t handle, cublasXtPinnedMemMode_t mode);
 static VALUE rb_cublasXtSetPinningMemMode(VALUE self){
+  cublasStatus_t status = cublasXtSetPinningMemMode (cublasXtHandle_t handle, cublasXtPinnedMemMode_t mode);
   return Qnil;
 }
 
@@ -66,12 +104,16 @@ const char* const CuBLASXtBlasOp_t[13] = {
 };
 
 /* Currently only 32-bit integer BLAS routines are supported */
+// cublasStatus_t cublasXtSetCpuRoutine (cublasXtHandle_t handle, cublasXtBlasOp_t blasOp, cublasXtOpType_t type, void* blasFunctor);
 static VALUE rb_cublasXtSetCpuRoutine(VALUE self){
+  cublasStatus_t status = cublasXtSetCpuRoutine (cublasXtHandle_t handle, cublasXtBlasOp_t blasOp, cublasXtOpType_t type, void* blasFunctor);
   return Qnil;
 }
 
 /* Specified the percentage of work that should done by the CPU, default is 0 (no work) */
+// cublasStatus_t cublasXtSetCpuRatio (cublasXtHandle_t handle, cublasXtBlasOp_t blasOp, cublasXtOpType_t type, float ratio);
 static VALUE rb_cublasXtSetCpuRatio(VALUE self){
+  cublasStatus_t status = cublasXtSetCpuRatio (cublasXtHandle_t handle, cublasXtBlasOp_t blasOp, cublasXtOpType_t type, float ratio);
   return Qnil;
 }
 
@@ -80,7 +122,11 @@ static VALUE rb_cublasXtSgemm(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasXtDgemm ( cublasXtHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, size_t m, size_t n, size_t k, const(double)* alpha, const(double)* A, size_t lda, const(double)* B, size_t ldb, const(double)* beta, double* C, size_t ldc);
+
 static VALUE rb_cublasXtDgemm(VALUE self){
+  cublasStatus_t status = cublasXtDgemm ( cublasXtHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, size_t m, size_t n, size_t k, const(double)* alpha, const(double)* A, size_t lda, const(double)* B, size_t ldb, const(double)* beta, double* C, size_t ldc);
+
   return Qnil;
 }
 
@@ -98,7 +144,10 @@ static VALUE rb_cublasXtSsyrk(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasXtDsyrk ( cublasXtHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, size_t n, size_t k, const(double)* alpha, const(double)* A, size_t lda, const(double)* beta, double* C, size_t ldc);
 static VALUE rb_cublasXtDsyrk(VALUE self){
+  cublasStatus_t status = cublasXtDsyrk ( cublasXtHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, size_t n, size_t k, const(double)* alpha, const(double)* A, size_t lda, const(double)* beta, double* C, size_t ldc);
+
   return Qnil;
 }
 
@@ -127,7 +176,10 @@ static VALUE rb_cublasXtSsyr2k(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasXtDsyr2k ( cublasXtHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, size_t n, size_t k, const(double)* alpha, const(double)* A, size_t lda, const(double)* B, size_t ldb, const(double)* beta, double* C, size_t ldc);
+
 static VALUE rb_cublasXtDsyr2k(VALUE self){
+  cublasStatus_t status = cublasXtDsyr2k(cublasXtHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, size_t n, size_t k, const(double)* alpha, const(double)* A, size_t lda, const(double)* B, size_t ldb, const(double)* beta, double* C, size_t ldc);
   return Qnil;
 }
 
@@ -156,7 +208,10 @@ static VALUE rb_cublasXtStrsm(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasXtDtrsm ( cublasXtHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, size_t m, size_t n, const(double)* alpha, const(double)* A, size_t lda, double* B, size_t ldb);
+
 static VALUE rb_cublasXtDtrsm(VALUE self){
+  cublasStatus_t status = cublasXtDtrsm ( cublasXtHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, size_t m, size_t n, const(double)* alpha, const(double)* A, size_t lda, double* B, size_t ldb);
   return Qnil;
 }
 
@@ -174,7 +229,11 @@ static VALUE rb_cublasXtSsymm(VALUE self){
   return Qnil;
 }
 
+
+// cublasStatus_t cublasXtDsymm ( cublasXtHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, size_t m, size_t n, const(double)* alpha, const(double)* A, size_t lda, const(double)* B, size_t ldb, const(double)* beta, double* C, size_t ldc);
+
 static VALUE rb_cublasXtDsymm(VALUE self){
+  cublasStatus_t status = cublasXtDsymm ( cublasXtHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, size_t m, size_t n, const(double)* alpha, const(double)* A, size_t lda, const(double)* B, size_t ldb, const(double)* beta, double* C, size_t ldc);
   return Qnil;
 }
 
@@ -202,7 +261,10 @@ static VALUE rb_cublasXtSsyrkx(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasXtDsyrkx (cublasXtHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, size_t n, size_t k, const(double)* alpha, const(double)* A, size_t lda, const(double)* B, size_t ldb, const(double)* beta, double* C, size_t ldc);
+
 static VALUE rb_cublasXtDsyrkx(VALUE self){
+  cublasStatus_t status = cublasXtDsyrkx(cublasXtHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, size_t n, size_t k, const(double)* alpha, const(double)* A, size_t lda, const(double)* B, size_t ldb, const(double)* beta, double* C, size_t ldc);
   return Qnil;
 }
 
@@ -231,7 +293,11 @@ static VALUE rb_cublasXtSspmm(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasXtDspmm ( cublasXtHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, size_t m, size_t n, const(double)* alpha, const(double)* AP, const(double)* B, size_t ldb, const(double)* beta, double* C,size_t ldc);
+
 static VALUE rb_cublasXtDspmm(VALUE self){
+  cublasStatus_t status = cublasXtDspmm ( cublasXtHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, size_t m, size_t n, const(double)* alpha, const(double)* AP, const(double)* B, size_t ldb, const(double)* beta, double* C,size_t ldc);
+
   return Qnil;
 }
 
@@ -249,7 +315,11 @@ static VALUE rb_cublasXtStrmm(VALUE self){
   return Qnil;
 }
 
+// cublasStatus_t cublasXtDtrmm ( cublasXtHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, size_t m, size_t n, const(double)* alpha, const(double)* A, size_t lda, const(double)* B, size_t ldb, double* C, size_t ldc);
+
 static VALUE rb_cublasXtDtrmm(VALUE self){
+  cublasStatus_t status = cublasXtDtrmm(cublasXtHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, size_t m, size_t n, const(double)* alpha, const(double)* A, size_t lda, const(double)* B, size_t ldb, double* C, size_t ldc);
+
   return Qnil;
 }
 
