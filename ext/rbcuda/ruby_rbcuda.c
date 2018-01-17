@@ -3,6 +3,7 @@ VALUE CUDA = Qnil;
 VALUE CuBLAS = Qnil;
 VALUE CuBLAS_v2 = Qnil;
 VALUE CuBLASXT = Qnil;
+VALUE CuSolver = Qnil;
 VALUE CuRand = Qnil;
 VALUE Dev_Array = Qnil;
 VALUE Profiler = Qnil;

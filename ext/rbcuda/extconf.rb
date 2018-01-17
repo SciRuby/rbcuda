@@ -12,9 +12,9 @@ $INSTALLFILES = [
 ]
 
 $DEBUG = true
-$CFLAGS = ["-Wall -Werror=return-type",$CFLAGS].join(" ")
-$CXXFLAGS = ["-Wall -Werror=return-type",$CXXFLAGS].join(" ")
-$CPPFLAGS = ["-Wall -Werror=return-type",$CPPFLAGS].join(" ")
+$CFLAGS = ["-w -Wall -Werror=return-type",$CFLAGS].join(" ")
+$CXXFLAGS = ["-w -Wall -Werror=return-type",$CXXFLAGS].join(" ")
+$CPPFLAGS = ["-w -Wall -Werror=return-type",$CPPFLAGS].join(" ")
 
 LIBDIR      = RbConfig::CONFIG['libdir']
 INCLUDEDIR  = RbConfig::CONFIG['includedir']
