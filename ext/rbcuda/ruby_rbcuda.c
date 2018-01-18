@@ -29,7 +29,6 @@ void Init_rbcuda();
 
 static void rbcu_free(dev_ptr* ptr);
 cudaMemcpyKind rbcu_memcopy_kind(VALUE sym);
-cublasOperation_t rbcu_cublasOperation_t(VALUE sym);
 
 //cuda_defines.c
 cudaOutputMode_t rb_cuda_output_from_rbsymbol(VALUE sym);
@@ -55,6 +54,14 @@ const char* get_function_cache_name(cudaFuncCache cache);
 cudaSharedMemConfig rb_cu_shared_mem_from_rbsymbol(VALUE sym);
 const char* get_shared_mem_name(cudaSharedMemConfig config);
 cudaDeviceAttr rb_cudaDeviceAttr_from_rbsymbol(VALUE sym);
+
+//cublas_defines
+cublasFillMode_t rbcu_cublasFillMode_t(VALUE sym);
+cublasDiagType_t rbcu_cublasDiagType_t(VALUE sym);
+cublasSideMode_t rbcu_cublasSideMode_t(VALUE sym);
+cublasOperation_t rbcu_cublasOperation_t(VALUE sym);
+cublasPointerMode_t rbcu_cublasPointerMode_t(VALUE sym);
+cublasAtomicsMode_t rbcu_cublasAtomicsMode_t(VALUE sym);
 
 inline void __checkCudaErrors( CUresult err, const char *file, const int line );
 void initCUDA(char* module_file, char* kernel_name);
