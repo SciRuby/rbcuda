@@ -1,35 +1,44 @@
 // cublasStatus_t cublasInit ();
 static VALUE rb_cublasInit(VALUE self){
+  cublasStatus_t status = cublasInit();
   return Qnil;
 }
 
 // cublasStatus_t cublasShutdown ();
 static VALUE rb_cublasShutdown(VALUE self){
+  cublasStatus_t status = cublasShutdown();
   return Qnil;
 }
 
 // cublasStatus_t cublasGetError ();
 static VALUE rb_cublasGetError(VALUE self){
+  cublasStatus_t status = cublasGetError();
   return Qnil;
 }
 
 // cublasStatus_t cublasGetVersion (int* version_);
 static VALUE rb_cublasGetVersion(VALUE self){
+  int version_
+  cublasStatus_t status = cublasGetVersion(&version);
   return Qnil;
 }
 
 // cublasStatus_t cublasAlloc (int n, int elemSize, void** devicePtr);
-static VALUE rb_cublasAlloc(VALUE self){
+static VALUE rb_cublasAlloc(VALUE self, VALUE n, VALUE elem_size, VALUE device_ptr){
   return Qnil;
 }
 
 // cublasStatus_t cublasFree (void* devicePtr);
-static VALUE rb_cublasFree(VALUE self){
+static VALUE rb_cublasFree(VALUE self, VALUE device_ptr){
+  cublasStatus_t status = cublasFree((void*)device_ptr);
   return Qnil;
 }
 
 // cublasStatus_t cublasSetKernelStream (cudaStream_t stream);
-static VALUE rb_cublasSetKernelStream(VALUE self){
+static VALUE rb_cublasSetKernelStream(VALUE self, VALUE stream_val){
+  custream_ptr* stream;
+  Data_Get_Struct(stream_val, custream_ptr, stream);
+  cublasStatus_t status = cublasSetKernelStream(stream->stream);
   return Qnil;
 }
 
@@ -43,7 +52,8 @@ static VALUE rb_cublasSnrm2(VALUE self){
 }
 
 // double cublasDnrm2 (int n, const(double)* x, int incx);
-static VALUE rb_cublasDnrm2(VALUE self){
+static VALUE rb_cublasDnrm2(VALUE self, VALUE n, VALUE x_val, VALUE incx){
+  double result = cublasSnrm2(NUM2INT(n),  x->carray, NUM2INT(incx));
   return Qnil;
 }
 
@@ -66,7 +76,8 @@ static VALUE rb_cublasSdot(VALUE self){
 }
 
 // double cublasDdot ( int n, const(double)* x, int incx, const(double)* y, int incy);
-static VALUE rb_cublasDdot(VALUE self){
+static VALUE rb_cublasDdot(VALUE self, VALUE n, VALUE x, VALUE y, VALUE incy){
+  double result = cublasDdot(NUM2INT(n), x->carray, NUM2INT(incx), y->carray, NUM2INT(incy));
   return Qnil;
 }
 
@@ -101,6 +112,7 @@ static VALUE rb_cublasSscal(VALUE self){
 
 // void cublasDscal (int n, double alpha, double* x, int incx);
 static VALUE rb_cublasDscal(VALUE self){
+  cublasDscal(NUM2INT(n), NUM2DBL(alpha), x->carray, NUM2INT(incx));
   return Qnil;
 }
 
@@ -134,6 +146,7 @@ static VALUE rb_cublasSaxpy(VALUE self){
 
 // void cublasDaxpy ( int n, double alpha, const(double)* x, int incx, double* y, int incy);
 static VALUE rb_cublasDaxpy(VALUE self){
+  cublasDaxpy(NUM2INT(n), NUM2DBL(alpha), x->carray, NUM2INT(incx),  y->carray, NUM2INT(incy));
   return Qnil;
 }
 
@@ -156,7 +169,8 @@ static VALUE rb_cublasScopy(VALUE self){
 }
 
 // void cublasDcopy (int n, const(double)* x, int incx, double* y, int incy);
-static VALUE rb_cublasDcopy(VALUE self){
+static VALUE rb_cublasDcopy(VALUE self, VALUE x, VALUE incx, VALUE y, VALUE incy){
+  cublasDcopy(NUM2INT(n),  x->carray, NUM2INT(incx),  y->carray, NUM2INT(incy));
   return Qnil;
 }
 
@@ -179,7 +193,8 @@ static VALUE rb_cublasSswap(VALUE self){
 }
 
 // void cublasDswap (int n, double* x, int incx, double* y, int incy);
-static VALUE rb_cublasDswap(VALUE self){
+static VALUE rb_cublasDswap(VALUE self, VALUE n, VALUE  x, VALUE incx, VALUE y, VALUE incy){
+  cublasDswap(NUM2INT(n), x->carray, NUM2INT(incx), y->carray, NUM2INT(incy));
   return Qnil;
 }
 
@@ -203,7 +218,8 @@ static VALUE rb_cublasIsamax(VALUE self){
 }
 
 // int cublasIdamax (int n, const(double)* x, int incx);
-static VALUE rb_cublasIdamax(VALUE self){
+static VALUE rb_cublasIdamax(VALUE self, VALUE n, VALUE x, VALUE incx){
+  int result = cublasIdamax(NUM2INT(n), x->carray, NUM2INT(incx));
   return Qnil;
 }
 
@@ -226,7 +242,8 @@ static VALUE rb_cublasIsamin(VALUE self){
 }
 
 // int cublasIdamin (int n, const(double)* x, int incx);
-static VALUE rb_cublasIdamin(VALUE self){
+static VALUE rb_cublasIdamin(VALUE self, VALUE n, VALUE x, VALUE incx){
+  int result = cublasIdamin(NUM2INT(n), x->carray, NUM2INT(incx));
   return Qnil;
 }
 
@@ -244,7 +261,8 @@ static VALUE rb_cublasIzamin(VALUE self){
 /* ASUM */
 
 // double cublasDasum (int n, const(double)* x, int incx);
-static VALUE rb_cublasSasum(VALUE self){
+static VALUE rb_cublasSasum(VALUE self, VALUE n, VALUE x, VALUE incx){
+  double asum = cublasDasum(NUM2INT(n), x->carray, NUM2INT(incx));
   return Qnil;
 }
 
@@ -272,7 +290,8 @@ static VALUE rb_cublasSrot(VALUE self){
 }
 
 // void cublasDrot ( int n, double* x, int incx, double* y, int incy, double sc, double ss);
-static VALUE rb_cublasDrot(VALUE self){
+static VALUE rb_cublasDrot(VALUE self, VALUE n, VALUE incx, VALUE y, VALUE incy, VALUE sc, VALUE ss){
+  cublasDrot( NUM2INT(n), x->carray, NUM2INT(incx), y->carray, NUM2INT(incy), NUM2DBL(sc), NUM2DBL(ss));
   return Qnil;
 }
 
@@ -306,6 +325,7 @@ static VALUE rb_cublasSrotg(VALUE self){
 
 // void cublasDrotg (double* sa, double* sb, double* sc, double* ss);
 static VALUE rb_cublasDrotg(VALUE self){
+  // cublasDrotg(double* sa, double* sb, double* sc, double* ss);
   return Qnil;
 }
 
@@ -329,6 +349,7 @@ static VALUE rb_cublasSrotm(VALUE self){
 
 // void cublasDrotm ( int n, double* x, int incx, double* y, int incy, const(double)* sparam);
 static VALUE rb_cublasDrotm(VALUE self){
+  cublasDrotm(NUM2INT(n), x->carray, NUM2INT(incx), y->carray, NUM2INT(incy), sparam->carray);
   return Qnil;
 }
 
@@ -342,6 +363,7 @@ static VALUE rb_cublasSrotmg(VALUE self){
 
 // void cublasDrotmg ( double* sd1, double* sd2, double* sx1, const(double)* sy1, double* sparam);
 static VALUE rb_cublasDrotmg(VALUE self){
+  // cublasDrotmg(double* sd1, double* sd2, double* sx1, const(double)* sy1, double* sparam);
   return Qnil;
 }
 
