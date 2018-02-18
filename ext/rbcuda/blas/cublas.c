@@ -18,13 +18,15 @@ static VALUE rb_cublasGetError(VALUE self){
 
 // cublasStatus_t cublasGetVersion (int* version_);
 static VALUE rb_cublasGetVersion(VALUE self){
-  int version_
+  int version;
   cublasStatus_t status = cublasGetVersion(&version);
   return Qnil;
 }
 
 // cublasStatus_t cublasAlloc (int n, int elemSize, void** devicePtr);
 static VALUE rb_cublasAlloc(VALUE self, VALUE n, VALUE elem_size, VALUE device_ptr){
+  void* devicePtr;
+  cublasAlloc(NUM2INT(n), NUM2INT(elem_size), &devicePtr);
   return Qnil;
 }
 
@@ -53,7 +55,10 @@ static VALUE rb_cublasSnrm2(VALUE self){
 
 // double cublasDnrm2 (int n, const(double)* x, int incx);
 static VALUE rb_cublasDnrm2(VALUE self, VALUE n, VALUE x_val, VALUE incx){
-  double result = cublasSnrm2(NUM2INT(n),  x->carray, NUM2INT(incx));
+  dev_ptr* ptr_x;
+  Data_Get_Struct(x_val, dev_ptr, ptr_x);
+
+  double result = cublasDnrm2(NUM2INT(n),  ptr_x->carray, NUM2INT(incx));
   return Qnil;
 }
 
@@ -76,9 +81,14 @@ static VALUE rb_cublasSdot(VALUE self){
 }
 
 // double cublasDdot ( int n, const(double)* x, int incx, const(double)* y, int incy);
-static VALUE rb_cublasDdot(VALUE self, VALUE n, VALUE x, VALUE y, VALUE incy){
-  double result = cublasDdot(NUM2INT(n), x->carray, NUM2INT(incx), y->carray, NUM2INT(incy));
-  return Qnil;
+static VALUE rb_cublasDdot(VALUE self, VALUE n, VALUE x, VALUE incx, VALUE y, VALUE incy){
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
+  double result = cublasDdot(NUM2INT(n), ptr_x->carray, NUM2INT(incx), ptr_y->carray, NUM2INT(incy));
+  return DBL2NUM(result);
 }
 
 // cuComplex cublasCdotu ( int n, const(cuComplex)* x, int incx, const(cuComplex)* y, int incy);
@@ -111,8 +121,11 @@ static VALUE rb_cublasSscal(VALUE self){
 }
 
 // void cublasDscal (int n, double alpha, double* x, int incx);
-static VALUE rb_cublasDscal(VALUE self){
-  cublasDscal(NUM2INT(n), NUM2DBL(alpha), x->carray, NUM2INT(incx));
+static VALUE rb_cublasDscal(VALUE self, VALUE n, VALUE alpha, VALUE x, VALUE incx){
+  dev_ptr* ptr_x;
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+
+  cublasDscal(NUM2INT(n), NUM2DBL(alpha), ptr_x->carray, NUM2INT(incx));
   return Qnil;
 }
 
@@ -145,8 +158,13 @@ static VALUE rb_cublasSaxpy(VALUE self){
 }
 
 // void cublasDaxpy ( int n, double alpha, const(double)* x, int incx, double* y, int incy);
-static VALUE rb_cublasDaxpy(VALUE self){
-  cublasDaxpy(NUM2INT(n), NUM2DBL(alpha), x->carray, NUM2INT(incx),  y->carray, NUM2INT(incy));
+static VALUE rb_cublasDaxpy(VALUE self, VALUE alpha, VALUE x. VALUE incx, VALUE y, VALUE incy){
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
+  cublasDaxpy(NUM2INT(n), NUM2DBL(alpha), ptr_x->carray, NUM2INT(incx),  ptr_y->carray, NUM2INT(incy));
   return Qnil;
 }
 
@@ -170,7 +188,12 @@ static VALUE rb_cublasScopy(VALUE self){
 
 // void cublasDcopy (int n, const(double)* x, int incx, double* y, int incy);
 static VALUE rb_cublasDcopy(VALUE self, VALUE x, VALUE incx, VALUE y, VALUE incy){
-  cublasDcopy(NUM2INT(n),  x->carray, NUM2INT(incx),  y->carray, NUM2INT(incy));
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
+  cublasDcopy(NUM2INT(n),  ptr_x->carray, NUM2INT(incx),  ptr_y->carray, NUM2INT(incy));
   return Qnil;
 }
 
@@ -194,6 +217,11 @@ static VALUE rb_cublasSswap(VALUE self){
 
 // void cublasDswap (int n, double* x, int incx, double* y, int incy);
 static VALUE rb_cublasDswap(VALUE self, VALUE n, VALUE  x, VALUE incx, VALUE y, VALUE incy){
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
   cublasDswap(NUM2INT(n), x->carray, NUM2INT(incx), y->carray, NUM2INT(incy));
   return Qnil;
 }
@@ -219,8 +247,10 @@ static VALUE rb_cublasIsamax(VALUE self){
 
 // int cublasIdamax (int n, const(double)* x, int incx);
 static VALUE rb_cublasIdamax(VALUE self, VALUE n, VALUE x, VALUE incx){
-  int result = cublasIdamax(NUM2INT(n), x->carray, NUM2INT(incx));
-  return Qnil;
+  dev_ptr* ptr_x;
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  int result = cublasIdamax(NUM2INT(n), ptr_x->carray, NUM2INT(incx));
+  return INT2NUM(result);
 }
 
 // int cublasIcamax (int n, const(cuComplex)* x, int incx);
@@ -243,7 +273,9 @@ static VALUE rb_cublasIsamin(VALUE self){
 
 // int cublasIdamin (int n, const(double)* x, int incx);
 static VALUE rb_cublasIdamin(VALUE self, VALUE n, VALUE x, VALUE incx){
-  int result = cublasIdamin(NUM2INT(n), x->carray, NUM2INT(incx));
+  dev_ptr* ptr_x;
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  int result = cublasIdamin(NUM2INT(n), ptr_x->carray, NUM2INT(incx));
   return Qnil;
 }
 
@@ -262,7 +294,9 @@ static VALUE rb_cublasIzamin(VALUE self){
 
 // double cublasDasum (int n, const(double)* x, int incx);
 static VALUE rb_cublasSasum(VALUE self, VALUE n, VALUE x, VALUE incx){
-  double asum = cublasDasum(NUM2INT(n), x->carray, NUM2INT(incx));
+  dev_ptr* ptr_x;
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  double asum = cublasDasum(NUM2INT(n), ptr_x->carray, NUM2INT(incx));
   return Qnil;
 }
 
@@ -291,6 +325,11 @@ static VALUE rb_cublasSrot(VALUE self){
 
 // void cublasDrot ( int n, double* x, int incx, double* y, int incy, double sc, double ss);
 static VALUE rb_cublasDrot(VALUE self, VALUE n, VALUE incx, VALUE y, VALUE incy, VALUE sc, VALUE ss){
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
   cublasDrot( NUM2INT(n), x->carray, NUM2INT(incx), y->carray, NUM2INT(incy), NUM2DBL(sc), NUM2DBL(ss));
   return Qnil;
 }
@@ -324,8 +363,8 @@ static VALUE rb_cublasSrotg(VALUE self){
 }
 
 // void cublasDrotg (double* sa, double* sb, double* sc, double* ss);
-static VALUE rb_cublasDrotg(VALUE self){
-  // cublasDrotg(double* sa, double* sb, double* sc, double* ss);
+static VALUE rb_cublasDrotg(VALUE self, VALUE sa, VALUE sb, VALUE sc, VALUE ss){
+  cublasDrotg((double*)sa, (double*)sb, (double*)sc, (double*)ss);
   return Qnil;
 }
 
@@ -348,8 +387,16 @@ static VALUE rb_cublasSrotm(VALUE self){
 }
 
 // void cublasDrotm ( int n, double* x, int incx, double* y, int incy, const(double)* sparam);
-static VALUE rb_cublasDrotm(VALUE self){
-  cublasDrotm(NUM2INT(n), x->carray, NUM2INT(incx), y->carray, NUM2INT(incy), sparam->carray);
+static VALUE rb_cublasDrotm(VALUE self, VALUE n, VALUE x, VALUE incx, VALUE y, VALUE incy, VALUE sparam){
+  dev_ptr* ptr_sparam;
+  Data_Get_Struct(sparam, dev_ptr, ptr_sparam);
+
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
+  cublasDrotm(NUM2INT(n), x->carray, NUM2INT(incx), y->carray, NUM2INT(incy), ptr_sparam->carray);
   return Qnil;
 }
 
@@ -378,6 +425,13 @@ static VALUE rb_cublasSgemv(VALUE self){
 }
 // void cublasDgemv ( char trans, int m, int n, double alpha, const(double)* A, int lda, const(double)* x, int incx, double beta, double* y, int incy);
 static VALUE rb_cublasDgemv(VALUE self){
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
+  cublasDgemv( char trans, int m, int n, double alpha, const(double)* A, int lda, const(double)* x, int incx, double beta, double* y, int incy);
+
   return Qnil;
 }
 
@@ -401,6 +455,13 @@ static VALUE rb_cublasSgbmv(VALUE self){
 
 // void cublasDgbmv ( char trans, int m, int n, int kl, int ku, double alpha, const(double)* A, int lda, const(double)* x, int incx, double beta, double* y, int incy);
 static VALUE rb_cublasDgbmv(VALUE self){
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
+  cublasDgbmv(char trans, int m, int n, int kl, int ku, double alpha, const(double)* A, int lda, const(double)* x, int incx, double beta, double* y, int incy);
+
   return Qnil;
 }
 
@@ -424,6 +485,13 @@ static VALUE rb_cublasStrmv(VALUE self){
 
 // void cublasDtrmv ( char uplo, char trans, char diag, int n, const(double)* A, int lda, double* x, int incx);
 static VALUE rb_cublasDtrmv(VALUE self){
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
+  cublasDtrmv(char uplo, char trans, char diag, int n, const(double)* A, int lda, double* x, int incx);
+
   return Qnil;
 }
 
@@ -449,6 +517,13 @@ static VALUE rb_cublasStbmv(VALUE self){
 
 // void cublasDtbmv ( char uplo, char trans, char diag, int n, int k, const(double)* A, int lda, double* x, int incx);
 static VALUE rb_cublasDtbmv(VALUE self){
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
+  cublasDtbmv ( char uplo, char trans, char diag, int n, int k, const(double)* A, int lda, double* x, int incx);
+
   return Qnil;
 }
 
@@ -472,6 +547,13 @@ static VALUE rb_cublasStpmV(VALUE self){
 
 // void cublasDtpmv ( char uplo, char trans, char diag, int n, const(double)* AP, double* x, int incx);
 static VALUE rb_cublasDtpmv(VALUE self){
+  dev_ptr* ptr_AP;
+  dev_ptr* ptr_x;
+  Data_Get_Struct(AP, dev_ptr, ptr_AP);
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+
+  cublasDtpmv(char uplo, char trans, char diag, int n, const(double)* AP, double* x, int incx);
+
   return Qnil;
 }
 
@@ -488,13 +570,20 @@ static VALUE rb_cublasZtpmv(VALUE self){
 /*------------------------------------------------------------------------*/
 /* TRSV */
 
-// void cublasDtrsv ( char uplo, char trans, char diag, int n, const(double)* A, int lda, double* x, int incx);
+// void cublasStrsv ( char uplo, char trans, char diag, int n, const(float)* A, int lda, float* x, int incx);
 static VALUE rb_cublasStrsv(VALUE self){
   return Qnil;
 }
 
-// void cublasStrsv ( char uplo, char trans, char diag, int n, const(float)* A, int lda, float* x, int incx);
+// void cublasDtrsv ( char uplo, char trans, char diag, int n, const(double)* A, int lda, double* x, int incx);
 static VALUE rb_cublasDtrsv(VALUE self){
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_x;
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+
+  cublasDtrsv(char uplo, char trans, char diag, int n, const(double)* A, int lda, double* x, int incx);
+
   return Qnil;
 }
 
@@ -519,6 +608,13 @@ static VALUE rb_cublasStpsv(VALUE self){
 
 // void cublasDtpsv ( char uplo, char trans, char diag, int n, const(double)* AP, double* x, int incx);
 static VALUE rb_cublasDtpsv(VALUE self){
+  dev_ptr* ptr_AP;
+  dev_ptr* ptr_x;
+  Data_Get_Struct(AP, dev_ptr, ptr_AP);
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+
+  cublasDtpsv(char uplo, char trans, char diag, int n, const(double)* AP, double* x, int incx);
+
   return Qnil;
 }
 
@@ -543,6 +639,13 @@ static VALUE rb_cublasStbsv(VALUE self){
 
 // void cublasDtbsv ( char uplo, char trans, char diag, int n, int k, const(double)* A, int lda, double* x, int incx);
 static VALUE rb_cublasDtbsv(VALUE self){
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_x;
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+
+  cublasDtbsv(char uplo, char trans, char diag, int n, int k, const(double)* A, int lda, double* x, int incx);
+
   return Qnil;
 }
 
@@ -567,6 +670,16 @@ static VALUE rb_cublasSsymv(VALUE self){
 
 // void cublasDsymv ( char uplo, int n, double alpha, const(double)* A, int lda, const(double)* x, int incx, double beta, double* y, int incy);
 static VALUE rb_cublasDsymv(VALUE self){
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
+  cublasDsymv(char uplo, int n, double alpha, const(double)* A, int lda, const(double)* x, int incx, double beta, double* y, int incy);
+
   return Qnil;
 }
 
@@ -591,6 +704,16 @@ static VALUE rb_cublasSsbmv(VALUE self){
 
 // void cublasDsbmv ( char uplo, int n, int k, double alpha, const(double)* A, int lda, const(double)* x, int incx, double beta, double* y, int incy);
 static VALUE rb_cublasDsbmv(VALUE self){
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
+  cublasDsbmv(char uplo, int n, int k, double alpha, const(double)* A, int lda, const(double)* x, int incx, double beta, double* y, int incy);
+
   return Qnil;
 }
 
@@ -615,6 +738,16 @@ static VALUE rb_cublasSspmv(VALUE self){
 
 // void cublasDspmv ( char uplo, int n, double alpha, const(double)* AP, const(double)* x, int incx, double beta, double* y, int incy);
 static VALUE rb_cublasDspmv(VALUE self){
+  dev_ptr* ptr_AP;
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+
+  Data_Get_Struct(AP, dev_ptr, ptr_AP);
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
+  cublasDspmv(char uplo, int n, double alpha, const(double)* AP, const(double)* x, int incx, double beta, double* y, int incy);
+
   return Qnil;
 }
 
@@ -639,6 +772,16 @@ static VALUE rb_cublasSger(VALUE self){
 
 // void cublasDger ( int m, int n, double alpha, const(double)* x, int incx, const(double)* y, int incy, double* A, int lda);
 static VALUE rb_cublasDger(VALUE self){
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
+  cublasDger(int m, int n, double alpha, const(double)* x, int incx, const(double)* y, int incy, double* A, int lda);
+
   return Qnil;
 }
 
@@ -672,6 +815,14 @@ static VALUE rb_cublasSsyr(VALUE self){
 
 // void cublasDsyr ( char uplo, int n, double alpha, const(double)* x, int incx, double* A, int lda);
 static VALUE rb_cublasDsyr(VALUE self){
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_x;
+
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+
+  cublasDsyr(char uplo, int n, double alpha, const(double)* x, int incx, double* A, int lda);
+
   return Qnil;
 }
 
@@ -695,6 +846,14 @@ static VALUE rb_cublasSspr(VALUE self){
 }
 // void cublasDspr ( char uplo, int n, double alpha, const(double)* x, int incx, double* AP);
 static VALUE rb_cublasDspr(VALUE self){
+  dev_ptr* ptr_AP;
+  dev_ptr* ptr_x;
+
+  Data_Get_Struct(AP, dev_ptr, ptr_AP);
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+
+  cublasDspr(char uplo, int n, double alpha, const(double)* x, int incx, double* AP);
+
   return Qnil;
 }
 
@@ -719,6 +878,16 @@ static VALUE rb_cublasSsyr2(VALUE self){
 
 // void cublasDsyr2 ( char uplo, int n, double alpha, const(double)* x, int incx, const(double)* y, int incy, double* A, int lda);
 static VALUE rb_cublasDsyr2(VALUE self){
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
+  cublasDsyr2(char uplo, int n, double alpha, const(double)* x, int incx, const(double)* y, int incy, double* A, int lda);
+
   return Qnil;
 }
 
@@ -742,6 +911,16 @@ static VALUE rb_cublasSspr2(VALUE self){
 
 // void cublasDspr2 ( char uplo, int n, double alpha, const(double)* x, int incx, const(double)* y, int incy, double* AP);
 static VALUE rb_cublasDspr2(VALUE self){
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
+  cublasDspr2(char uplo, int n, double alpha, const(double)* x, int incx, const(double)* y, int incy, double* AP);
+
   return Qnil;
 }
 
@@ -766,6 +945,16 @@ static VALUE rb_cublasSgemm(VALUE self){
 
 // void cublasDgemm ( char transa, char transb, int m, int n, int k, double alpha, const(double)* A, int lda, const(double)* B, int ldb, double beta, double* C, int ldc);
 static VALUE rb_cublasDgemm(VALUE self){
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_B;
+  dev_ptr* ptr_C;
+
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(B, dev_ptr, ptr_B);
+  Data_Get_Struct(C, dev_ptr, ptr_C);
+
+  cublasDgemm(char transa, char transb, int m, int n, int k, double alpha, const(double)* A, int lda, const(double)* B, int ldb, double beta, double* C, int ldc);
+
   return Qnil;
 }
 
@@ -789,6 +978,16 @@ static VALUE rb_cublasSsyrk(VALUE self){
 
 // void cublasDsyrk ( char uplo, char trans, int n, int k, double alpha, const(double)* A, int lda, double beta, double* C, int ldc);
 static VALUE rb_cublasDsyrk(VALUE self){
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_B;
+  dev_ptr* ptr_C;
+
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(B, dev_ptr, ptr_B);
+  Data_Get_Struct(C, dev_ptr, ptr_C);
+
+  cublasDsyrk(char uplo, char trans, int n, int k, double alpha, const(double)* A, int lda, double beta, double* C, int ldc);
+
   return Qnil;
 }
 
@@ -825,6 +1024,16 @@ static VALUE rb_cublasSsyr2k(VALUE self){
 
 // void cublasDsyr2k ( char uplo, char trans, int n, int k, double alpha, const(double)* A, int lda, const(double)* B, int ldb, double beta, double* C, int ldc);
 static VALUE rb_cublasDsyr2k(VALUE self){
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_B;
+  dev_ptr* ptr_C;
+
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(B, dev_ptr, ptr_B);
+  Data_Get_Struct(C, dev_ptr, ptr_C);
+
+  cublasDsyr2k(char uplo, char trans, int n, int k, double alpha, const(double)* A, int lda, const(double)* B, int ldb, double beta, double* C, int ldc);
+
   return Qnil;
 }
 
@@ -862,6 +1071,16 @@ static VALUE rb_cublasSsymm(VALUE self){
 
 // void cublasDsymm ( char side, char uplo, int m, int n, double alpha, const(double)* A, int lda, const(double)* B, int ldb, double beta, double* C, int ldc);
 static VALUE rb_cublasDsymm(VALUE self){
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_B;
+  dev_ptr* ptr_C;
+
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(B, dev_ptr, ptr_B);
+  Data_Get_Struct(C, dev_ptr, ptr_C);
+
+  cublasDsymm(char side, char uplo, int m, int n, double alpha, const(double)* A, int lda, const(double)* B, int ldb, double beta, double* C, int ldc);
+
   return Qnil;
 }
 
@@ -898,6 +1117,14 @@ static VALUE rb_cublasStrsm(VALUE self){
 
 // void cublasDtrsm ( char side, char uplo, char transa, char diag, int m, int n, double alpha, const(double)* A, int lda, double* B, int ldb);
 static VALUE rb_cublasDtrsm(VALUE self){
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_B;
+
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(B, dev_ptr, ptr_B);
+
+  cublasDtrsm(char side, char uplo, char transa, char diag, int m, int n, double alpha, const(double)* A, int lda, double* B, int ldb);
+
   return Qnil;
 }
 
@@ -922,6 +1149,14 @@ static VALUE rb_cublasStrmm(VALUE self){
 
 // void cublasDtrmm ( char side, char uplo, char transa, char diag, int m, int n, double alpha, const(double)* A, int lda, double* B, int ldb);
 static VALUE rb_cublasDtrmm(VALUE self){
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_B;
+
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(B, dev_ptr, ptr_B);
+
+  cublasDtrmm(char side, char uplo, char transa, char diag, int m, int n, double alpha, const(double)* A, int lda, double* B, int ldb);
+
   return Qnil;
 }
 
