@@ -4,12 +4,12 @@ static VALUE rb_cusolverDnCreate(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDestroy(cusolverDnHandle_t handle);
-static VALUE rb_cusolverDnDestroy(VALUE self){
+static VALUE rb_cusolverDnDestroy(VALUE self, VALUE handle){
   return Qnil;
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnSetStream (cusolverDnHandle_t handle, cudaStream_t streamId);
-static VALUE rb_cusolverDnSetStream(VALUE self){
+static VALUE rb_cusolverDnSetStream(VALUE self, VALUE streamId){
   return Qnil;
 }
 
@@ -25,7 +25,7 @@ static VALUE rb_cusolverDnSpotrf_bufferSize(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDpotrf_bufferSize( cusolverDnHandle_t handle, cublasFillMode_t uplo, int n, double *A, int lda, int *Lwork );
-static VALUE rb_cusolverDnDpotrf_bufferSize(VALUE self){
+static VALUE rb_cusolverDnDpotrf_bufferSize(VALUE self, VALUE handle, VALUE uplo, VALUE n, VALUE A, VALUE lda, VALUE Lwork){
   return Qnil;
 }
 
@@ -45,7 +45,7 @@ static VALUE rb_cusolverDnSpotrf(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDpotrf( cusolverDnHandle_t handle, cublasFillMode_t uplo, int n, double *A, int lda, double *Workspace, int Lwork, int *devInfo );
-static VALUE rb_cusolverDnDpotrf(VALUE self){
+static VALUE rb_cusolverDnDpotrf(VALUE self, VALUE handle, VALUE uplo, VALUE n, VALUE A, VALUE lda, VALUE Workspace, VALUE Lwork, VALUE devInfo){
   return Qnil;
 }
 
@@ -66,7 +66,7 @@ static VALUE rb_cusolverDnSpotrs(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDpotrs( cusolverDnHandle_t handle, cublasFillMode_t uplo, int n, int nrhs, const double *A, int lda, double *B, int ldb, int *devInfo);
-static VALUE rb_cusolverDnDpotrs(VALUE self){
+static VALUE rb_cusolverDnDpotrs(VALUE self, VALUE handle, VALUE uplo, VALUE n, VALUE nrhs, VALUE A, VALUE lda, VALUE B, VALUE ldb, VALUE devInfo){
   return Qnil;
 }
 
@@ -88,7 +88,7 @@ static VALUE rb_cusolverDnSgetrf_bufferSize(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDgetrf_bufferSize( cusolverDnHandle_t handle, int m, int n, double *A, int lda, int *Lwork );
-static VALUE rb_cusolverDnDgetrf_bufferSize(VALUE self){
+static VALUE rb_cusolverDnDgetrf_bufferSize(VALUE self, VALUE handle, VALUE m, VALUE n, VALUE A, VALUE lda, VALUE Lwork){
   return Qnil;
 }
 
@@ -109,7 +109,7 @@ static VALUE rb_cusolverDnSgetrf(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDgetrf( cusolverDnHandle_t handle, int m, int n, double *A, int lda, double *Workspace, int *devIpiv, int *devInfo );
-static VALUE rb_cusolverDnDgetrf(VALUE self){
+static VALUE rb_cusolverDnDgetrf(VALUE self, VALUE handle, VALUE m, VALUE n, VALUE A, VALUE lda, VALUE Workspace, VALUE devIpiv, VALUE devInfo){
   return Qnil;
 }
 
@@ -130,7 +130,7 @@ static VALUE rb_cusolverDnSlaswp(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDlaswp( cusolverDnHandle_t handle, int n, double *A, int lda, int k1, int k2, const int *devIpiv, int incx);
-static VALUE rb_cusolverDnDlaswp(VALUE self){
+static VALUE rb_cusolverDnDlaswp(VALUE self, VALUE handle, VALUE n, VALUE A, VALUE lda, VALUE k1, VALUE k2, VALUE devIpiv, VALUE incx){
   return Qnil;
 }
 
@@ -151,7 +151,7 @@ static VALUE rb_cusolverDnSgetrs(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDgetrs( cusolverDnHandle_t handle, cublasOperation_t trans, int n, int nrhs, const double *A, int lda, const int *devIpiv, double *B, int ldb, int *devInfo );
-static VALUE rb_cusolverDnDgetrs(VALUE self){
+static VALUE rb_cusolverDnDgetrs(VALUE self, VALUE handle, VALUE trans, VALUE n, VALUE nrhs, VALUE A, VALUE lda, VALUE devIpiv, VALUE B, VALUE ldb, VALUE devInfo ){
   return Qnil;
 }
 
@@ -172,7 +172,7 @@ static VALUE rb_cusolverDnSgeqrf(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDgeqrf( cusolverDnHandle_t handle, int m, int n, double *A, int lda, double *TAU, double *Workspace, int Lwork, int *devInfo );
-static VALUE rb_cusolverDnDgeqrf(VALUE self){
+static VALUE rb_cusolverDnDgeqrf(VALUE self, VALUE handle, VALUE m, VALUE n, VALUE A, VALUE lda, VALUE TAU, VALUE Workspace, VALUE Lwork, VALUE devInfo){
   return Qnil;
 }
 
@@ -192,7 +192,7 @@ static VALUE rb_cusolverDnSormqr(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDormqr( cusolverDnHandle_t handle, cublasSideMode_t side, cublasOperation_t trans, int m, int n, int k, const double *A, int lda, const double *tau, double *C, int ldc, double *work, int lwork, int *devInfo);
-static VALUE rb_cusolverDnDormqr(VALUE self){
+static VALUE rb_cusolverDnDormqr(VALUE self, VALUE handle, VALUE side, VALUE trans, VALUE m, VALUE n, VALUE k, VALUE A, VALUE lda, VALUE tau, VALUE C, VALUE ldc, VALUE work, VALUE lwork, VALUE devInfo){
   return Qnil;
 }
 
@@ -214,7 +214,7 @@ static VALUE rb_cusolverDnSgeqrf_bufferSize(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDgeqrf_bufferSize( cusolverDnHandle_t handle, int m, int n, double *A, int lda, int *Lwork );
-static VALUE rb_cusolverDnDgeqrf_bufferSize(VALUE self){
+static VALUE rb_cusolverDnDgeqrf_bufferSize(VALUE self, VALUE handle, VALUE m, VALUE n, VALUE A, VALUE lda, VALUE Lwork){
   return Qnil;
 }
 
@@ -236,7 +236,7 @@ static VALUE rb_cusolverDnSgebrd(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDgebrd( cusolverDnHandle_t handle, int m, int n, double *A, int lda, double *D, double *E, double *TAUQ, double *TAUP, double *Work, int Lwork, int *devInfo );
-static VALUE rb_cusolverDnDgebrd(VALUE self){
+static VALUE rb_cusolverDnDgebrd(VALUE self, VALUE handle, VALUE m, VALUE n, VALUE A, VALUE lda, VALUE D, VALUE E, VALUE TAUQ, VALUE TAUP, VALUE Work, VALUE Lwork, VALUE devInfo){
   return Qnil;
 }
 
@@ -257,7 +257,7 @@ static VALUE rb_cusolverDnSsytrd(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDsytrd( cusolverDnHandle_t handle, signed char uplo, int n, double *A, int lda, double *D, double *E, double *tau, double *Work, int Lwork, int *info);
-static VALUE rb_cusolverDnDsytrd(VALUE self){
+static VALUE rb_cusolverDnDsytrd(VALUE self, VALUE handle, VALUE uplo, VALUE n, VALUE A, VALUE lda, VALUE D, VALUE E, VALUE tau, VALUE Work, VALUE Lwork, VALUE info){
   return Qnil;
 }
 
@@ -268,7 +268,7 @@ static VALUE rb_cusolverDnSgebrd_bufferSize(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDgebrd_bufferSize( cusolverDnHandle_t handle, int m, int n, int *Lwork );
-static VALUE rb_cusolverDnDgebrd_bufferSize(VALUE self){
+static VALUE rb_cusolverDnDgebrd_bufferSize(VALUE self, VALUE handle, VALUE m, VALUE n, VALUE Lwork){
   return Qnil;
 }
 
@@ -289,7 +289,7 @@ static VALUE rb_cusolverDnSgesvd_bufferSize(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDgesvd_bufferSize( cusolverDnHandle_t handle, int m, int n, int *Lwork );
-static VALUE rb_cusolverDnDgesvd_bufferSize(VALUE self){
+static VALUE rb_cusolverDnDgesvd_bufferSize(VALUE self, VALUE handle, VALUE m, VALUE n, VALUE Lwork){
   return Qnil;
 }
 
@@ -309,7 +309,7 @@ static VALUE rb_cusolverDnSgesvd(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDgesvd ( cusolverDnHandle_t handle, signed char jobu, signed char jobvt, int m, int n, double *A, int lda, double *S, double *U, int ldu, double *VT, int ldvt, double *Work, int Lwork, double *rwork, int *devInfo );
-static VALUE rb_cusolverDnDgesvd(VALUE self){
+static VALUE rb_cusolverDnDgesvd(VALUE self, VALUE handle, VALUE jobu, VALUE jobvt, VALUE m, VALUE n, VALUE A, VALUE lda, VALUE S, VALUE U, VALUE ldu, VALUE VT, VALUE ldvt, VALUE Work, VALUE Lwork, VALUE rwork, VALUE devInfo){
   return Qnil;
 }
 
@@ -330,7 +330,7 @@ static VALUE rb_cusolverDnSsytrf(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDsytrf( cusolverDnHandle_t handle, cublasFillMode_t uplo, int n, double *A, int lda, int *ipiv, double *work, int lwork, int *devInfo );
-static VALUE rb_cusolverDnDsytrf(VALUE self){
+static VALUE rb_cusolverDnDsytrf(VALUE self, VALUE handle, VALUE uplo, VALUE n, VALUE A, VALUE lda, VALUE ipiv, VALUE work, VALUE lwork, VALUE devInfo){
   return Qnil;
 }
 
@@ -351,7 +351,7 @@ static VALUE rb_cusolverDnSsytrf_bufferSize(VALUE self){
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDsytrf_bufferSize( cusolverDnHandle_t handle, int n, double *A, int lda, int *Lwork );
-static VALUE rb_cusolverDnDsytrf_bufferSize(VALUE self){
+static VALUE rb_cusolverDnDsytrf_bufferSize(VALUE self, VALUE handle, VALUE n, VALUE A, VALUE lda, VALUE Lwork){
   return Qnil;
 }
 
