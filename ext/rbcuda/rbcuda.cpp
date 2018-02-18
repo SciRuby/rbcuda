@@ -6,6 +6,7 @@
 #include <map>
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <cublas.h>
 #include <cublas_v2.h>
 #include "cublasXt.h"
 #include <cuda_profiler_api.h>
