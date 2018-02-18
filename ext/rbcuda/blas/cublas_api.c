@@ -197,7 +197,7 @@ static VALUE rb_cublasGetPointerMode_v2(VALUE self, VALUE handler_val){
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
 
   cublasPointerMode_t mode;
-  cublasStatus_t status = cublasGetPointerMode(handler->handle, &mode);
+  cublasStatus_t status = cublasGetPointerMode_v2(handler->handle, &mode);
   return Qnil;
 }
 
@@ -208,7 +208,7 @@ static VALUE rb_cublasSetPointerMode_v2(VALUE self, VALUE handler_val, VALUE mod
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
 
-  cublasStatus_t status = cublasSetPointerMode(handler->handle, rbcu_cublasPointerMode_t(mode))
+  cublasStatus_t status = cublasSetPointerMode_v2(handler->handle, rbcu_cublasPointerMode_t(mode));
   return Qnil;
 }
 
@@ -217,6 +217,8 @@ static VALUE rb_cublasSetPointerMode_v2(VALUE self, VALUE handler_val, VALUE mod
 static VALUE rb_cublasGetAtomicsMode(VALUE self, VALUE handler_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
+
+  cublasAtomicsMode_t mode;
 
   cublasStatus_t status = cublasGetAtomicsMode(handler->handle, &mode);
   return Qnil;
@@ -228,7 +230,7 @@ static VALUE rb_cublasSetAtomicsMode(VALUE self, VALUE handler_val, VALUE mode){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
 
-  cublasStatus_t status = cublasSetAtomicsMode (cublasHandle_t handle, rbcu_cublasAtomicsMode_t(mode));
+  cublasStatus_t status = cublasSetAtomicsMode(handler->handle, rbcu_cublasAtomicsMode_t(mode));
   return Qnil;
 }
 
@@ -655,7 +657,7 @@ static VALUE rb_cublasDrotm_v2(VALUE self, VALUE handler_val, VALUE y1_val){
 
   double d1, d2, param;
 
-  cublasStatus_t status = cublasDrotmg_v2(handler->handle, &d1, &d2,  x1->carray, y1->carray,  &param);
+  cublasStatus_t status = cublasDrotmg_v2(handler->handle, &d1, &d2,  ptr_x1->carray, ptr_y1->carray,  &param);
 
   return Qnil;
 }
@@ -693,7 +695,7 @@ static VALUE rb_cublasDgemv_v2(VALUE self, VALUE handler_val, VALUE trans, VALUE
   dev_ptr* ptr_A;
   Data_Get_Struct(a_val, dev_ptr, ptr_A);
 
-  cublasStatus_t status = cublasDgemv_v2(handler->handle, rbcu_cublasOperation_t(trans), int m, int n, (double*)alpha, ptr_A->carray, int lda, (double*)x, int incx, (double*)beta, (double*)y, NUM2INT(incy));
+  cublasStatus_t status = cublasDgemv_v2(handler->handle, rbcu_cublasOperation_t(trans),  NUM2INT(m),  NUM2INT(n), (double*)alpha, ptr_A->carray,  NUM2INT(lda), (double*)x_val,  NUM2INT(incx), (double*)beta, (double*)y, NUM2INT(incy));
 
   return Qnil;
 }
@@ -719,6 +721,9 @@ static VALUE rb_cublasDgbmv_v2(VALUE self, VALUE handler_val, VALUE trans, VALUE
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
 
+  dev_ptr* ptr_A;
+  Data_Get_Struct(a_val, dev_ptr, ptr_A);
+
   cublasStatus_t status = cublasDgbmv_v2(handler->handle, rbcu_cublasOperation_t(trans), NUM2INT(m), NUM2INT(n), NUM2INT(kl), NUM2INT(ku), (double*)alpha, ptr_A->carray,  NUM2INT(lda), (double*)x_val, NUM2INT(incx), (double*)beta, (double*)y, NUM2INT(incy));
 
   return Qnil;
@@ -740,7 +745,7 @@ static VALUE rb_cublasStrmv_v2(VALUE self){
 
 // cublasStatus_t cublasDtrmv_v2 ( cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const(double)* A, int lda, double* x, int incx);
 
-static VALUE rb_cublasDtrmv_v2(VALUE self, VALUE handler_val, VALUE uplo, VALUE trans, VALUE diag, VALUE a_val, VALUE lda, VALUE x, VALUE incx){
+static VALUE rb_cublasDtrmv_v2(VALUE self, VALUE handler_val, VALUE uplo, VALUE trans, VALUE diag, VALUE n, VALUE a_val, VALUE lda, VALUE x, VALUE incx){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
 
@@ -777,7 +782,7 @@ static VALUE rb_cublasDtbmv_v2(VALUE self, VALUE handler_val, VALUE uplo, VALUE 
   dev_ptr* ptr_A;
   Data_Get_Struct(a_val, dev_ptr, ptr_A);
 
-  cublasStatus_t status = cublasDtbmv_v2(handler->handle, rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans), rbcu_cublasDiagType_t(diag), NUM2INT(n), int k, ptr_A->carray, NUM2INT(lda), (double*)x, NUM2INT(incx));
+  cublasStatus_t status = cublasDtbmv_v2(handler->handle, rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans), rbcu_cublasDiagType_t(diag), NUM2INT(n),  NUM2INT(k), ptr_A->carray, NUM2INT(lda), (double*)x_val, NUM2INT(incx));
 
   return Qnil;
 }
