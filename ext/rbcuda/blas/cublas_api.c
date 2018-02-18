@@ -1192,14 +1192,14 @@ static VALUE rb_cublasDsyrk_v2(VALUE self, VALUE handler_val, VALUE uplo, VALUE 
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
 
-  dev_ptr* ptr_a;
-  dev_ptr* ptr_b;
-  dev_ptr* ptr_c;
-  Data_Get_Struct(A, dev_ptr, ptr_a);
-  Data_Get_Struct(B, dev_ptr, ptr_b);
-  Data_Get_Struct(C, dev_ptr, ptr_c);
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_B;
+  dev_ptr* ptr_C;
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(B, dev_ptr, ptr_B);
+  Data_Get_Struct(C, dev_ptr, ptr_C);
 
-  cublasStatus_t status = cublasDsyrk_v2(handler->handle, rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans), NUM2INT(n), NUM2INT(k), const(double)* alpha, const(double)* A, NUM2INT(lda), const(double)* beta, double* C, NUM2INT(ldc));
+  cublasStatus_t status = cublasDsyrk_v2(handler->handle, rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans), NUM2INT(n), NUM2INT(k), (double*)alpha, ptr_A->carray, NUM2INT(lda), (double*)beta, ptr_C->carray, NUM2INT(ldc));
   return Qnil;
 }
 
@@ -1238,14 +1238,14 @@ static VALUE rb_cublasDsyr2k_v2(VALUE self, VALUE handler_val, VALUE uplo, VALUE
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
 
-  dev_ptr* ptr_a;
-  dev_ptr* ptr_b;
-  dev_ptr* ptr_c;
-  Data_Get_Struct(A, dev_ptr, ptr_a);
-  Data_Get_Struct(B, dev_ptr, ptr_b);
-  Data_Get_Struct(C, dev_ptr, ptr_c);
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_B;
+  dev_ptr* ptr_C;
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(B, dev_ptr, ptr_B);
+  Data_Get_Struct(C, dev_ptr, ptr_C);
 
-  cublasStatus_t status = cublasDsyr2k_v2(handler->handle, rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans), NUM2INT(n), NUM2INT(k), const(double)* alpha, const(double)* A, NUM2INT(lda), const(double)* B, NUM2INT(ldb), const(double)* beta, double* C, NUM2INT(ldc));
+  cublasStatus_t status = cublasDsyr2k_v2(handler->handle, rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans), NUM2INT(n), NUM2INT(k), (double*) alpha, ptr_A->carray, NUM2INT(lda), ptr_B->carray, NUM2INT(ldb), (double*)beta, ptr_C->carray, NUM2INT(ldc));
   return Qnil;
 }
 
@@ -1286,19 +1286,19 @@ static VALUE rb_cublasDsyrkx(VALUE self, VALUE handler_val, VALUE uplo, VALUE tr
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
 
-  dev_ptr* ptr_a;
-  dev_ptr* ptr_b;
-  dev_ptr* ptr_c;
-  Data_Get_Struct(A, dev_ptr, ptr_a);
-  Data_Get_Struct(B, dev_ptr, ptr_b);
-  Data_Get_Struct(C, dev_ptr, ptr_c);
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_B;
+  dev_ptr* ptr_C;
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(B, dev_ptr, ptr_B);
+  Data_Get_Struct(C, dev_ptr, ptr_C);
 
   const double alf = 1;
   const double bet = 0;
   // const double *alpha = &alf;
   // const double *beta = &bet;
 
-  cublasStatus_t status = cublasDsyrkx(handler->handle, rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans), NUM2INT(n), NUM2INT(k), const(double)* alpha, const(double)* A, NUM2INT(lda), const(double)* B, NUM2INT(ldb), const(double)* beta, double* C, NUM2INT(ldc));
+  cublasStatus_t status = cublasDsyrkx(handler->handle, rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans), NUM2INT(n), NUM2INT(k), (double*)alpha, ptr_A->carray, NUM2INT(lda), ptr_B->carray, NUM2INT(ldb), (double*) beta, ptr_C->carray, NUM2INT(ldc));
   return Qnil;
 }
 
@@ -1506,10 +1506,10 @@ static VALUE rb_cublasDgetrfBatched(VALUE self, VALUE handler_val, VALUE n, VALU
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
 
 
-  dev_ptr* ptr_a;
-  Data_Get_Struct(A, dev_ptr, ptr_a);
+  dev_ptr* ptr_A;
+  Data_Get_Struct(A, dev_ptr, ptr_A);
 
-  // cublasStatus_t status = cublasDgetrfBatched(handler->handle, NUM2INT(n), double** A, NUM2INT(lda), (int*)P, (int*)info, NUM2INT(batch_size));
+  cublasStatus_t status = cublasDgetrfBatched(handler->handle, NUM2INT(n), &ptr_A->carray, NUM2INT(lda), (int*)P, (int*)info, NUM2INT(batch_size));
   return Qnil;
 }
 
@@ -1537,12 +1537,12 @@ static VALUE rb_cublasDgetriBatched(VALUE self, VALUE handler_val, VALUE n, VALU
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
 
-  dev_ptr* ptr_a;
-  dev_ptr* ptr_c;
-  Data_Get_Struct(A, dev_ptr, ptr_a);
-  Data_Get_Struct(C, dev_ptr, ptr_c);
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_C;
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(C, dev_ptr, ptr_C);
 
-  // cublasStatus_t status = cublasDgetriBatched(handler->handle, NUM2INT(n), const(double)** A, NUM2INT(lda), const(int)* P, double** C, NUM2INT(ldc), int* info, NUM2INT(batch_size));
+  // cublasStatus_t status = cublasDgetriBatched(handler->handle, NUM2INT(n), &ptr_A->carray, NUM2INT(lda), (int*)P, &ptr_C->carray, NUM2INT(ldc), (int*)info, NUM2INT(batch_size));
   return Qnil;
 }
 
@@ -1572,7 +1572,7 @@ static VALUE rb_cublasDgetrsBatched(VALUE self, VALUE handler_val, VALUE trans, 
   Data_Get_Struct(Aarray, dev_ptr, ptr_Aarray);
   Data_Get_Struct(Barray, dev_ptr, ptr_Barray);
 
-  // cublasStatus_t status = cublasDgetrsBatched(handler->handle, rbcu_cublasOperation_t(trans), NUM2INT(n), NUM2INT(nrhs), const(double)** Aarray, NUM2INT(lda), const(int)* devIpiv, double** Barray, NUM2INT(ldb), int* info, NUM2INT(batch_size));
+  // cublasStatus_t status = cublasDgetrsBatched(handler->handle, rbcu_cublasOperation_t(trans), NUM2INT(n), NUM2INT(nrhs), *ptr_Aarray->carray, NUM2INT(lda), (int*)devIpiv, &ptr_Barray->carray, NUM2INT(ldb), (int*)info, NUM2INT(batch_size));
   return Qnil;
 }
 
@@ -1599,12 +1599,12 @@ static VALUE rb_cublasDtrsmBatched(VALUE self, VALUE handler_val, VALUE side, VA
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
 
-  dev_ptr* ptr_a;
-  dev_ptr* ptr_b;
-  Data_Get_Struct(A, dev_ptr, ptr_a);
-  Data_Get_Struct(B, dev_ptr, ptr_b);
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_B;
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(B, dev_ptr, ptr_B);
 
-  // cublasStatus_t status = cublasDtrsmBatched(handler->handle, rbcu_cublasSideMode_t(side), rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans), rbcu_cublasDiagType_t(diag), NUM2INT(m), NUM2INT(n), const(double)* alpha, const(double)** A, NUM2INT(lda), double** B, NUM2INT(ldb), NUM2INT(batch_count));
+  // cublasStatus_t status = cublasDtrsmBatched(handler->handle, rbcu_cublasSideMode_t(side), rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans), rbcu_cublasDiagType_t(diag), NUM2INT(m), NUM2INT(n), (double*) alpha, &ptr_A->carray, NUM2INT(lda), &ptr_B->carray, NUM2INT(ldb), NUM2INT(batch_count));
   return Qnil;
 }
 
@@ -1637,7 +1637,7 @@ static VALUE rb_cublasDmatinvBatched(VALUE self, VALUE handler_val, VALUE n, VAL
   Data_Get_Struct(A, dev_ptr, ptr_A);
   Data_Get_Struct(Ainv, dev_ptr, ptr_Ainv);
 
-  // cublasStatus_t status cublasDmatinvBatched(handler->handle, NUM2INT(n), const(double)** A, NUM2INT(lda), double** Ainv, NUM2INT(lda_inv), int* info, NUM2INT(batch_size));
+  // cublasStatus_t status = cublasDmatinvBatched(handler->handle, NUM2INT(n), &ptr_A->carray, NUM2INT(lda), &ptr_Ainv->carray, NUM2INT(lda_inv), (int*)info, NUM2INT(batch_size));
   return Qnil;
 }
 
@@ -1669,7 +1669,7 @@ static VALUE rb_cublasDgeqrfBatched(VALUE self, VALUE handler_val, VALUE m, VALU
   Data_Get_Struct(Aarray, dev_ptr, ptr_Aarray);
   Data_Get_Struct(TauArray, dev_ptr, ptr_TauArray);
 
-  // cublasStatus_t status = cublasDgeqrfBatched(handler->handle, NUM2INT(m), NUM2INT(n), double** Aarray, NUM2INT(lda), double** TauArray, int* info, NUM2INT(batch_size));
+  cublasStatus_t status = cublasDgeqrfBatched(handler->handle, NUM2INT(m), NUM2INT(n), &ptr_Aarray->carray, NUM2INT(lda), &ptr_TauArray->carray, (int*)info, NUM2INT(batch_size));
   return Qnil;
 }
 
@@ -1701,7 +1701,7 @@ static VALUE rb_cublasDgelsBatched(VALUE self, VALUE handler_val, VALUE trans, V
   Data_Get_Struct(Aarray, dev_ptr, ptr_Aarray);
   Data_Get_Struct(Carray, dev_ptr, ptr_Carray);
 
-  // cublasStatus_t status = cublasDgelsBatched(handler->handle, rbcu_cublasOperation_t(trans), NUM2INT(m), NUM2INT(n), NUM2INT(nrhs), (double**)Aarray, NUM2INT(lda), double** Carray, NUM2INT(ldc), int* info, int* devInfoArray, NUM2INT(batch_size));
+  cublasStatus_t status = cublasDgelsBatched(handler->handle, rbcu_cublasOperation_t(trans), NUM2INT(m), NUM2INT(n), NUM2INT(nrhs), &ptr_Aarray->carray, NUM2INT(lda), &ptr_Carray->carray, NUM2INT(ldc), (int*)info, (int*)devInfoArray, NUM2INT(batch_size));
   return Qnil;
 }
 
@@ -1731,7 +1731,7 @@ static VALUE rb_cublasDdgmm(VALUE self, VALUE handler_val, VALUE mode, VALUE m, 
   Data_Get_Struct(A, dev_ptr, ptr_A);
   Data_Get_Struct(C, dev_ptr, ptr_C);
 
-  cublasStatus_t status = cublasDdgmm(handler->handle, rbcu_cublasSideMode_t(mode), NUM2INT(m), NUM2INT(n), (double*)A, NUM2INT(lda), (double*)x, NUM2INT(incx), (double*)C, NUM2INT(ldc));
+  cublasStatus_t status = cublasDdgmm(handler->handle, rbcu_cublasSideMode_t(mode), NUM2INT(m), NUM2INT(n), ptr_A->carray, NUM2INT(lda), (double*)x, NUM2INT(incx), ptr_C->carray, NUM2INT(ldc));
   return Qnil;
 }
 
@@ -1761,7 +1761,7 @@ static VALUE rb_cublasDtpttr(VALUE self, VALUE handler_val, VALUE uplo, VALUE n,
   Data_Get_Struct(A, dev_ptr, ptr_A);
   Data_Get_Struct(AP, dev_ptr, ptr_AP);
 
-  cublasStatus_t status = cublasDtpttr(handler->handle, rbcu_cublasFillMode_t(uplo), NUM2INT(n), (double*)AP, (double*)A, NUM2INT(lda));
+  cublasStatus_t status = cublasDtpttr(handler->handle, rbcu_cublasFillMode_t(uplo), NUM2INT(n), ptr_AP->carray, ptr_A->carray, NUM2INT(lda));
   return Qnil;
 }
 
@@ -1791,7 +1791,7 @@ static VALUE rb_cublasDtrttp(VALUE self, VALUE handler_val, VALUE uplo, VALUE n,
   Data_Get_Struct(A, dev_ptr, ptr_A);
   Data_Get_Struct(AP, dev_ptr, ptr_AP);
 
-  cublasStatus_t status = cublasDtrttp(handler->handle, rbcu_cublasFillMode_t(uplo), NUM2INT(n), (double*) A, NUM2INT(lda), (double*)AP);
+  cublasStatus_t status = cublasDtrttp(handler->handle, rbcu_cublasFillMode_t(uplo), NUM2INT(n), ptr_A->carray, NUM2INT(lda), ptr_AP->carray);
   return Qnil;
 }
 
