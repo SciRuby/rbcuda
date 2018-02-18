@@ -424,7 +424,7 @@ static VALUE rb_cublasSgemv(VALUE self){
   return Qnil;
 }
 // void cublasDgemv ( char trans, int m, int n, double alpha, const(double)* A, int lda, const(double)* x, int incx, double beta, double* y, int incy);
-static VALUE rb_cublasDgemv(VALUE self){
+static VALUE rb_cublasDgemv(VALUE self, VALUE trans, VALUE m, VALUE n, VALUE alpha, VALUE A, VALUE lda, VALUE x, VALUE incx, VALUE beta, VALUE y, VALUE incy){
   dev_ptr* ptr_x;
   dev_ptr* ptr_y;
   Data_Get_Struct(x, dev_ptr, ptr_x);
@@ -454,7 +454,7 @@ static VALUE rb_cublasSgbmv(VALUE self){
 }
 
 // void cublasDgbmv ( char trans, int m, int n, int kl, int ku, double alpha, const(double)* A, int lda, const(double)* x, int incx, double beta, double* y, int incy);
-static VALUE rb_cublasDgbmv(VALUE self){
+static VALUE rb_cublasDgbmv(VALUE self, VALUE trans, VALUE m, VALUE n, VALUE kl, VALUE ku, VALUE alpha, VALUE A, VALUE lda, VALUE x, VALUE incx, VALUE beta, VALUE y, VALUE incy){
   dev_ptr* ptr_x;
   dev_ptr* ptr_y;
   Data_Get_Struct(x, dev_ptr, ptr_x);
@@ -484,7 +484,7 @@ static VALUE rb_cublasStrmv(VALUE self){
 }
 
 // void cublasDtrmv ( char uplo, char trans, char diag, int n, const(double)* A, int lda, double* x, int incx);
-static VALUE rb_cublasDtrmv(VALUE self){
+static VALUE rb_cublasDtrmv(VALUE self, VALUE uplo, VALUE trans, VALUE diag, VALUE n, VALUE A, VALUE lda, VALUE x, VALUE incx){
   dev_ptr* ptr_x;
   dev_ptr* ptr_y;
   Data_Get_Struct(x, dev_ptr, ptr_x);
@@ -516,7 +516,7 @@ static VALUE rb_cublasStbmv(VALUE self){
 }
 
 // void cublasDtbmv ( char uplo, char trans, char diag, int n, int k, const(double)* A, int lda, double* x, int incx);
-static VALUE rb_cublasDtbmv(VALUE self){
+static VALUE rb_cublasDtbmv(VALUE self, VALUE uplo, VALUE trans, VALUE diag, VALUE n, VALUE k, VALUE A, VALUE lda, VALUE x, VALUE incx){
   dev_ptr* ptr_x;
   dev_ptr* ptr_y;
   Data_Get_Struct(x, dev_ptr, ptr_x);
@@ -546,7 +546,7 @@ static VALUE rb_cublasStpmV(VALUE self){
 }
 
 // void cublasDtpmv ( char uplo, char trans, char diag, int n, const(double)* AP, double* x, int incx);
-static VALUE rb_cublasDtpmv(VALUE self){
+static VALUE rb_cublasDtpmv(VALUE self, VALUE uplo, VALUE trans, VALUE diag, VALUE n, VALUE AP, VALUE x, VALUE incx){
   dev_ptr* ptr_AP;
   dev_ptr* ptr_x;
   Data_Get_Struct(AP, dev_ptr, ptr_AP);
@@ -576,7 +576,7 @@ static VALUE rb_cublasStrsv(VALUE self){
 }
 
 // void cublasDtrsv ( char uplo, char trans, char diag, int n, const(double)* A, int lda, double* x, int incx);
-static VALUE rb_cublasDtrsv(VALUE self){
+static VALUE rb_cublasDtrsv(VALUE self, VALUE uplo, VALUE trans, VALUE diag, VALUE n, VALUE A, VALUE lda, VALUE x, VALUE incx){
   dev_ptr* ptr_A;
   dev_ptr* ptr_x;
   Data_Get_Struct(A, dev_ptr, ptr_A);
@@ -607,7 +607,7 @@ static VALUE rb_cublasStpsv(VALUE self){
 }
 
 // void cublasDtpsv ( char uplo, char trans, char diag, int n, const(double)* AP, double* x, int incx);
-static VALUE rb_cublasDtpsv(VALUE self){
+static VALUE rb_cublasDtpsv(VALUE self, VALUE uplo, VALUE trans, VALUE diag, VALUE n, VALUE AP, VALUE x, VALUE incx){
   dev_ptr* ptr_AP;
   dev_ptr* ptr_x;
   Data_Get_Struct(AP, dev_ptr, ptr_AP);
@@ -638,7 +638,7 @@ static VALUE rb_cublasStbsv(VALUE self){
 }
 
 // void cublasDtbsv ( char uplo, char trans, char diag, int n, int k, const(double)* A, int lda, double* x, int incx);
-static VALUE rb_cublasDtbsv(VALUE self){
+static VALUE rb_cublasDtbsv(VALUE self, VALUE uplo, VALUE trans, VALUE diag, VALUE n, VALUE k, VALUE A, VALUE lda, VALUE x, VALUE incx){
   dev_ptr* ptr_A;
   dev_ptr* ptr_x;
   Data_Get_Struct(A, dev_ptr, ptr_A);
@@ -669,7 +669,7 @@ static VALUE rb_cublasSsymv(VALUE self){
 }
 
 // void cublasDsymv ( char uplo, int n, double alpha, const(double)* A, int lda, const(double)* x, int incx, double beta, double* y, int incy);
-static VALUE rb_cublasDsymv(VALUE self){
+static VALUE rb_cublasDsymv(VALUE self, VALUE uplo, VALUE n, VALUE alpha, VALUE A, VALUE lda, VALUE x, VALUE incx, VALUE beta, VALUE y, VALUE incy){
   dev_ptr* ptr_A;
   dev_ptr* ptr_x;
   dev_ptr* ptr_y;
@@ -703,7 +703,7 @@ static VALUE rb_cublasSsbmv(VALUE self){
 }
 
 // void cublasDsbmv ( char uplo, int n, int k, double alpha, const(double)* A, int lda, const(double)* x, int incx, double beta, double* y, int incy);
-static VALUE rb_cublasDsbmv(VALUE self){
+static VALUE rb_cublasDsbmv(VALUE self, VALUE uplo, VALUE n, VALUE k, VALUE alpha, VALUE A, VALUE lda, VALUE x, VALUE incx, VALUE beta, VALUE y, VALUE incy){
   dev_ptr* ptr_A;
   dev_ptr* ptr_x;
   dev_ptr* ptr_y;
@@ -737,7 +737,7 @@ static VALUE rb_cublasSspmv(VALUE self){
 }
 
 // void cublasDspmv ( char uplo, int n, double alpha, const(double)* AP, const(double)* x, int incx, double beta, double* y, int incy);
-static VALUE rb_cublasDspmv(VALUE self){
+static VALUE rb_cublasDspmv(VALUE self, VALUE uplo, VALUE n, VALUE alpha, VALUE AP, VALUE x, VALUE incx, VALUE beta, VALUE y, VALUE incy){
   dev_ptr* ptr_AP;
   dev_ptr* ptr_x;
   dev_ptr* ptr_y;
@@ -771,7 +771,7 @@ static VALUE rb_cublasSger(VALUE self){
 }
 
 // void cublasDger ( int m, int n, double alpha, const(double)* x, int incx, const(double)* y, int incy, double* A, int lda);
-static VALUE rb_cublasDger(VALUE self){
+static VALUE rb_cublasDger(VALUE self, VALUE m, VALUE n, VALUE alpha, VALUE x, VALUE incx, VALUE y, VALUE incy, VALUE A, VALUE lda){
   dev_ptr* ptr_A;
   dev_ptr* ptr_x;
   dev_ptr* ptr_y;
@@ -814,7 +814,7 @@ static VALUE rb_cublasSsyr(VALUE self){
 }
 
 // void cublasDsyr ( char uplo, int n, double alpha, const(double)* x, int incx, double* A, int lda);
-static VALUE rb_cublasDsyr(VALUE self){
+static VALUE rb_cublasDsyr(VALUE self, VALUE uplo, VALUE n, VALUE alpha, VALUE x, VALUE incx, VALUE A, VALUE lda){
   dev_ptr* ptr_A;
   dev_ptr* ptr_x;
 
@@ -845,7 +845,7 @@ static VALUE rb_cublasSspr(VALUE self){
   return Qnil;
 }
 // void cublasDspr ( char uplo, int n, double alpha, const(double)* x, int incx, double* AP);
-static VALUE rb_cublasDspr(VALUE self){
+static VALUE rb_cublasDspr(VALUE self, VALUE uplo, VALUE n, VALUE alpha, VALUE x, VALUE incx, VALUE AP){
   dev_ptr* ptr_AP;
   dev_ptr* ptr_x;
 
@@ -877,7 +877,7 @@ static VALUE rb_cublasSsyr2(VALUE self){
 }
 
 // void cublasDsyr2 ( char uplo, int n, double alpha, const(double)* x, int incx, const(double)* y, int incy, double* A, int lda);
-static VALUE rb_cublasDsyr2(VALUE self){
+static VALUE rb_cublasDsyr2(VALUE self, VALUE uplo, VALUE n, VALUE alpha, VALUE x, VALUE incx, VALUE y, VALUE incy, VALUE A, VALUE lda){
   dev_ptr* ptr_A;
   dev_ptr* ptr_x;
   dev_ptr* ptr_y;
@@ -910,7 +910,7 @@ static VALUE rb_cublasSspr2(VALUE self){
 }
 
 // void cublasDspr2 ( char uplo, int n, double alpha, const(double)* x, int incx, const(double)* y, int incy, double* AP);
-static VALUE rb_cublasDspr2(VALUE self){
+static VALUE rb_cublasDspr2(VALUE self, VALUE uplo, VALUE n, VALUE alpha, VALUE x, VALUE incx, VALUE y, VALUE incy, VALUE AP){
   dev_ptr* ptr_A;
   dev_ptr* ptr_x;
   dev_ptr* ptr_y;
@@ -944,7 +944,7 @@ static VALUE rb_cublasSgemm(VALUE self){
 }
 
 // void cublasDgemm ( char transa, char transb, int m, int n, int k, double alpha, const(double)* A, int lda, const(double)* B, int ldb, double beta, double* C, int ldc);
-static VALUE rb_cublasDgemm(VALUE self){
+static VALUE rb_cublasDgemm(VALUE self, VALUE transa, VALUE transb, VALUE m, VALUE n, VALUE k, VALUE alpha, VALUE A, VALUE lda, VALUE B, VALUE ldb, VALUE beta, VALUE C, VALUE ldc){
   dev_ptr* ptr_A;
   dev_ptr* ptr_B;
   dev_ptr* ptr_C;
@@ -977,7 +977,7 @@ static VALUE rb_cublasSsyrk(VALUE self){
 }
 
 // void cublasDsyrk ( char uplo, char trans, int n, int k, double alpha, const(double)* A, int lda, double beta, double* C, int ldc);
-static VALUE rb_cublasDsyrk(VALUE self){
+static VALUE rb_cublasDsyrk(VALUE self, VALUE uplo, VALUE trans, VALUE n, VALUE k, VALUE alpha, VALUE A, VALUE lda, VALUE beta, VALUE C, VALUE ldc){
   dev_ptr* ptr_A;
   dev_ptr* ptr_B;
   dev_ptr* ptr_C;
@@ -1023,7 +1023,7 @@ static VALUE rb_cublasSsyr2k(VALUE self){
 }
 
 // void cublasDsyr2k ( char uplo, char trans, int n, int k, double alpha, const(double)* A, int lda, const(double)* B, int ldb, double beta, double* C, int ldc);
-static VALUE rb_cublasDsyr2k(VALUE self){
+static VALUE rb_cublasDsyr2k(VALUE self, VALUE uplo, VALUE trans, VALUE n, VALUE k, VALUE alpha, VALUE A, VALUE lda, VALUE B, VALUE ldb, VALUE beta. VALUE C, VALUE ldc){
   dev_ptr* ptr_A;
   dev_ptr* ptr_B;
   dev_ptr* ptr_C;
@@ -1070,7 +1070,7 @@ static VALUE rb_cublasSsymm(VALUE self){
 }
 
 // void cublasDsymm ( char side, char uplo, int m, int n, double alpha, const(double)* A, int lda, const(double)* B, int ldb, double beta, double* C, int ldc);
-static VALUE rb_cublasDsymm(VALUE self){
+static VALUE rb_cublasDsymm(VALUE self, VALUE side, VALUE uplo, VALUE m, VALUE n, VALUE alpha, VALUE A, VALUE lda, VALUE B, VALUE ldb, VALUE beta, VALUE C, VALUE ldc){
   dev_ptr* ptr_A;
   dev_ptr* ptr_B;
   dev_ptr* ptr_C;
@@ -1116,7 +1116,7 @@ static VALUE rb_cublasStrsm(VALUE self){
 }
 
 // void cublasDtrsm ( char side, char uplo, char transa, char diag, int m, int n, double alpha, const(double)* A, int lda, double* B, int ldb);
-static VALUE rb_cublasDtrsm(VALUE self){
+static VALUE rb_cublasDtrsm(VALUE self, VALUE side, VALUE uplo, VALUE transa, VALUE diag, VALUE m, VALUE n, VALUE alpha, VALUE A, VALUE lda, VALUE B, VALUE ldb){
   dev_ptr* ptr_A;
   dev_ptr* ptr_B;
 
@@ -1148,7 +1148,7 @@ static VALUE rb_cublasStrmm(VALUE self){
 }
 
 // void cublasDtrmm ( char side, char uplo, char transa, char diag, int m, int n, double alpha, const(double)* A, int lda, double* B, int ldb);
-static VALUE rb_cublasDtrmm(VALUE self){
+static VALUE rb_cublasDtrmm(VALUE self, VALUE side, VALUE uplo, VALUE transa, VALUE diag, VALUE m, VALUE n, VALUE alpha, VALUE A, VALUE lda, VALUE B, VALUE ldb){
   dev_ptr* ptr_A;
   dev_ptr* ptr_B;
 
