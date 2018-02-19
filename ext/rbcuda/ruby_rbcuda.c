@@ -215,7 +215,7 @@ static VALUE rb_cublasZsyrk(VALUE self);
 static VALUE rb_cublasCherk(VALUE self);
 static VALUE rb_cublasZherk(VALUE self);
 static VALUE rb_cublasSsyr2k(VALUE self);
-static VALUE rb_cublasDsyr2k(VALUE self, VALUE uplo, VALUE trans, VALUE n, VALUE k, VALUE alpha, VALUE A, VALUE lda, VALUE B, VALUE ldb, VALUE beta. VALUE C, VALUE ldc);
+static VALUE rb_cublasDsyr2k(VALUE self, VALUE uplo, VALUE trans, VALUE n, VALUE k, VALUE alpha, VALUE A, VALUE lda, VALUE B, VALUE ldb, VALUE beta, VALUE C, VALUE ldc);
 static VALUE rb_cublasCsyr2k(VALUE self);
 static VALUE rb_cublasZsyr2k(VALUE self);
 static VALUE rb_cublasCher2k(VALUE self);
