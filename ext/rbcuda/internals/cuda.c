@@ -101,9 +101,9 @@ static VALUE rb_cuDeviceGetCount(VALUE self){
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_INVALID_DEVICE
 
 static VALUE rb_cuDeviceGetName(VALUE self, VALUE len_val, VALUE device_val){
-  char* name;
+  char* name = (char *)malloc(NUM2ULONG(len_val) * sizeof(char));
   CUdevice dev = NUM2ULONG(device_val);
-  CUresult result = cuDeviceGetName(name, NUM2INT(len_val), dev);
+  CUresult result = cuDeviceGetName(name, NUM2ULONG(len_val), dev);
   return rb_str_new_cstr(name);
 }
 
@@ -2152,7 +2152,15 @@ static VALUE rb_cuLaunchKernel(VALUE self, VALUE f_val, VALUE gridDimX, VALUE gr
   function_ptr* f;
   Data_Get_Struct(f_val, function_ptr, f);
   custream_ptr* h_stream;
-  Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+  // Data_Get_Struct(h_stream_val, custream_ptr, h_stream);
+
+  void* args[3];
+
+  for(size_t i = 0; i < 3; i++){
+    dev_ptr* ptr_arr;
+    Data_Get_Struct(RARRAY_AREF(kernel_params, i), dev_ptr, ptr_arr);
+    args[i] = ptr_arr->carray;
+  }
 
   CUresult result = cuLaunchKernel(
     f->function,
@@ -2163,9 +2171,9 @@ static VALUE rb_cuLaunchKernel(VALUE self, VALUE f_val, VALUE gridDimX, VALUE gr
     NUM2UINT(blockDimY),
     NUM2UINT(blockDimZ),
     NUM2UINT(sharedMemBytes),
-    h_stream->stream,
-    (void**)kernel_params,
-    (void**)extra
+    0,
+    args,
+    0
   );
 
   return Qtrue;

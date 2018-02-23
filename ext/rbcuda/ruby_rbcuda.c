@@ -70,7 +70,7 @@ void setupDeviceMemory(CUdeviceptr *d_a, CUdeviceptr *d_b, CUdeviceptr *d_c);
 void releaseDeviceMemory(CUdeviceptr d_a, CUdeviceptr d_b, CUdeviceptr d_c);
 void runKernel(CUdeviceptr d_a, CUdeviceptr d_b, CUdeviceptr d_c);
 static VALUE test(char* module_file);
-
+static VALUE init(VALUE module_val, VALUE kernel_name);
 static VALUE test_kernel(VALUE self, VALUE module_file_name);
 
 //Arithmetic
@@ -1018,16 +1018,17 @@ void Init_rbcuda() {
 
   Driver = rb_define_class_under(RbCUDA, "Driver", rb_cObject);
   rb_define_singleton_method(Driver, "test_kernel", (METHOD)test_kernel, 1);
+  rb_define_singleton_method(Driver, "init", (METHOD)init, 1);
 
   CUDA = rb_define_module_under(RbCUDA, "CUDA");
   rb_define_singleton_method(CUDA, "cuGetErrorString", (METHOD)rb_cuGetErrorString, 0);
   rb_define_singleton_method(CUDA, "cuGetErrorName", (METHOD)rb_cuGetErrorName, 0);
-  rb_define_singleton_method(CUDA, "cuInit", (METHOD)rb_cuInit, 0);
+  rb_define_singleton_method(CUDA, "cuInit", (METHOD)rb_cuInit, 1);
   rb_define_singleton_method(CUDA, "cuDriverGetVersion", (METHOD)rb_cuDriverGetVersion, 0);
-  rb_define_singleton_method(CUDA, "cuDeviceGet", (METHOD)rb_cuDeviceGet, 0);
+  rb_define_singleton_method(CUDA, "cuDeviceGet", (METHOD)rb_cuDeviceGet, 1);
   rb_define_singleton_method(CUDA, "cuDeviceGetCount", (METHOD)rb_cuDeviceGetCount, 0);
-  rb_define_singleton_method(CUDA, "cuDeviceGetName", (METHOD)rb_cuDeviceGetName, 0);
-  rb_define_singleton_method(CUDA, "cuDeviceTotalMem_v2", (METHOD)rb_cuDeviceTotalMem_v2, 0);
+  rb_define_singleton_method(CUDA, "cuDeviceGetName", (METHOD)rb_cuDeviceGetName, 2);
+  rb_define_singleton_method(CUDA, "cuDeviceTotalMem_v2", (METHOD)rb_cuDeviceTotalMem_v2, 1);
   rb_define_singleton_method(CUDA, "cuDeviceGetAttribute", (METHOD)rb_cuDeviceGetAttribute, 0);
   rb_define_singleton_method(CUDA, "cuDeviceGetProperties", (METHOD)rb_cuDeviceGetProperties, 0);
   rb_define_singleton_method(CUDA, "cuDeviceComputeCapability", (METHOD)rb_cuDeviceComputeCapability, 0);
@@ -1036,7 +1037,7 @@ void Init_rbcuda() {
   rb_define_singleton_method(CUDA, "cuDevicePrimaryCtxSetFlags", (METHOD)rb_cuDevicePrimaryCtxSetFlags, 0);
   rb_define_singleton_method(CUDA, "cuDevicePrimaryCtxGetState", (METHOD)rb_cuDevicePrimaryCtxGetState, 0);
   rb_define_singleton_method(CUDA, "cuDevicePrimaryCtxReset", (METHOD)rb_cuDevicePrimaryCtxReset, 0);
-  rb_define_singleton_method(CUDA, "cuCtxCreate_v2", (METHOD)rb_cuCtxCreate_v2, 0);
+  rb_define_singleton_method(CUDA, "cuCtxCreate_v2", (METHOD)rb_cuCtxCreate_v2, 2);
   rb_define_singleton_method(CUDA, "cuCtxDestroy_v2", (METHOD)rb_cuCtxDestroy_v2, 0);
   rb_define_singleton_method(CUDA, "cuCtxPushCurrent_v2", (METHOD)rb_cuCtxPushCurrent_v2, 0);
   rb_define_singleton_method(CUDA, "cuCtxPopCurrent_v2", (METHOD)rb_cuCtxPopCurrent_v2, 0);
@@ -1055,12 +1056,12 @@ void Init_rbcuda() {
   rb_define_singleton_method(CUDA, "cuCtxGetStreamPriorityRange", (METHOD)rb_cuCtxGetStreamPriorityRange, 0);
   rb_define_singleton_method(CUDA, "cuCtxAttach", (METHOD)rb_cuCtxAttach, 0);
   rb_define_singleton_method(CUDA, "cuCtxDetach", (METHOD)rb_cuCtxDetach, 0);
-  rb_define_singleton_method(CUDA, "cuModuleLoad", (METHOD)rb_cuModuleLoad, 0);
+  rb_define_singleton_method(CUDA, "cuModuleLoad", (METHOD)rb_cuModuleLoad, 1);
   rb_define_singleton_method(CUDA, "cuModuleLoadData", (METHOD)rb_cuModuleLoadData, 0);
   rb_define_singleton_method(CUDA, "cuModuleLoadDataEx", (METHOD)rb_cuModuleLoadDataEx, 0);
   rb_define_singleton_method(CUDA, "cuModuleLoadFatBinary", (METHOD)rb_cuModuleLoadFatBinary, 0);
   rb_define_singleton_method(CUDA, "cuModuleUnload", (METHOD)rb_cuModuleUnload, 0);
-  rb_define_singleton_method(CUDA, "cuModuleGetFunction", (METHOD)rb_cuModuleGetFunction, 0);
+  rb_define_singleton_method(CUDA, "cuModuleGetFunction", (METHOD)rb_cuModuleGetFunction, 2);
   rb_define_singleton_method(CUDA, "cuModuleGetGlobal_v2", (METHOD)rb_cuModuleGetGlobal_v2, 0);
   rb_define_singleton_method(CUDA, "cuModuleGetTexRef", (METHOD)rb_cuModuleGetTexRef, 0);
   rb_define_singleton_method(CUDA, "cuModuleGetSurfRef", (METHOD)rb_cuModuleGetSurfRef, 0);
@@ -1155,7 +1156,7 @@ void Init_rbcuda() {
   rb_define_singleton_method(CUDA, "cuFuncGetAttribute", (METHOD)rb_cuFuncGetAttribute, 0);
   rb_define_singleton_method(CUDA, "cuFuncSetCacheConfig", (METHOD)rb_cuFuncSetCacheConfig, 0);
   rb_define_singleton_method(CUDA, "cuFuncSetSharedMemConfig", (METHOD)rb_cuFuncSetSharedMemConfig, 0);
-  rb_define_singleton_method(CUDA, "cuLaunchKernel", (METHOD)rb_cuLaunchKernel, 0);
+  rb_define_singleton_method(CUDA, "cuLaunchKernel", (METHOD)rb_cuLaunchKernel, 11);
   rb_define_singleton_method(CUDA, "cuFuncSetBlockShape", (METHOD)rb_cuFuncSetBlockShape, 0);
   rb_define_singleton_method(CUDA, "cuFuncSetSharedSize", (METHOD)rb_cuFuncSetSharedSize, 0);
   rb_define_singleton_method(CUDA, "cuParamSetSize", (METHOD)rb_cuParamSetSize, 0);
