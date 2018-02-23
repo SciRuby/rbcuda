@@ -101,7 +101,7 @@ static VALUE rb_cublasZscal(VALUE self);
 static VALUE rb_cublasCsscal(VALUE self);
 static VALUE rb_cublasZdscal(VALUE self);
 static VALUE rb_cublasSaxpy(VALUE self);
-static VALUE rb_cublasDaxpy(VALUE self, VALUE alpha, VALUE x. VALUE incx, VALUE y, VALUE incy);
+static VALUE rb_cublasDaxpy(VALUE self, VALUE alpha, VALUE x, VALUE incx, VALUE y, VALUE incy);
 static VALUE rb_cublasCaxpy(VALUE self);
 static VALUE rb_cublasZaxpy(VALUE self);
 static VALUE rb_cublasScopy(VALUE self);
@@ -1934,6 +1934,7 @@ static void rbcu_free(dev_ptr* ptr){
 #include "internals/cuda_runtime_api.c"
 
 #include "profiler/cuda_profiler_api.c"
+#include "solver/cusolverDn.c"
 
 #include "random/curand.c"
 #include "driver/driver.c"
