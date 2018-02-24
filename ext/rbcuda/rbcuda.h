@@ -23,6 +23,11 @@ typedef struct FUNCTION_PTR
   CUfunction function;
 }function_ptr;
 
+typedef struct DEVICE_PTR
+{
+  CUdevice device;
+}device_ptr;
+
 typedef struct TEXTURE_PTR
 {
   CUtexref texture;

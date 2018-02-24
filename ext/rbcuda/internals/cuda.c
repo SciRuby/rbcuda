@@ -69,9 +69,9 @@ static VALUE rb_cuDriverGetVersion(VALUE self, VALUE driver_version_val){
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE, CUDA_ERROR_INVALID_DEVICE
 
 static VALUE rb_cuDeviceGet(VALUE self, VALUE ordinal){
-  CUdevice device;
-  CUresult result = cuDeviceGet(&device, NUM2INT(ordinal));
-  return UINT2NUM(device);
+  device_ptr* pdevice = ALLOC(device_ptr);
+  CUresult result = cuDeviceGet(&pdevice->device, NUM2INT(ordinal));
+  return Data_Wrap_Struct(RbCuDevice, NULL, rbcu_free, pdevice);
 }
 
 // CUresult cuDeviceGetCount ( int* count )
@@ -102,8 +102,9 @@ static VALUE rb_cuDeviceGetCount(VALUE self){
 
 static VALUE rb_cuDeviceGetName(VALUE self, VALUE len_val, VALUE device_val){
   char* name = (char *)malloc(NUM2ULONG(len_val) * sizeof(char));
-  CUdevice dev = NUM2ULONG(device_val);
-  CUresult result = cuDeviceGetName(name, NUM2ULONG(len_val), dev);
+  device_ptr* device;
+  Data_Get_Struct(device_val, device_ptr, device);
+  CUresult result = cuDeviceGetName(name, NUM2ULONG(len_val), device->device);
   return rb_str_new_cstr(name);
 }
 
@@ -119,8 +120,9 @@ static VALUE rb_cuDeviceGetName(VALUE self, VALUE len_val, VALUE device_val){
 
 static VALUE rb_cuDeviceTotalMem_v2(VALUE self, VALUE device_val){
   size_t bytes;
-  CUdevice dev = NUM2ULONG(device_val);
-  CUresult result = cuDeviceTotalMem_v2(&bytes, dev);
+  device_ptr* device;
+  Data_Get_Struct(device_val, device_ptr, device);
+  CUresult result = cuDeviceTotalMem_v2(&bytes, device->device);
   return ULONG2NUM(bytes);
 }
 
@@ -138,9 +140,10 @@ static VALUE rb_cuDeviceTotalMem_v2(VALUE self, VALUE device_val){
 
 static VALUE rb_cuDeviceGetAttribute(VALUE self, VALUE pi_val, VALUE attrib_val, VALUE device_val){
   int pi;
-  CUdevice dev = NUM2ULONG(device_val);
+  device_ptr* device;
+  Data_Get_Struct(device_val, device_ptr, device);
   CUdevice_attribute attrib = rb_cu_get_attrib_from_rbsymbol(attrib_val);
-  CUresult result = cuDeviceGetAttribute(&pi, attrib, dev);
+  CUresult result = cuDeviceGetAttribute(&pi, attrib, device->device);
   return INT2NUM(pi);
 }
 
@@ -153,10 +156,11 @@ static VALUE rb_cuDeviceGetAttribute(VALUE self, VALUE pi_val, VALUE attrib_val,
 // - Device to get properties for
 
 static VALUE rb_cuDeviceGetProperties(VALUE self, VALUE device_val){
-  CUdevice dev = NUM2ULONG(device_val);
+  device_ptr* device;
+  Data_Get_Struct(device_val, device_ptr, device);
   CUdevprop* prop;
-  CUresult result = cuDeviceGetProperties(prop, dev);
-  return ULONG2NUM(dev);
+  CUresult result = cuDeviceGetProperties(prop, device->device);
+  return Qnil;
 }
 
 // CUresult cuDeviceComputeCapability ( int* major, int* minor, CUdevice dev )
@@ -173,8 +177,9 @@ static VALUE rb_cuDeviceGetProperties(VALUE self, VALUE device_val){
 
 static VALUE rb_cuDeviceComputeCapability(VALUE self, VALUE device_val){
   int major, minor;
-  CUdevice dev = NUM2ULONG(device_val);
-  CUresult result = cuDeviceComputeCapability(&major, &minor, dev);
+  device_ptr* device;
+  Data_Get_Struct(device_val, device_ptr, device);
+  CUresult result = cuDeviceComputeCapability(&major, &minor, device->device);
   return Qnil;
 }
 
@@ -191,8 +196,9 @@ static VALUE rb_cuDeviceComputeCapability(VALUE self, VALUE device_val){
 
 static VALUE rb_cuDevicePrimaryCtxRetain(VALUE self, VALUE device_val){
   ctx_ptr* pctx = ALLOC(ctx_ptr);
-  CUdevice dev = NUM2ULONG(device_val);
-  CUresult result = cuDevicePrimaryCtxRetain(&pctx->ctx, dev);
+  device_ptr* device;
+  Data_Get_Struct(device_val, device_ptr, device);
+  CUresult result = cuDevicePrimaryCtxRetain(&pctx->ctx, device->device);
   return Data_Wrap_Struct(RbCuContext, NULL, rbcu_free, pctx);
 }
 
@@ -205,8 +211,9 @@ static VALUE rb_cuDevicePrimaryCtxRetain(VALUE self, VALUE device_val){
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_DEVICE
 
 static VALUE rb_cuDevicePrimaryCtxRelease(VALUE self, VALUE device_val){
-  CUdevice dev = NUM2ULONG(device_val);
-  CUresult result = cuDevicePrimaryCtxRelease(dev);
+  device_ptr* device;
+  Data_Get_Struct(device_val, device_ptr, device);
+  CUresult result = cuDevicePrimaryCtxRelease(device->device);
   return Qnil;
 }
 
@@ -223,8 +230,9 @@ static VALUE rb_cuDevicePrimaryCtxRelease(VALUE self, VALUE device_val){
 
 
 static VALUE rb_cuDevicePrimaryCtxSetFlags(VALUE self, VALUE  device_val, VALUE flags){
-  CUdevice dev = NUM2ULONG(device_val);
-  CUresult result = cuDevicePrimaryCtxSetFlags(dev, NUM2UINT(flags));
+  device_ptr* device;
+  Data_Get_Struct(device_val, device_ptr, device);
+  CUresult result = cuDevicePrimaryCtxSetFlags(device->device, NUM2UINT(flags));
   return Qnil;
 }
 
@@ -241,10 +249,11 @@ static VALUE rb_cuDevicePrimaryCtxSetFlags(VALUE self, VALUE  device_val, VALUE 
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_DEVICE, CUDA_ERROR_INVALID_VALUE,
 
 static VALUE rb_cuDevicePrimaryCtxGetState(VALUE self, VALUE device_val){
-  CUdevice dev = NUM2ULONG(device_val);
   uint flags;
   int active;
-  CUresult result = cuDevicePrimaryCtxGetState(dev, &flags, &active);
+  device_ptr* device;
+  Data_Get_Struct(device_val, device_ptr, device);
+  CUresult result = cuDevicePrimaryCtxGetState(device->device, &flags, &active);
   return Qnil;
 }
 
@@ -258,8 +267,9 @@ static VALUE rb_cuDevicePrimaryCtxGetState(VALUE self, VALUE device_val){
 // CUDA_ERROR_PRIMARY_CONTEXT_ACTIVE
 
 static VALUE rb_cuDevicePrimaryCtxReset(VALUE self, VALUE device_val){
-  CUdevice dev = NUM2ULONG(device_val);
-  CUresult result = cuDevicePrimaryCtxReset(dev);
+  device_ptr* device;
+  Data_Get_Struct(device_val, device_ptr, device);
+  CUresult result = cuDevicePrimaryCtxReset(device->device);
   return Qnil;
 }
 
@@ -282,9 +292,10 @@ static VALUE rb_cuDevicePrimaryCtxReset(VALUE self, VALUE device_val){
 /////////////////////////////////////////////////////////
 
 static VALUE rb_cuCtxCreate_v2(VALUE self, VALUE flags, VALUE device_val){
-  CUdevice dev = NUM2ULONG(device_val);
+  device_ptr* device;
+  Data_Get_Struct(device_val, device_ptr, device);
   ctx_ptr* pctx = ALLOC(ctx_ptr);
-  CUresult result = cuCtxCreate_v2 (&pctx->ctx, UINT2NUM(flags), dev);
+  CUresult result = cuCtxCreate_v2 (&pctx->ctx, UINT2NUM(flags), device->device);
   return Data_Wrap_Struct(RbCuContext, NULL, rbcu_free, pctx);
 }
 
@@ -368,9 +379,9 @@ static VALUE rb_cuCtxGetCurrent(VALUE self){
 // CUDA_SUCCESS, CUDA_ERROR_DEINITIALIZED, CUDA_ERROR_NOT_INITIALIZED, CUDA_ERROR_INVALID_CONTEXT, CUDA_ERROR_INVALID_VALUE,
 
 static VALUE rb_cuCtxGetDevice(VALUE self){
-  CUdevice device;
-  CUresult result = cuCtxGetDevice(&device);
-  return ULONG2NUM(device);
+  device_ptr* device = ALLOC(device_ptr);
+  CUresult result = cuCtxGetDevice(&device->device);
+  return Data_Wrap_Struct(RbCuDevice, NULL, rbcu_free, device);
 }
 
 // CUresult cuCtxGetFlags ( unsigned int* flags )

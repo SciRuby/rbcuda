@@ -45,13 +45,14 @@ puts module_file.path
 RbCUDA::CUDA.cuInit(0);
 
 device = RbCUDA::CUDA.cuDeviceGet(0);
+puts device
 
 puts RbCUDA::CUDA.cuDeviceGetCount;
 
-puts RbCUDA::CUDA.cuDeviceGetName(100, 0);
-puts (RbCUDA::CUDA.cuDeviceTotalMem_v2(0)/(1024**2)).to_s + " MB"
+puts RbCUDA::CUDA.cuDeviceGetName(100, device);
+puts (RbCUDA::CUDA.cuDeviceTotalMem_v2(device)/(1024**2)).to_s + " MB"
 
-ctx = RbCUDA::CUDA.cuCtxCreate_v2(0, 0)
+ctx = RbCUDA::CUDA.cuCtxCreate_v2(0, device)
 
 puts ctx
 

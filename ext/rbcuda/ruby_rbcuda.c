@@ -10,6 +10,7 @@ VALUE Profiler = Qnil;
 VALUE Runtime = Qnil;
 VALUE CuBLASHandler = Qnil;
 VALUE RbCuContext = Qnil;
+VALUE RbCuDevice = Qnil;
 VALUE RbCuModule = Qnil;
 VALUE RbCuFunction = Qnil;
 VALUE RbCuArray = Qnil;
@@ -1003,6 +1004,7 @@ void Init_rbcuda() {
 
   CuBLASHandler = rb_define_class_under(RbCUDA, "CuBLASHandler", rb_cObject);
   RbCuContext   = rb_define_class_under(RbCUDA, "RbCuContext",   rb_cObject);
+  RbCuDevice    = rb_define_class_under(RbCUDA, "RbCuDevice",    rb_cObject);
   RbCuModule    = rb_define_class_under(RbCUDA, "RbCuModule",    rb_cObject);
   RbCuFunction  = rb_define_class_under(RbCUDA, "RbCuFunction",  rb_cObject);
   RbCuArray     = rb_define_class_under(RbCUDA, "RbCuArray",     rb_cObject);
