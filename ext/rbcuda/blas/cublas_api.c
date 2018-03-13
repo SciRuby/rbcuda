@@ -298,10 +298,17 @@ static VALUE rb_cublasSnrm2_v2(VALUE self){
 
 // cublasStatus_t cublasDnrm2_v2 (cublasHandle_t handle, int n, const(double)* x, int incx, double* result); /* host or device pointer */
 
-static VALUE rb_cublasDnrm2_v2(VALUE self, VALUE handler_val){
+static VALUE rb_cublasDnrm2_v2(VALUE self, VALUE handler_val, VALUE n, VALUE x, VALUE incx){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
-  return Qnil;
+
+  dev_ptr* ptr_x;
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+
+  double result;
+
+  cublasStatus_t status = cublasDnrm2_v2(handler->handle, NUM2INT(n), ptr_x->carray, NUM2INT(incx), &result);
+  return DBL2NUM(result);
 }
 
 static VALUE rb_cublasScnrm2_v2(VALUE self){
