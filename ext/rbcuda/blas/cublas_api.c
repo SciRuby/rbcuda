@@ -327,10 +327,19 @@ static VALUE rb_cublasSdot_v2(VALUE self){
 
 // cublasStatus_t cublasDdot_v2 ( cublasHandle_t handle, int n, const(double)* x, int incx, const(double)* y, int incy, double* result); /* host or device pointer */
 
-static VALUE rb_cublasDdot_v2(VALUE self, VALUE handler_val){
+static VALUE rb_cublasDdot_v2(VALUE self, VALUE handler_val, VALUE n, VALUE x, VALUE incx, VALUE y, VALUE incy){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
-  return Qnil;
+
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
+  Data_Get_Struct(x, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
+
+  double result;
+
+  cublasStatus_t status = cublasDdot_v2(handler->handle, NUM2INT(n), ptr_x->carray, NUM2INT(incx), ptr_y->carray, NUM2INT(incy), &result);
+  return DBL2NUM(result);
 }
 
 static VALUE rb_cublasCdotu_v2(VALUE self){
@@ -363,10 +372,9 @@ static VALUE rb_cublasDscal_v2(VALUE self, VALUE handler_val, VALUE n, VALUE alp
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
   dev_ptr* ptr_x;
   Data_Get_Struct(x_val, dev_ptr, ptr_x);
-  const double alpha2 = 1;
-  const double *alf = &alpha2;
+  const double alf = NUM2DBL(alpha);
 
-  cublasStatus_t status = cublasDscal_v2 (handler->handle, NUM2INT(n), alf, ptr_x->carray, NUM2INT(incx));
+  cublasStatus_t status = cublasDscal_v2(handler->handle, NUM2INT(n), &alf, ptr_x->carray, NUM2INT(incx));
   return Qnil;
 }
 
@@ -403,9 +411,8 @@ static VALUE rb_cublasDaxpy_v2(VALUE self, VALUE handler_val, VALUE n, VALUE alp
   Data_Get_Struct(x_val, dev_ptr, ptr_x);
   Data_Get_Struct(y_val, dev_ptr, ptr_y);
 
-  const double alpha2 = 1;
-  const double *alf = &alpha2;
-  cublasStatus_t status = cublasDaxpy_v2(handler->handle, NUM2INT(n), alf, ptr_x->carray, NUM2INT(incx), ptr_y->carray, NUM2INT(incy));
+  const double alf = NUM2DBL(alpha);
+  cublasStatus_t status = cublasDaxpy_v2(handler->handle, NUM2INT(n), &alf, ptr_x->carray, NUM2INT(incx), ptr_y->carray, NUM2INT(incy));
 
   return Qnil;
 }
@@ -527,7 +534,7 @@ static VALUE rb_cublasIdamin_v2(VALUE self, VALUE handler_val, VALUE n, VALUE x_
 
   int result;
 
-  cublasStatus_t status = cublasIdamax_v2(handler->handle, NUM2INT(n), ptr_x->carray, NUM2INT(incx), &result);
+  cublasStatus_t status = cublasIdamin_v2(handler->handle, NUM2INT(n), ptr_x->carray, NUM2INT(incx), &result);
 
   return INT2NUM(result);
 }

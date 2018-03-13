@@ -71,7 +71,7 @@ void setupDeviceMemory(CUdeviceptr *d_a, CUdeviceptr *d_b, CUdeviceptr *d_c);
 void releaseDeviceMemory(CUdeviceptr d_a, CUdeviceptr d_b, CUdeviceptr d_c);
 void runKernel(CUdeviceptr d_a, CUdeviceptr d_b, CUdeviceptr d_c);
 static VALUE test(char* module_file);
-static VALUE init(VALUE module_val, VALUE kernel_name);
+// static VALUE init(VALUE module_val, VALUE kernel_name);
 static VALUE test_kernel(VALUE self, VALUE module_file_name);
 
 //Arithmetic
@@ -310,11 +310,11 @@ static VALUE rb_cublasGetVectorAsync(VALUE self);
 static VALUE rb_cublasSetMatrixAsync(VALUE self);
 static VALUE rb_cublasGetMatrixAsync(VALUE self);
 static VALUE rb_cublasSnrm2_v2(VALUE self);
-static VALUE rb_cublasDnrm2_v2(VALUE self, VALUE handler_val);
+static VALUE rb_cublasDnrm2_v2(VALUE self, VALUE handler_val, VALUE n, VALUE x, VALUE incx);
 static VALUE rb_cublasScnrm2_v2(VALUE self);
 static VALUE rb_cublasDznrm2_v2(VALUE self);
 static VALUE rb_cublasSdot_v2(VALUE self);
-static VALUE rb_cublasDdot_v2(VALUE self, VALUE handler_val);
+static VALUE rb_cublasDdot_v2(VALUE self, VALUE handler_val, VALUE n, VALUE x, VALUE incx, VALUE y, VALUE incy);
 static VALUE rb_cublasCdotu_v2(VALUE self);
 static VALUE rb_cublasCdotc_v2(VALUE self);
 static VALUE rb_cublasZdotu_v2(VALUE self);
@@ -1020,7 +1020,8 @@ void Init_rbcuda() {
 
   Driver = rb_define_class_under(RbCUDA, "Driver", rb_cObject);
   rb_define_singleton_method(Driver, "test_kernel", (METHOD)test_kernel, 1);
-  rb_define_singleton_method(Driver, "init", (METHOD)init, 1);
+  // rb_define_singleton_method(Driver, "init", (METHOD)init, 1);
+
 
   CUDA = rb_define_module_under(RbCUDA, "CUDA");
   rb_define_singleton_method(CUDA, "cuGetErrorString", (METHOD)rb_cuGetErrorString, 1);
@@ -1549,17 +1550,17 @@ void Init_rbcuda() {
   rb_define_singleton_method(CuBLAS_v2, "cublasSetMatrixAsync", (METHOD)rb_cublasSetMatrixAsync, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasGetMatrixAsync", (METHOD)rb_cublasGetMatrixAsync, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasSnrm2_v2", (METHOD)rb_cublasSnrm2_v2, 0);
-  rb_define_singleton_method(CuBLAS_v2, "cublasDnrm2_v2", (METHOD)rb_cublasDnrm2_v2, 1);
+  rb_define_singleton_method(CuBLAS_v2, "cublasDnrm2_v2", (METHOD)rb_cublasDnrm2_v2, 4);
   rb_define_singleton_method(CuBLAS_v2, "cublasScnrm2_v2", (METHOD)rb_cublasScnrm2_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasDznrm2_v2", (METHOD)rb_cublasDznrm2_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasSdot_v2", (METHOD)rb_cublasSdot_v2, 0);
-  rb_define_singleton_method(CuBLAS_v2, "cublasDdot_v2", (METHOD)rb_cublasDdot_v2, 1);
+  rb_define_singleton_method(CuBLAS_v2, "cublasDdot_v2", (METHOD)rb_cublasDdot_v2, 6) ;
   rb_define_singleton_method(CuBLAS_v2, "cublasCdotu_v2", (METHOD)rb_cublasCdotu_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasCdotc_v2", (METHOD)rb_cublasCdotc_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasZdotu_v2", (METHOD)rb_cublasZdotu_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasZdotc_v2", (METHOD)rb_cublasZdotc_v2, 0);
-  rb_define_singleton_method(CuBLAS_v2, "cublasSscal_v2", (METHOD)rb_cublasSscal_v2, 5);
-  rb_define_singleton_method(CuBLAS_v2, "cublasDscal_v2", (METHOD)rb_cublasDscal_v2, 0);
+  rb_define_singleton_method(CuBLAS_v2, "cublasSscal_v2", (METHOD)rb_cublasSscal_v2, 0);
+  rb_define_singleton_method(CuBLAS_v2, "cublasDscal_v2", (METHOD)rb_cublasDscal_v2, 5);
   rb_define_singleton_method(CuBLAS_v2, "cublasCscal_v2", (METHOD)rb_cublasCscal_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasCsscal_v2", (METHOD)rb_cublasCsscal_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasZscal_v2", (METHOD)rb_cublasZscal_v2, 0);
@@ -1875,7 +1876,7 @@ void Init_rbcuda() {
   rb_define_singleton_method(CuSolver, "cusolverDnCgesvd_bufferSize", (METHOD)rb_cusolverDnCgesvd_bufferSize, 0);
   rb_define_singleton_method(CuSolver, "cusolverDnZgesvd_bufferSize", (METHOD)rb_cusolverDnZgesvd_bufferSize, 0);
   rb_define_singleton_method(CuSolver, "cusolverDnSgesvd", (METHOD)rb_cusolverDnSgesvd, 0);
-  rb_define_singleton_method(CuSolver, "cusolverDnDgesvd", (METHOD)rb_cusolverDnDgesvd, 16);
+  rb_define_singleton_method(CuSolver, "cusolverDnDgesvd", (METHOD)rb_cusolverDnDgesvd, 15);
   rb_define_singleton_method(CuSolver, "cusolverDnCgesvd", (METHOD)rb_cusolverDnCgesvd, 0);
   rb_define_singleton_method(CuSolver, "cusolverDnZgesvd", (METHOD)rb_cusolverDnZgesvd, 0);
   rb_define_singleton_method(CuSolver, "cusolverDnSsytrf", (METHOD)rb_cusolverDnSsytrf, 0);
