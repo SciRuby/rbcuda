@@ -120,3 +120,28 @@ RbCUDA::Runtime.cudaMemcpy(gpu_ary_res1, arr, shape[0]*shape[1], :cudaMemcpyHost
 puts RbCUDA::CuBLAS_v2.cublasDasum_v2(handle, shape[0], gpu_ary_res1, 1)
 
 RbCUDA::Runtime.cudaFree(gpu_ary_res1)
+
+puts "============================"
+
+shape = [4,1]
+gpu_ary_res1 = RbCUDA::Runtime.cudaMalloc(shape)
+gpu_ary_res2 = RbCUDA::Runtime.cudaMalloc(shape)
+
+RbCUDA::Runtime.cudaMemcpy(gpu_ary_res1, cpu_ary1, shape[0]*shape[1], :cudaMemcpyHostToDevice)
+RbCUDA::Runtime.cudaMemcpy(gpu_ary_res2, cpu_ary2, shape[0]*shape[1], :cudaMemcpyHostToDevice)
+
+RbCUDA::CuBLAS_v2.cublasDrot_v2(handle, shape[0], gpu_ary_res1, 1, gpu_ary_res2, 1, 2, 1)
+
+puts RbCUDA::Runtime.cudaMemcpy([], gpu_ary_res1, shape[0]*shape[1], :cudaMemcpyDeviceToHost)
+puts RbCUDA::Runtime.cudaMemcpy([], gpu_ary_res2, shape[0]*shape[1], :cudaMemcpyDeviceToHost)
+RbCUDA::Runtime.cudaFree(gpu_ary_res1)
+RbCUDA::Runtime.cudaFree(gpu_ary_res2)
+
+puts "============================"
+a = 4
+b = 3
+c = 2
+d = 5
+puts RbCUDA::CuBLAS_v2.cublasDrotg_v2(handle, a, b, c, d)
+
+puts "============================"

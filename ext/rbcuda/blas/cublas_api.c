@@ -584,21 +584,20 @@ static VALUE rb_cublasSrot_v2(VALUE self){
 
 // cublasStatus_t cublasDrot_v2 ( cublasHandle_t handle, int n, double* x, int incx, double* y, int incy, const(double)* c, const(double)* s); /* host or device pointer */
 
-static VALUE rb_cublasDrot_v2(VALUE self, VALUE handler_val, VALUE n, VALUE x_val, VALUE incx, VALUE y_val, VALUE incy, VALUE c_val, VALUE c, VALUE s){
+static VALUE rb_cublasDrot_v2(VALUE self, VALUE handler_val, VALUE n, VALUE x_val, VALUE incx, VALUE y_val, VALUE incy, VALUE c_val, VALUE s_val){
   dev_ptr* ptr_x;
   dev_ptr* ptr_y;
-  dev_ptr* ptr_c;
-  dev_ptr* ptr_s;
 
   Data_Get_Struct(x_val, dev_ptr, ptr_x);
   Data_Get_Struct(y_val, dev_ptr, ptr_y);
-  Data_Get_Struct(c_val, dev_ptr, ptr_c);
-  Data_Get_Struct(c_val, dev_ptr, ptr_s);
+
+  double c = DBL2NUM(c_val);
+  double s = DBL2NUM(s_val);
 
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
 
-  cublasStatus_t status = cublasDrot_v2(handler->handle, NUM2INT(n), ptr_x->carray, NUM2INT(incx), ptr_y->carray, NUM2INT(incy), ptr_c->carray, ptr_s->carray);
+  cublasStatus_t status = cublasDrot_v2(handler->handle, NUM2INT(n), ptr_x->carray, NUM2INT(incx), ptr_y->carray, NUM2INT(incy), &c, &s);
 
   return Qnil;
 }
@@ -628,21 +627,24 @@ static VALUE rb_cublasSrotg_v2(VALUE self){
 
 // cublasStatus_t cublasDrotg_v2 ( cublasHandle_t handle, double* a, double* b, double* c, double* s); /* host or device pointer */
 
-static VALUE rb_cublasDrotg_v2(VALUE self, VALUE handler_val, VALUE a_val, VALUE b_val, VALUE c_val, VALUE d_val){
+static VALUE rb_cublasDrotg_v2(VALUE self, VALUE handler_val, VALUE a_val, VALUE b_val, VALUE c_val, VALUE s_val){
   rb_cublas_handle* handler;
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
-  dev_ptr* ptr_a;
-  dev_ptr* ptr_b;
-  dev_ptr* ptr_c;
-  dev_ptr* ptr_d;
-  Data_Get_Struct(a_val, dev_ptr, ptr_a);
-  Data_Get_Struct(b_val, dev_ptr, ptr_b);
-  Data_Get_Struct(c_val, dev_ptr, ptr_c);
-  Data_Get_Struct(d_val, dev_ptr, ptr_d);
 
-  cublasStatus_t status = cublasDrotg_v2(handler->handle, ptr_a->carray, ptr_b->carray, ptr_c->carray, ptr_d->carray);
+  double a = DBL2NUM(a_val);
+  double b = DBL2NUM(b_val);
+  double c = DBL2NUM(c_val);
+  double s = DBL2NUM(s_val);
 
-  return Qtrue;
+  cublasStatus_t status = cublasDrotg_v2(handler->handle, &a, &b, &c, &s);
+
+  VALUE hash = rb_hash_new();
+  rb_hash_aset(hash, rb_str_new_cstr("a"), DBL2NUM(a));
+  rb_hash_aset(hash, rb_str_new_cstr("b"), DBL2NUM(b));
+  rb_hash_aset(hash, rb_str_new_cstr("c"), DBL2NUM(c));
+  rb_hash_aset(hash, rb_str_new_cstr("s"), DBL2NUM(s));
+
+  return hash;
 }
 
 static VALUE rb_cublasCrotg_v2(VALUE self){
@@ -707,9 +709,18 @@ static VALUE rb_cublasDgemv_v2(VALUE self, VALUE handler_val, VALUE trans, VALUE
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
 
   dev_ptr* ptr_A;
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
   Data_Get_Struct(a_val, dev_ptr, ptr_A);
+  Data_Get_Struct(x_val, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
 
-  cublasStatus_t status = cublasDgemv_v2(handler->handle, rbcu_cublasOperation_t(trans),  NUM2INT(m),  NUM2INT(n), (double*)alpha, ptr_A->carray,  NUM2INT(lda), (double*)x_val,  NUM2INT(incx), (double*)beta, (double*)y, NUM2INT(incy));
+  double alf = NUM2DBL(alpha);
+  double bet = NUM2DBL(beta);
+
+  cublasStatus_t status = cublasDgemv_v2(handler->handle, rbcu_cublasOperation_t(trans),  NUM2INT(m),  NUM2INT(n),
+                                          &alf, ptr_A->carray, NUM2INT(lda), ptr_x->carray, NUM2INT(incx), &bet,
+                                          ptr_y->carray, NUM2INT(incy));
 
   return Qnil;
 }
@@ -736,9 +747,18 @@ static VALUE rb_cublasDgbmv_v2(VALUE self, VALUE handler_val, VALUE trans, VALUE
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
 
   dev_ptr* ptr_A;
+  dev_ptr* ptr_x;
+  dev_ptr* ptr_y;
   Data_Get_Struct(a_val, dev_ptr, ptr_A);
+  Data_Get_Struct(x_val, dev_ptr, ptr_x);
+  Data_Get_Struct(y, dev_ptr, ptr_y);
 
-  cublasStatus_t status = cublasDgbmv_v2(handler->handle, rbcu_cublasOperation_t(trans), NUM2INT(m), NUM2INT(n), NUM2INT(kl), NUM2INT(ku), (double*)alpha, ptr_A->carray,  NUM2INT(lda), (double*)x_val, NUM2INT(incx), (double*)beta, (double*)y, NUM2INT(incy));
+  double alf = NUM2DBL(alpha);
+  double bet = NUM2DBL(beta);
+
+  cublasStatus_t status = cublasDgbmv_v2(handler->handle, rbcu_cublasOperation_t(trans), NUM2INT(m), NUM2INT(n), NUM2INT(kl), NUM2INT(ku),
+                                          &alf, ptr_A->carray,  NUM2INT(lda), ptr_x->carray, NUM2INT(incx),
+                                          &bet, ptr_y->carray, NUM2INT(incy));
 
   return Qnil;
 }
@@ -764,9 +784,13 @@ static VALUE rb_cublasDtrmv_v2(VALUE self, VALUE handler_val, VALUE uplo, VALUE 
   Data_Get_Struct(handler_val, rb_cublas_handle, handler);
 
   dev_ptr* ptr_A;
+  dev_ptr* ptr_x;
   Data_Get_Struct(a_val, dev_ptr, ptr_A);
+  Data_Get_Struct(x, dev_ptr, ptr_x);
 
-  cublasStatus_t status = cublasDtrmv_v2(handler->handle, rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans), rbcu_cublasDiagType_t(diag), NUM2INT(n), ptr_A->carray, NUM2INT(lda), (double*)x, NUM2INT(incx));
+  cublasStatus_t status = cublasDtrmv_v2(handler->handle, rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans),
+                                          rbcu_cublasDiagType_t(diag), NUM2INT(n), ptr_A->carray, NUM2INT(lda),
+                                          ptr_x->carray, NUM2INT(incx));
 
   return Qnil;
 }
@@ -794,9 +818,13 @@ static VALUE rb_cublasDtbmv_v2(VALUE self, VALUE handler_val, VALUE uplo, VALUE 
 
 
   dev_ptr* ptr_A;
+  dev_ptr* ptr_x;
   Data_Get_Struct(a_val, dev_ptr, ptr_A);
+  Data_Get_Struct(x_val, dev_ptr, ptr_x);
 
-  cublasStatus_t status = cublasDtbmv_v2(handler->handle, rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans), rbcu_cublasDiagType_t(diag), NUM2INT(n),  NUM2INT(k), ptr_A->carray, NUM2INT(lda), (double*)x_val, NUM2INT(incx));
+  cublasStatus_t status = cublasDtbmv_v2(handler->handle, rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans),
+                                          rbcu_cublasDiagType_t(diag), NUM2INT(n),  NUM2INT(k), ptr_A->carray, NUM2INT(lda),
+                                          ptr_x->carray, NUM2INT(incx));
 
   return Qnil;
 }

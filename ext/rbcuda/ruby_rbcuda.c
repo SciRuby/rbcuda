@@ -350,13 +350,13 @@ static VALUE rb_cublasDasum_v2(VALUE self, VALUE handler_val, VALUE n, VALUE x_v
 static VALUE rb_cublasScasum_v2(VALUE self);
 static VALUE rb_cublasDzasum_v2(VALUE self);
 static VALUE rb_cublasSrot_v2(VALUE self);
-static VALUE rb_cublasDrot_v2(VALUE self, VALUE handler_val, VALUE n, VALUE x_val, VALUE incx, VALUE y_val, VALUE incy, VALUE c_val, VALUE c, VALUE s);
+static VALUE rb_cublasDrot_v2(VALUE self, VALUE handler_val, VALUE n, VALUE x_val, VALUE incx, VALUE y_val, VALUE incy, VALUE c_val, VALUE s_val);
 static VALUE rb_cublasCrot_v2(VALUE self);
 static VALUE rb_cublasCsrot_v2(VALUE self);
 static VALUE rb_cublasZrot_v2(VALUE self);
 static VALUE rb_cublasZdrot_v2(VALUE self);
 static VALUE rb_cublasSrotg_v2(VALUE self);
-static VALUE rb_cublasDrotg_v2(VALUE self, VALUE handler_val, VALUE a_val, VALUE b_val, VALUE c_val, VALUE d_val);
+static VALUE rb_cublasDrotg_v2(VALUE self, VALUE handler_val, VALUE a_val, VALUE b_val, VALUE c_val, VALUE s_val);
 static VALUE rb_cublasCrotg_v2(VALUE self);
 static VALUE rb_cublasZrotg_v2(VALUE self);
 static VALUE rb_cublasSrotm_v2(VALUE self);
@@ -1590,7 +1590,7 @@ void Init_rbcuda() {
   rb_define_singleton_method(CuBLAS_v2, "cublasScasum_v2", (METHOD)rb_cublasScasum_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasDzasum_v2", (METHOD)rb_cublasDzasum_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasSrot_v2", (METHOD)rb_cublasSrot_v2, 0);
-  rb_define_singleton_method(CuBLAS_v2, "cublasDrot_v2", (METHOD)rb_cublasDrot_v2, 9);
+  rb_define_singleton_method(CuBLAS_v2, "cublasDrot_v2", (METHOD)rb_cublasDrot_v2, 8);
   rb_define_singleton_method(CuBLAS_v2, "cublasCrot_v2", (METHOD)rb_cublasCrot_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasCsrot_v2", (METHOD)rb_cublasCsrot_v2, 0);
   rb_define_singleton_method(CuBLAS_v2, "cublasZrot_v2", (METHOD)rb_cublasZrot_v2, 0);
