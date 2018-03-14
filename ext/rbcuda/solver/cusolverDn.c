@@ -1,16 +1,31 @@
 // cusolverStatus_t CUDENSEAPI cusolverDnCreate(cusolverDnHandle_t *handle);
 static VALUE rb_cusolverDnCreate(VALUE self){
-  return Qnil;
+  rb_cusolver_handle* handler = ALLOC(rb_cusolver_handle);
+  cusolverStatus_t status = cusolverDnCreate(&handler->handle);
+
+  return Data_Wrap_Struct(CuSolverHandler, NULL, rbcu_free, handler);
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDestroy(cusolverDnHandle_t handle);
-static VALUE rb_cusolverDnDestroy(VALUE self, VALUE handle){
-  return Qnil;
+static VALUE rb_cusolverDnDestroy(VALUE self, VALUE handler_val){
+  rb_cusolver_handle* handler;
+  Data_Get_Struct(handler_val, rb_cusolver_handle, handler);
+
+  cusolverStatus_t status = cusolverDnDestroy(handler->handle);
+  return Qtrue;
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnSetStream (cusolverDnHandle_t handle, cudaStream_t streamId);
-static VALUE rb_cusolverDnSetStream(VALUE self, VALUE streamId){
-  return Qnil;
+static VALUE rb_cusolverDnSetStream(VALUE self, VALUE handler_val, VALUE stream_id){
+  rb_cusolver_handle* handler;
+  Data_Get_Struct(handler_val, rb_cusolver_handle, handler);
+
+  cudastream_ptr* stream_ptr;
+  Data_Get_Struct(stream_id, cudastream_ptr, stream_ptr);
+
+  cusolverStatus_t status = cusolverDnSetStream(handler->handle, stream_ptr->stream);
+
+  return Qtrue;
 }
 
 // cusolverStatus_t CUDENSEAPI cusolverDnGetStream(cusolverDnHandle_t handle, cudaStream_t *streamId);

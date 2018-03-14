@@ -53,6 +53,12 @@ typedef struct CUSTREAM_PTR
   CUstream stream;
 }custream_ptr;
 
+typedef struct CUDASTREAM_PTR
+{
+  cudaStream_t stream;
+}cudastream_ptr;
+
+
 typedef struct  RB_CU_EVENT
 {
   CUevent event;
@@ -83,7 +89,10 @@ typedef struct RB_CUBLAS_HANDLE
   cublasHandle_t handle;
 }rb_cublas_handle;
 
-
+typedef struct RB_CUSOLVER_HANDLE
+{
+  cusolverDnHandle_t handle;
+}rb_cusolver_handle;
 
 // struct __device_builtin__ cudaFuncAttributes
 // {

@@ -9,6 +9,7 @@ VALUE Dev_Array = Qnil;
 VALUE Profiler = Qnil;
 VALUE Runtime = Qnil;
 VALUE CuBLASHandler = Qnil;
+VALUE CuSolverHandler = Qnil;
 VALUE RbCuContext = Qnil;
 VALUE RbCuDevice = Qnil;
 VALUE RbCuModule = Qnil;
@@ -23,6 +24,7 @@ VALUE RbCuIPCEventHandler = Qnil;
 VALUE RbCuIPCMemHandler = Qnil;
 VALUE Driver = Qnil;
 VALUE Arithmetic = Qnil;
+VALUE RbCuCUDAStream = Qnil;
 VALUE RbCuCUDAIPCEventHandler = Qnil;
 VALUE RbCuCUDAIPCMemHandler = Qnil;
 // prototypes
@@ -878,8 +880,8 @@ static VALUE rb_cudaGetExportTable(VALUE self);
 
 //CuSolver
 static VALUE rb_cusolverDnCreate(VALUE self);
-static VALUE rb_cusolverDnDestroy(VALUE self, VALUE handle);
-static VALUE rb_cusolverDnSetStream(VALUE self, VALUE streamId);
+static VALUE rb_cusolverDnDestroy(VALUE self, VALUE handler_val);
+static VALUE rb_cusolverDnSetStream(VALUE self, VALUE handler_val, VALUE stream_id);
 static VALUE rb_cusolverDnGetStream(VALUE self);
 static VALUE rb_cusolverDnSpotrf_bufferSize(VALUE self);
 static VALUE rb_cusolverDnDpotrf_bufferSize(VALUE self, VALUE handle, VALUE uplo, VALUE n, VALUE A, VALUE lda, VALUE Lwork);
@@ -1002,20 +1004,22 @@ void Init_rbcuda() {
   cNMatrix = rb_define_class("NMatrix", rb_cObject);
   rb_define_method(cNMatrix, "to_af_array", (METHOD)rb_nmatrix_to_gpu_ary_method, 0);
 
-  CuBLASHandler = rb_define_class_under(RbCUDA, "CuBLASHandler", rb_cObject);
-  RbCuContext   = rb_define_class_under(RbCUDA, "RbCuContext",   rb_cObject);
-  RbCuDevice    = rb_define_class_under(RbCUDA, "RbCuDevice",    rb_cObject);
-  RbCuModule    = rb_define_class_under(RbCUDA, "RbCuModule",    rb_cObject);
-  RbCuFunction  = rb_define_class_under(RbCUDA, "RbCuFunction",  rb_cObject);
-  RbCuArray     = rb_define_class_under(RbCUDA, "RbCuArray",     rb_cObject);
-  RbCuStream    = rb_define_class_under(RbCUDA, "RbCuStream",    rb_cObject);
-  RbCuTexture   = rb_define_class_under(RbCUDA, "RbCuTexture",   rb_cObject);
-  RbCuSurface   = rb_define_class_under(RbCUDA, "RbCuSurface",   rb_cObject);
-  RbCuLinkState = rb_define_class_under(RbCUDA, "RbCuLinkState", rb_cObject);
-  RbCuEvent     = rb_define_class_under(RbCUDA, "RbCuEvent",     rb_cObject);
+  CuBLASHandler   = rb_define_class_under(RbCUDA, "CuBLASHandler",   rb_cObject);
+  CuSolverHandler = rb_define_class_under(RbCUDA, "CuSolverHandler", rb_cObject);
+  RbCuContext     = rb_define_class_under(RbCUDA, "RbCuContext",     rb_cObject);
+  RbCuDevice      = rb_define_class_under(RbCUDA, "RbCuDevice",      rb_cObject);
+  RbCuModule      = rb_define_class_under(RbCUDA, "RbCuModule",      rb_cObject);
+  RbCuFunction    = rb_define_class_under(RbCUDA, "RbCuFunction",    rb_cObject);
+  RbCuArray       = rb_define_class_under(RbCUDA, "RbCuArray",       rb_cObject);
+  RbCuStream      = rb_define_class_under(RbCUDA, "RbCuStream",      rb_cObject);
+  RbCuTexture     = rb_define_class_under(RbCUDA, "RbCuTexture",     rb_cObject);
+  RbCuSurface     = rb_define_class_under(RbCUDA, "RbCuSurface",     rb_cObject);
+  RbCuLinkState   = rb_define_class_under(RbCUDA, "RbCuLinkState",   rb_cObject);
+  RbCuEvent       = rb_define_class_under(RbCUDA, "RbCuEvent",       rb_cObject);
   RbCuIPCMemHandler   = rb_define_class_under(RbCUDA, "RbCuIPCMemHandler",   rb_cObject);
   RbCuIPCEventHandler = rb_define_class_under(RbCUDA, "RbCuIPCEventHandler", rb_cObject);
-  RbCuCUDAIPCMemHandler   = rb_define_class_under(RbCUDA, "RbCuCUDAIPCMemHandler", rb_cObject);
+  RbCuCUDAStream          = rb_define_class_under(RbCUDA, "RbCuCUDAStream",          rb_cObject);
+  RbCuCUDAIPCMemHandler   = rb_define_class_under(RbCUDA, "RbCuCUDAIPCMemHandler",   rb_cObject);
   RbCuCUDAIPCEventHandler = rb_define_class_under(RbCUDA, "RbCuCUDAIPCEventHandler", rb_cObject);
 
   Driver = rb_define_class_under(RbCUDA, "Driver", rb_cObject);
@@ -1819,7 +1823,7 @@ void Init_rbcuda() {
   CuSolver = rb_define_module_under(RbCUDA, "CuSolver");
   rb_define_singleton_method(CuSolver, "cusolverDnCreate", (METHOD)rb_cusolverDnCreate, 0);
   rb_define_singleton_method(CuSolver, "cusolverDnDestroy", (METHOD)rb_cusolverDnDestroy, 1);
-  rb_define_singleton_method(CuSolver, "cusolverDnSetStream", (METHOD)rb_cusolverDnSetStream, 0);
+  rb_define_singleton_method(CuSolver, "cusolverDnSetStream", (METHOD)rb_cusolverDnSetStream, 2);
   rb_define_singleton_method(CuSolver, "cusolverDnGetStream", (METHOD)rb_cusolverDnGetStream, 0);
   rb_define_singleton_method(CuSolver, "cusolverDnSpotrf_bufferSize", (METHOD)rb_cusolverDnSpotrf_bufferSize, 6);
   rb_define_singleton_method(CuSolver, "cusolverDnDpotrf_bufferSize", (METHOD)rb_cusolverDnDpotrf_bufferSize, 0);
