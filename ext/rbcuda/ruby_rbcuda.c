@@ -882,7 +882,7 @@ static VALUE rb_cudaGetExportTable(VALUE self);
 static VALUE rb_cusolverDnCreate(VALUE self);
 static VALUE rb_cusolverDnDestroy(VALUE self, VALUE handler_val);
 static VALUE rb_cusolverDnSetStream(VALUE self, VALUE handler_val, VALUE stream_id);
-static VALUE rb_cusolverDnGetStream(VALUE self);
+static VALUE rb_cusolverDnGetStream(VALUE self, VALUE handler_val);
 static VALUE rb_cusolverDnSpotrf_bufferSize(VALUE self);
 static VALUE rb_cusolverDnDpotrf_bufferSize(VALUE self, VALUE handle, VALUE uplo, VALUE n, VALUE A, VALUE lda, VALUE Lwork);
 static VALUE rb_cusolverDnCpotrf_bufferSize(VALUE self);
