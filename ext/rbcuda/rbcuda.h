@@ -8,6 +8,11 @@ typedef struct DEV_PTR
   double* carray;
 }dev_ptr;
 
+typedef struct DEV_PTR_INT
+{
+  int* carray;
+}dev_ptr_int;
+
 typedef struct CONTEXT_PTR
 {
   CUcontext ctx;

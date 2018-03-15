@@ -6,6 +6,7 @@ VALUE CuBLASXT = Qnil;
 VALUE CuSolver = Qnil;
 VALUE CuRand = Qnil;
 VALUE Dev_Array = Qnil;
+VALUE Dev_Array_Int = Qnil;
 VALUE Profiler = Qnil;
 VALUE Runtime = Qnil;
 VALUE CuBLASHandler = Qnil;
@@ -997,6 +998,8 @@ void Init_rbcuda() {
 
   Dev_Array = rb_define_class_under(RbCUDA, "Dev_Array", rb_cObject);
   rb_define_method(Dev_Array, "to_nmatrix", (METHOD)rb_dev_ary_to_nmatrix, 1);
+
+  Dev_Array_Int = rb_define_class_under(RbCUDA, "Dev_Array_Int", rb_cObject);
 
   Arithmetic = rb_define_module_under(RbCUDA, "Arithmetic");
   rb_define_singleton_method(Arithmetic, "add", (METHOD)rb_elementwise_addition, 3);

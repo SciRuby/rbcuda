@@ -83,12 +83,14 @@ static VALUE rb_cusolverDnDpotrf(VALUE self, VALUE handler_val, VALUE uplo, VALU
   Data_Get_Struct(handler_val, rb_cusolver_handle, handler);
 
   dev_ptr* ptr_A;
+  dev_ptr* ptr_Workspace;
   Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(Workspace, dev_ptr, ptr_Workspace);
 
   int dev_info = NUM2INT(devInfo);
 
   cusolverStatus_t status = cusolverDnDpotrf(handler->handle, rbcu_cublasFillMode_t(uplo), NUM2INT(n), ptr_A->carray,
-                                              NUM2INT(lda), double *Workspace, NUM2INT(Lwork), &dev_info );
+                                              NUM2INT(lda), ptr_Workspace->carray, NUM2INT(Lwork), &dev_info );
 
   return Qnil;
 }
@@ -181,12 +183,17 @@ static VALUE rb_cusolverDnDgetrf(VALUE self, VALUE handler_val, VALUE m, VALUE n
   Data_Get_Struct(handler_val, rb_cusolver_handle, handler);
 
   dev_ptr* ptr_A;
+  dev_ptr* ptr_Workspace;
   Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(Workspace, dev_ptr, ptr_Workspace);
+
+  dev_ptr_int* ptr_devIpiv;
+  Data_Get_Struct(devIpiv, dev_ptr_int, ptr_devIpiv);
 
   int dev_info = NUM2INT(devInfo);
 
-  cusolverStatus_t status = cusolverDnDgetrf(handler->handle, NUM2INT(m), NUM2INT(n), ptr_A->carray, NUM2INT(lda), double *Workspace,
-                                              int *devIpiv, &dev_info );
+  cusolverStatus_t status = cusolverDnDgetrf(handler->handle, NUM2INT(m), NUM2INT(n), ptr_A->carray, NUM2INT(lda), ptr_Workspace->carray,
+                                              ptr_devIpiv->carray, &dev_info );
   return Qnil;
 }
 
@@ -214,8 +221,11 @@ static VALUE rb_cusolverDnDlaswp(VALUE self, VALUE handler_val, VALUE n, VALUE A
   dev_ptr* ptr_A;
   Data_Get_Struct(A, dev_ptr, ptr_A);
 
+  dev_ptr_int* ptr_devIpiv;
+  Data_Get_Struct(devIpiv, dev_ptr_int, ptr_devIpiv);
+
   cusolverStatus_t status = cusolverDnDlaswp(handler->handle, NUM2INT(n), ptr_A->carray, NUM2INT(lda), NUM2INT(k1), NUM2INT(k2),
-                                              const int *devIpiv, NUM2INT(incx));
+                                              ptr_devIpiv->carray, NUM2INT(incx));
   return Qnil;
 }
 
@@ -245,10 +255,13 @@ static VALUE rb_cusolverDnDgetrs(VALUE self, VALUE handler_val, VALUE trans, VAL
   Data_Get_Struct(A, dev_ptr, ptr_A);
   Data_Get_Struct(B, dev_ptr, ptr_B);
 
+  dev_ptr_int* ptr_devIpiv;
+  Data_Get_Struct(devIpiv, dev_ptr_int, ptr_devIpiv);
+
   int dev_info = NUM2INT(devInfo);
 
   cusolverStatus_t status = cusolverDnDgetrs(handler->handle, rbcu_cublasOperation_t(trans), NUM2INT(n), NUM2INT(nrhs),
-                                              ptr_A->carray, NUM2INT(lda), const int *devIpiv, double *B, int ldb, &dev_info );
+                                              ptr_A->carray, NUM2INT(lda), ptr_devIpiv->carray, ptr_B->carray, NUM2INT(ldb), &dev_info );
   return Qnil;
 }
 
@@ -274,12 +287,16 @@ static VALUE rb_cusolverDnDgeqrf(VALUE self, VALUE handler_val, VALUE m, VALUE n
   Data_Get_Struct(handler_val, rb_cusolver_handle, handler);
 
   dev_ptr* ptr_A;
+  dev_ptr* ptr_TAU;
+  dev_ptr* ptr_Workspace;
   Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(TAU, dev_ptr, ptr_TAU);
+  Data_Get_Struct(Workspace, dev_ptr, ptr_Workspace);
 
   int dev_info = NUM2INT(devInfo);
 
   cusolverStatus_t status = cusolverDnDgeqrf(handler->handle, NUM2INT(m), NUM2INT(n), ptr_A->carray, NUM2INT(lda),
-                                              double *TAU, double *Workspace, NUM2INT(Lwork), &dev_info );
+                                              ptr_TAU->carray, ptr_Workspace->carray, NUM2INT(Lwork), &dev_info );
   return Qnil;
 }
 
@@ -305,14 +322,18 @@ static VALUE rb_cusolverDnDormqr(VALUE self, VALUE handler_val, VALUE side, VALU
 
   dev_ptr* ptr_A;
   dev_ptr* ptr_C;
+  dev_ptr* ptr_tau;
+  dev_ptr* ptr_work;
   Data_Get_Struct(A, dev_ptr, ptr_A);
   Data_Get_Struct(C, dev_ptr, ptr_C);
+  Data_Get_Struct(tau, dev_ptr, ptr_tau);
+  Data_Get_Struct(work, dev_ptr, ptr_work);
 
   int dev_info = NUM2INT(devInfo);
 
   cusolverStatus_t status = cusolverDnDormqr(handler->handle, rbcu_cublasSideMode_t(side), rbcu_cublasOperation_t(trans),
-                                              NUM2INT(m), NUM2INT(n), NUM2INT(k), ptr_A->carray, NUM2INT(lda), const double *tau,
-                                              ptr_C->carray, NUM2INT(ldc), double *work, NUM2INT(lwork), &dev_info);
+                                              NUM2INT(m), NUM2INT(n), NUM2INT(k), ptr_A->carray, NUM2INT(lda), ptr_tau->carray,
+                                              ptr_C->carray, NUM2INT(ldc), ptr_work->carray, NUM2INT(lwork), &dev_info);
   return Qnil;
 }
 
@@ -369,10 +390,23 @@ static VALUE rb_cusolverDnDgebrd(VALUE self, VALUE handler_val, VALUE m, VALUE n
   rb_cusolver_handle* handler;
   Data_Get_Struct(handler_val, rb_cusolver_handle, handler);
 
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_D;
+  dev_ptr* ptr_E;
+  dev_ptr* ptr_TAUQ;
+  dev_ptr* ptr_TAUP;
+  dev_ptr* ptr_Work;
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(D, dev_ptr, ptr_D);
+  Data_Get_Struct(E, dev_ptr, ptr_E);
+  Data_Get_Struct(TAUQ, dev_ptr, ptr_TAUQ);
+  Data_Get_Struct(TAUP, dev_ptr, ptr_TAUP);
+  Data_Get_Struct(Work, dev_ptr, ptr_Work);
+
   int dev_info = NUM2INT(devInfo);
 
-  cusolverStatus_t status = cusolverDnDgebrd(handler->handle, NUM2INT(m), NUM2INT(n), ptr_A->carray, NUM2INT(lda), double *D,
-                                              double *E, double *TAUQ, double *TAUP, double *Work, NUM2INT(Lwork), &dev_info);
+  cusolverStatus_t status = cusolverDnDgebrd(handler->handle, NUM2INT(m), NUM2INT(n), ptr_A->carray, NUM2INT(lda), ptr_D->carray,
+                                              ptr_E->carray, ptr_TAUQ->carray, ptr_TAUP->carray, ptr_Work->carray, NUM2INT(Lwork), &dev_info);
   return Qnil;
 }
 
@@ -397,8 +431,19 @@ static VALUE rb_cusolverDnDsytrd(VALUE self, VALUE handler_val, VALUE uplo, VALU
   rb_cusolver_handle* handler;
   Data_Get_Struct(handler_val, rb_cusolver_handle, handler);
 
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_D;
+  dev_ptr* ptr_E;
+  dev_ptr* ptr_tau;
+  dev_ptr* ptr_Work;
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(D, dev_ptr, ptr_D);
+  Data_Get_Struct(E, dev_ptr, ptr_E);
+  Data_Get_Struct(tau, dev_ptr, ptr_tau);
+  Data_Get_Struct(Work, dev_ptr, ptr_Work);
+
   cusolverStatus_t status = cusolverDnDsytrd(handler->handle, signed char uplo, NUM2INT(n), ptr_A->carray, NUM2INT(lda),
-                                              double *D, double *E, double *tau, double *Work, NUM2INT(Lwork), int *info);
+                                              ptr_D->carray, ptr_E->carray, ptr_tau->carray, ptr_Work->carray, NUM2INT(Lwork), int *info);
   return Qnil;
 }
 
@@ -410,6 +455,9 @@ static VALUE rb_cusolverDnSgebrd_bufferSize(VALUE self){
 
 // cusolverStatus_t CUDENSEAPI cusolverDnDgebrd_bufferSize( cusolverDnHandle_t handle, int m, int n, int *Lwork );
 static VALUE rb_cusolverDnDgebrd_bufferSize(VALUE self, VALUE handler_val, VALUE m, VALUE n, VALUE Lwork){
+  rb_cusolver_handle* handler;
+  Data_Get_Struct(handler_val, rb_cusolver_handle, handler);
+
   int lwork_size = NUM2INT(Lwork);
 
   cusolverStatus_t status = cusolverDnDgebrd_bufferSize(handler->handle, NUM2INT(m), NUM2INT(n), &lwork_size );
@@ -464,14 +512,22 @@ static VALUE rb_cusolverDnDgesvd(VALUE self, VALUE handler_val, VALUE jobu, VALU
   Data_Get_Struct(handler_val, rb_cusolver_handle, handler);
 
   dev_ptr* ptr_A;
+  dev_ptr* ptr_S;
+  dev_ptr* ptr_U;
+  dev_ptr* ptr_VT;
+  dev_ptr* ptr_work;
   Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(S, dev_ptr, ptr_S);
+  Data_Get_Struct(U, dev_ptr, ptr_U);
+  Data_Get_Struct(VT, dev_ptr, ptr_VT);
+  Data_Get_Struct(Work, dev_ptr, ptr_work);
 
   int dev_info = NUM2INT(devInfo);
-
+  double rwork_size = NUM2DBL(rwork);
   cusolverStatus_t status = cusolverDnDgesvd(handler->handle, signed char jobu, signed char jobvt, NUM2INT(m),
-                                              NUM2INT(n), ptr_A->carray, NUM2INT(lda), double *S, double *U,
-                                              NUM2INT(ldu), double *VT, NUM2INT(ldvt), double *Work, NUM2INT(Lwork),
-                                              double *rwork, &dev_info );
+                                              NUM2INT(n), ptr_A->carray, NUM2INT(lda), ptr_S->carray, ptr_U->carray,
+                                              NUM2INT(ldu), ptr_VT->carray, NUM2INT(ldvt), ptr_work->carray, NUM2INT(Lwork),
+                                              &rwork_size, &dev_info );
   return Qnil;
 }
 
@@ -497,12 +553,17 @@ static VALUE rb_cusolverDnDsytrf(VALUE self, VALUE handler_val, VALUE uplo, VALU
   Data_Get_Struct(handler_val, rb_cusolver_handle, handler);
 
   dev_ptr* ptr_A;
+  dev_ptr* ptr_work;
   Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(work, dev_ptr, ptr_work);
+
+  dev_ptr_int* ptr_ipiv;
+  Data_Get_Struct(ipiv, dev_ptr_int, ptr_ipiv);
 
   int dev_info = NUM2INT(devInfo);
 
   cusolverStatus_t status = cusolverDnDsytrf(handler->handle, rbcu_cublasFillMode_t(uplo), NUM2INT(n), ptr_A->carray,
-                                              NUM2INT(lda), int *ipiv, double *work, NUM2INT(lwork), &dev_info);
+                                              NUM2INT(lda), ptr_ipiv->carray, ptr_work->carray, NUM2INT(lwork), &dev_info);
   return Qnil;
 }
 
