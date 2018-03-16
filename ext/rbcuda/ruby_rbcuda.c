@@ -958,32 +958,32 @@ static VALUE rb_cudaProfilerStop(VALUE self);
 
 
 //CuRand
-static VALUE rb_curandCreateGenerator(VALUE self);
-static VALUE rb_curandCreateGeneratorHost(VALUE self);
-static VALUE rb_curandDestroyGenerator(VALUE self);
+static VALUE rb_curandCreateGenerator(VALUE self, curandRngType_t rng_type);
+static VALUE rb_curandCreateGeneratorHost(VALUE self, VALUE rng_type);
+static VALUE rb_curandDestroyGenerator(VALUE self, VALUE generator_val);
 static VALUE rb_curandGetVersion(VALUE self);
-static VALUE rb_curandSetStream(VALUE self);
-static VALUE rb_curandSetPseudoRandomGeneratorSeed(VALUE self);
-static VALUE rb_curandSetGeneratorOffset(VALUE self);
-static VALUE rb_curandSetGeneratorOrdering(VALUE self);
-static VALUE rb_curandSetQuasiRandomGeneratorDimensions(VALUE self);
-static VALUE rb_curandGenerate(VALUE self);
-static VALUE rb_curandGenerateLongLong(VALUE self);
-static VALUE rb_curandGenerateUniform(VALUE self);
-static VALUE rb_curandGenerateUniformDouble(VALUE self);
-static VALUE rb_curandGenerateNormal(VALUE self);
-static VALUE rb_curandGenerateNormalDouble(VALUE self);
-static VALUE rb_curandGenerateLogNormal(VALUE self);
-static VALUE rb_curandGenerateLogNormalDouble(VALUE self);
-static VALUE rb_curandCreatePoissonDistribution(VALUE self);
-static VALUE rb_curandDestroyDistribution(VALUE self);
-static VALUE rb_curandGeneratePoisson(VALUE self);
+static VALUE rb_curandSetStream(VALUE self, VALUE generator_val, cudaStream_t stream);
+static VALUE rb_curandSetPseudoRandomGeneratorSeed(VALUE self, VALUE generator_val, VALUE seed);
+static VALUE rb_curandSetGeneratorOffset(VALUE self, VALUE generator_val, VALUE offset);
+static VALUE rb_curandSetGeneratorOrdering(VALUE self, VALUE generator_val, VALUE order);
+static VALUE rb_curandSetQuasiRandomGeneratorDimensions(VALUE self, VALUE generator_val, VALUE num_dimensions);
+static VALUE rb_curandGenerate(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE num);
+static VALUE rb_curandGenerateLongLong(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE num);
+static VALUE rb_curandGenerateUniform(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE num);
+static VALUE rb_curandGenerateUniformDouble(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE num);
+static VALUE rb_curandGenerateNormal(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE n, VALUE mean, VALUE stddev);
+static VALUE rb_curandGenerateNormalDouble(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE n, VALUE mean, VALUE stddev);
+static VALUE rb_curandGenerateLogNormal(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE n, VALUE mean, VALUE stddev);
+static VALUE rb_curandGenerateLogNormalDouble(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE n, VALUE mean, VALUE stddev);
+static VALUE rb_curandCreatePoissonDistribution(VALUE self, VALUE lambda);
+static VALUE rb_curandDestroyDistribution(VALUE self, VALUE discrete_distribution);
+static VALUE rb_curandGeneratePoisson(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE n, VALUE lambda);
 static VALUE rb_curandGeneratePoissonMethod(VALUE self);
-static VALUE rb_curandGenerateSeeds(VALUE self);
+static VALUE rb_curandGenerateSeeds(VALUE self, VALUE generator_val);
 static VALUE rb_curandGetDirectionVectors32(VALUE self);
-static VALUE rb_curandGetScrambleConstants32(VALUE self);
+static VALUE rb_curandGetScrambleConstants32(VALUE self, VALUE constants);
 static VALUE rb_curandGetDirectionVectors64(VALUE self);
-static VALUE rb_curandGetScrambleConstants64(VALUE self);
+static VALUE rb_curandGetScrambleConstants64(VALUE self, VALUE constants);
 
 // NMatrix
 extern "C++" {
