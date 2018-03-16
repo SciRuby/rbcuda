@@ -442,8 +442,10 @@ static VALUE rb_cusolverDnDsytrd(VALUE self, VALUE handler_val, VALUE uplo, VALU
   Data_Get_Struct(tau, dev_ptr, ptr_tau);
   Data_Get_Struct(Work, dev_ptr, ptr_Work);
 
-  cusolverStatus_t status = cusolverDnDsytrd(handler->handle, signed char uplo, NUM2INT(n), ptr_A->carray, NUM2INT(lda),
-                                              ptr_D->carray, ptr_E->carray, ptr_tau->carray, ptr_Work->carray, NUM2INT(Lwork), int *info);
+  int info_op = NUM2INT(info);
+
+  cusolverStatus_t status = cusolverDnDsytrd(handler->handle, StringValuePtr(uplo)[0], NUM2INT(n), ptr_A->carray, NUM2INT(lda),
+                                              ptr_D->carray, ptr_E->carray, ptr_tau->carray, ptr_Work->carray, NUM2INT(Lwork), &info_op);
   return Qnil;
 }
 
@@ -524,7 +526,7 @@ static VALUE rb_cusolverDnDgesvd(VALUE self, VALUE handler_val, VALUE jobu, VALU
 
   int dev_info = NUM2INT(devInfo);
   double rwork_size = NUM2DBL(rwork);
-  cusolverStatus_t status = cusolverDnDgesvd(handler->handle, signed char jobu, signed char jobvt, NUM2INT(m),
+  cusolverStatus_t status = cusolverDnDgesvd(handler->handle, StringValuePtr(jobu)[0], StringValuePtr(jobvt)[0], NUM2INT(m),
                                               NUM2INT(n), ptr_A->carray, NUM2INT(lda), ptr_S->carray, ptr_U->carray,
                                               NUM2INT(ldu), ptr_VT->carray, NUM2INT(ldvt), ptr_work->carray, NUM2INT(Lwork),
                                               &rwork_size, &dev_info );
