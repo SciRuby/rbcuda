@@ -29,6 +29,8 @@ VALUE Arithmetic = Qnil;
 VALUE RbCuCUDAStream = Qnil;
 VALUE RbCuCUDAIPCEventHandler = Qnil;
 VALUE RbCuCUDAIPCMemHandler = Qnil;
+VALUE CuRandDiscreteDistribution = Qnil;
+
 // prototypes
 void Init_rbcuda();
 
@@ -70,6 +72,7 @@ cublasAtomicsMode_t rbcu_cublasAtomicsMode_t(VALUE sym);
 
 //curand defines
 curandRngType_t rbcu_rand_rng_type(VALUE sym);
+curandOrdering_t rbcu_rand_ordering_type(VALUE sym);
 
 inline void __checkCudaErrors( CUresult err, const char *file, const int line );
 void initCUDA(char* module_file, char* kernel_name);
@@ -966,7 +969,7 @@ static VALUE rb_curandCreateGenerator(VALUE self, VALUE rng_type);
 static VALUE rb_curandCreateGeneratorHost(VALUE self, VALUE rng_type);
 static VALUE rb_curandDestroyGenerator(VALUE self, VALUE generator_val);
 static VALUE rb_curandGetVersion(VALUE self);
-static VALUE rb_curandSetStream(VALUE self, VALUE generator_val, cudaStream_t stream);
+static VALUE rb_curandSetStream(VALUE self, VALUE generator_val, VALUE stream);
 static VALUE rb_curandSetPseudoRandomGeneratorSeed(VALUE self, VALUE generator_val, VALUE seed);
 static VALUE rb_curandSetGeneratorOffset(VALUE self, VALUE generator_val, VALUE offset);
 static VALUE rb_curandSetGeneratorOrdering(VALUE self, VALUE generator_val, VALUE order);
@@ -1029,6 +1032,7 @@ void Init_rbcuda() {
   RbCuCUDAStream          = rb_define_class_under(RbCUDA, "RbCuCUDAStream",          rb_cObject);
   RbCuCUDAIPCMemHandler   = rb_define_class_under(RbCUDA, "RbCuCUDAIPCMemHandler",   rb_cObject);
   RbCuCUDAIPCEventHandler = rb_define_class_under(RbCUDA, "RbCuCUDAIPCEventHandler", rb_cObject);
+  CuRandDiscreteDistribution = rb_define_class_under(RbCUDA, "CuRandDiscreteDistribution", rb_cObject);
 
   Driver = rb_define_class_under(RbCUDA, "Driver", rb_cObject);
   rb_define_singleton_method(Driver, "test_kernel", (METHOD)test_kernel, 1);

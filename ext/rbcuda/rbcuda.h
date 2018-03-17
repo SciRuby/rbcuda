@@ -103,6 +103,10 @@ typedef struct RB_CURAND_GENERATOR{
   curandGenerator_t generator;
 }rb_curand_generator;
 
+typedef struct RB_CURAND_DISCRETE_DISTRIBUTION{
+  curandDiscreteDistribution_t distribution;
+}rb_curand_discrete_distribution;
+
 // struct __device_builtin__ cudaFuncAttributes
 // {
 //   size_t sharedSizeBytes;
