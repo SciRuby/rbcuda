@@ -11,6 +11,7 @@ VALUE Profiler = Qnil;
 VALUE Runtime = Qnil;
 VALUE CuBLASHandler = Qnil;
 VALUE CuSolverHandler = Qnil;
+VALUE CuRandGenerator = Qnil;
 VALUE RbCuContext = Qnil;
 VALUE RbCuDevice = Qnil;
 VALUE RbCuModule = Qnil;
@@ -66,6 +67,9 @@ cublasSideMode_t rbcu_cublasSideMode_t(VALUE sym);
 cublasOperation_t rbcu_cublasOperation_t(VALUE sym);
 cublasPointerMode_t rbcu_cublasPointerMode_t(VALUE sym);
 cublasAtomicsMode_t rbcu_cublasAtomicsMode_t(VALUE sym);
+
+//curand defines
+curandRngType_t rbcu_rand_rng_type(VALUE sym);
 
 inline void __checkCudaErrors( CUresult err, const char *file, const int line );
 void initCUDA(char* module_file, char* kernel_name);
@@ -958,7 +962,7 @@ static VALUE rb_cudaProfilerStop(VALUE self);
 
 
 //CuRand
-static VALUE rb_curandCreateGenerator(VALUE self, curandRngType_t rng_type);
+static VALUE rb_curandCreateGenerator(VALUE self, VALUE rng_type);
 static VALUE rb_curandCreateGeneratorHost(VALUE self, VALUE rng_type);
 static VALUE rb_curandDestroyGenerator(VALUE self, VALUE generator_val);
 static VALUE rb_curandGetVersion(VALUE self);
@@ -1009,6 +1013,7 @@ void Init_rbcuda() {
 
   CuBLASHandler   = rb_define_class_under(RbCUDA, "CuBLASHandler",   rb_cObject);
   CuSolverHandler = rb_define_class_under(RbCUDA, "CuSolverHandler", rb_cObject);
+  CuRandGenerator = rb_define_class_under(RbCUDA, "CuRandGenerator", rb_cObject);
   RbCuContext     = rb_define_class_under(RbCUDA, "RbCuContext",     rb_cObject);
   RbCuDevice      = rb_define_class_under(RbCUDA, "RbCuDevice",      rb_cObject);
   RbCuModule      = rb_define_class_under(RbCUDA, "RbCuModule",      rb_cObject);

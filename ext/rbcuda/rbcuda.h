@@ -99,6 +99,10 @@ typedef struct RB_CUSOLVER_HANDLE
   cusolverDnHandle_t handle;
 }rb_cusolver_handle;
 
+typedef struct RB_CURAND_GENERATOR{
+  curandGenerator_t generator;
+}rb_curand_generator;
+
 // struct __device_builtin__ cudaFuncAttributes
 // {
 //   size_t sharedSizeBytes;

@@ -33,6 +33,20 @@ std::map<char*, size_t> CuRand_RngType = {
 
 // alias curandRngType_t = curandRngType;
 
+curandRngType_t rbcu_rand_rng_type(VALUE sym) {
+  ID sym_id = SYM2ID(sym);
+
+  for(std::map<char*, size_t>::value_type& entry : CuRand_RngType) {
+    if (sym_id == rb_intern(entry.first)) {
+      return static_cast<curandRngType_t>(entry.second);
+    }
+  }
+
+  VALUE str = rb_any_to_s(sym);
+  rb_raise(rb_eArgError, "invalid Rng type symbol (:%s) specified", RSTRING_PTR(str));
+}
+
+
 std::map<char*, size_t> CuRand_Ordering = {
   {"CURAND_ORDERING_PSEUDO_BEST", 100}, ///< Best ordering for pseudorandom results
   {"CURAND_ORDERING_PSEUDO_DEFAULT", 101}, ///< Specific default 4096 thread sequence for pseudorandom results
@@ -184,9 +198,11 @@ std::map<char*, size_t> CuRand_Method = {
 
 // curandStatus_t CURANDAPI curandCreateGenerator(curandGenerator_t *generator, curandRngType_t rng_type);
 
-static VALUE rb_curandCreateGenerator(VALUE self, curandRngType_t rng_type){
-  // curandStatus_t status = curandCreateGenerator(curandGenerator_t *generator, curandRngType_t rng_type);
-  return Qnil;
+static VALUE rb_curandCreateGenerator(VALUE self, VALUE rng_type){
+  rb_curand_generator* generator_ptr = ALLOC(rb_curand_generator);
+  curandStatus_t status = curandCreateGenerator(&generator_ptr->generator, rbcu_rand_rng_type(rng_type));
+
+  return Data_Wrap_Struct(CuRandGenerator, NULL, rbcu_free, generator_ptr);
 }
 
 /**
@@ -270,8 +286,10 @@ static VALUE rb_curandCreateGenerator(VALUE self, curandRngType_t rng_type){
 // curandStatus_t CURANDAPI curandCreateGeneratorHost(curandGenerator_t *generator, curandRngType_t rng_type);
 
 static VALUE rb_curandCreateGeneratorHost(VALUE self, VALUE rng_type){
-  // curandStatus_t status = curandCreateGeneratorHost(curandGenerator_t *generator, curandRngType_t rng_type);
-  return Qnil;
+  rb_curand_generator* generator_ptr = ALLOC(rb_curand_generator);
+  curandStatus_t status = curandCreateGeneratorHost(&generator_ptr->generator, rbcu_rand_rng_type(rng_type));
+
+  return Data_Wrap_Struct(CuRandGenerator, NULL, rbcu_free, generator_ptr);
 }
 
 /**
@@ -288,8 +306,12 @@ static VALUE rb_curandCreateGeneratorHost(VALUE self, VALUE rng_type){
 // curandStatus_t CURANDAPI curandDestroyGenerator(curandGenerator_t generator);
 
 static VALUE rb_curandDestroyGenerator(VALUE self, VALUE generator_val){
-  // curandStatus_t status = curandDestroyGenerator(curandGenerator_t generator);
-  return Qnil;
+  rb_curand_generator* generator_ptr;
+  Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
+
+  curandStatus_t status = curandDestroyGenerator(generator_ptr->generator);
+
+  return Qtrue;
 }
 
 /**
@@ -329,6 +351,9 @@ static VALUE rb_curandGetVersion(VALUE self){
 // curandStatus_t CURANDAPI curandSetStream(curandGenerator_t generator, cudaStream_t stream);
 
 static VALUE rb_curandSetStream(VALUE self, VALUE generator_val, cudaStream_t stream){
+  rb_curand_generator* generator_ptr;
+  Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
+
   // curandStatus_t status = curandSetStream(curandGenerator_t generator, cudaStream_t stream);
   return Qnil;
 }
@@ -352,6 +377,9 @@ static VALUE rb_curandSetStream(VALUE self, VALUE generator_val, cudaStream_t st
 // curandStatus_t CURANDAPI curandSetPseudoRandomGeneratorSeed(curandGenerator_t generator, unsigned long long seed);
 
 static VALUE rb_curandSetPseudoRandomGeneratorSeed(VALUE self, VALUE generator_val, VALUE seed){
+  rb_curand_generator* generator_ptr;
+  Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
+
   // curandStatus_t status = curandSetPseudoRandomGeneratorSeed(curandGenerator_t generator, unsigned long long seed);
   return Qnil;
 }
@@ -374,6 +402,9 @@ static VALUE rb_curandSetPseudoRandomGeneratorSeed(VALUE self, VALUE generator_v
 // curandStatus_t CURANDAPI curandSetGeneratorOffset(curandGenerator_t generator, unsigned long long offset);
 
 static VALUE rb_curandSetGeneratorOffset(VALUE self, VALUE generator_val, VALUE offset){
+  rb_curand_generator* generator_ptr;
+  Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
+
   // curandStatus_t status = curandSetGeneratorOffset(curandGenerator_t generator, unsigned long long offset);
   return Qnil;
 }
@@ -402,6 +433,9 @@ static VALUE rb_curandSetGeneratorOffset(VALUE self, VALUE generator_val, VALUE 
 // curandStatus_t CURANDAPI curandSetGeneratorOrdering(curandGenerator_t generator, curandOrdering_t order);
 
 static VALUE rb_curandSetGeneratorOrdering(VALUE self, VALUE generator_val, VALUE order){
+  rb_curand_generator* generator_ptr;
+  Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
+
   // curandStatus_t status = curandSetGeneratorOrdering(curandGenerator_t generator, curandOrdering_t order);
   return Qnil;
 }
@@ -426,6 +460,9 @@ static VALUE rb_curandSetGeneratorOrdering(VALUE self, VALUE generator_val, VALU
 // curandStatus_t CURANDAPI curandSetQuasiRandomGeneratorDimensions(curandGenerator_t generator, unsigned int num_dimensions);
 
 static VALUE rb_curandSetQuasiRandomGeneratorDimensions(VALUE self, VALUE generator_val, VALUE num_dimensions){
+  rb_curand_generator* generator_ptr;
+  Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
+
   // curandStatus_t status = curandSetQuasiRandomGeneratorDimensions(curandGenerator_t generator, unsigned int num_dimensions);
   return Qnil;
 }
@@ -459,6 +496,9 @@ static VALUE rb_curandSetQuasiRandomGeneratorDimensions(VALUE self, VALUE genera
 // curandStatus_t CURANDAPI curandGenerate(curandGenerator_t generator, unsigned int *outputPtr, size_t num);
 
 static VALUE rb_curandGenerate(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE num){
+  rb_curand_generator* generator_ptr;
+  Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
+
   // curandStatus_t status = curandGenerate(curandGenerator_t generator, unsigned int *outputPtr, size_t num);
   return Qnil;
 }
@@ -491,6 +531,9 @@ static VALUE rb_curandGenerate(VALUE self, VALUE generator_val, VALUE outputPtr,
 // curandStatus_t CURANDAPI curandGenerateLongLong(curandGenerator_t generator, unsigned long long *outputPtr, size_t num);
 
 static VALUE rb_curandGenerateLongLong(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE num){
+  rb_curand_generator* generator_ptr;
+  Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
+
   // curandStatus_t status = curandGenerateLongLong(curandGenerator_t generator, unsigned long long *outputPtr, size_t num);
   return Qnil;
 }
@@ -523,6 +566,9 @@ static VALUE rb_curandGenerateLongLong(VALUE self, VALUE generator_val, VALUE ou
 // curandStatus_t CURANDAPI curandGenerateUniform(curandGenerator_t generator, float *outputPtr, size_t num);
 
 static VALUE rb_curandGenerateUniform(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE num){
+  rb_curand_generator* generator_ptr;
+  Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
+
   // curandStatus_t status = curandGenerateUniform(curandGenerator_t generator, float *outputPtr, size_t num);
   return Qnil;
 }
@@ -556,6 +602,9 @@ static VALUE rb_curandGenerateUniform(VALUE self, VALUE generator_val, VALUE out
 // curandStatus_t CURANDAPI curandGenerateUniformDouble(curandGenerator_t generator, double *outputPtr, size_t num);
 
 static VALUE rb_curandGenerateUniformDouble(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE num){
+  rb_curand_generator* generator_ptr;
+  Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
+
   // curandStatus_t status = curandGenerateUniformDouble(curandGenerator_t generator, double *outputPtr, size_t num);
   return Qnil;
 }
@@ -605,6 +654,9 @@ static VALUE rb_curandGenerateUniformDouble(VALUE self, VALUE generator_val, VAL
 // curandStatus_t CURANDAPI curandGenerateNormal(curandGenerator_t generator, float *outputPtr, size_t n, float mean, float stddev);
 
 static VALUE rb_curandGenerateNormal(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE n, VALUE mean, VALUE stddev){
+  rb_curand_generator* generator_ptr;
+  Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
+
   // curandStatus_t status = curandGenerateNormal(curandGenerator_t generator, float *outputPtr, size_t n, float mean, float stddev);
   return Qnil;
 }
@@ -655,6 +707,9 @@ static VALUE rb_curandGenerateNormal(VALUE self, VALUE generator_val, VALUE outp
 // curandStatus_t CURANDAPI curandGenerateNormalDouble(curandGenerator_t generator, double *outputPtr, size_t n, double mean, double stddev);
 
 static VALUE rb_curandGenerateNormalDouble(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE n, VALUE mean, VALUE stddev){
+  rb_curand_generator* generator_ptr;
+  Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
+
   // curandStatus_t status = curandGenerateNormalDouble(curandGenerator_t generator, double *outputPtr, size_t n, double mean, double stddev);
   return Qnil;
 }
@@ -705,6 +760,9 @@ static VALUE rb_curandGenerateNormalDouble(VALUE self, VALUE generator_val, VALU
 // curandStatus_t CURANDAPI curandGenerateLogNormal(curandGenerator_t generator, float *outputPtr, size_t n, float mean, float stddev);
 
 static VALUE rb_curandGenerateLogNormal(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE n, VALUE mean, VALUE stddev){
+  rb_curand_generator* generator_ptr;
+  Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
+
   // curandStatus_t status = curandGenerateLogNormal(curandGenerator_t generator, float *outputPtr, size_t n, float mean, float stddev);
   return Qnil;
 }
@@ -756,6 +814,9 @@ static VALUE rb_curandGenerateLogNormal(VALUE self, VALUE generator_val, VALUE o
 // curandStatus_t CURANDAPI curandGenerateLogNormalDouble(curandGenerator_t generator, double *outputPtr, size_t n, double mean, double stddev);
 
 static VALUE rb_curandGenerateLogNormalDouble(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE n, VALUE mean, VALUE stddev){
+  rb_curand_generator* generator_ptr;
+  Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
+
   // curandStatus_t status = curandGenerateLogNormalDouble(curandGenerator_t generator, double *outputPtr, size_t n, double mean, double stddev);
   return Qnil;
 }
@@ -838,6 +899,9 @@ static VALUE rb_curandDestroyDistribution(VALUE self, VALUE discrete_distributio
 // curandStatus_t CURANDAPI curandGeneratePoisson(curandGenerator_t generator, unsigned int *outputPtr, size_t n, double lambda);
 
 static VALUE rb_curandGeneratePoisson(VALUE self, VALUE generator_val, VALUE outputPtr, VALUE n, VALUE lambda){
+  rb_curand_generator* generator_ptr;
+  Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
+
   // curandStatus_t status = curandGeneratePoisson(curandGenerator_t generator, unsigned int *outputPtr, size_t n, double lambda);
   return Qnil;
 }
@@ -870,6 +934,9 @@ static VALUE rb_curandGeneratePoissonMethod(VALUE self){
 // curandStatus_t CURANDAPI  curandGenerateSeeds(curandGenerator_t generator);
 
 static VALUE rb_curandGenerateSeeds(VALUE self, VALUE generator_val){
+  rb_curand_generator* generator_ptr;
+  Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
+
   // curandStatus_t status = curandGenerateSeeds(curandGenerator_t generator);
   return Qnil;
 }
