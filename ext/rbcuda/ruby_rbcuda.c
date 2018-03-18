@@ -1012,7 +1012,7 @@ void Init_rbcuda() {
   rb_define_singleton_method(Arithmetic, "add", (METHOD)rb_elementwise_addition, 3);
 
   cNMatrix = rb_define_class("NMatrix", rb_cObject);
-  rb_define_method(cNMatrix, "to_af_array", (METHOD)rb_nmatrix_to_gpu_ary_method, 0);
+  rb_define_method(cNMatrix, "to_dev_array", (METHOD)rb_nmatrix_to_gpu_ary_method, 0);
 
   CuBLASHandler   = rb_define_class_under(RbCUDA, "CuBLASHandler",   rb_cObject);
   CuSolverHandler = rb_define_class_under(RbCUDA, "CuSolverHandler", rb_cObject);
