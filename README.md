@@ -42,6 +42,12 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/prasun
 
 Everyone interacting in the Rbcuda project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/prasunanand/rbcuda/blob/master/CODE_OF_CONDUCT.md).
 
+## Acknowledgements
+
+* Ruby Association (Japan) for providing the initial funding for this project through the Ruby Association Grant 2017
+* Special Thanks to Kenta Murata (@mrkn) for his support and mentorship
+* Fukuoka Ruby Award 2018
+
 # LICENSE
 
 This software is distributed under the [BSD 3-Clause License](LICENSE).
