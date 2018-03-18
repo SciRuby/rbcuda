@@ -621,7 +621,10 @@ static VALUE rb_curandGenerateUniformDouble(VALUE self, VALUE generator_val, VAL
   rb_curand_generator* generator_ptr;
   Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
 
-  // curandStatus_t status = curandGenerateUniformDouble(curandGenerator_t generator, double *outputPtr, size_t num);
+  dev_ptr* output;
+  Data_Get_Struct(outputPtr, dev_ptr, output);
+
+  curandStatus_t status = curandGenerateUniformDouble(generator_ptr->generator, output->carray, NUM2UINT(num));
   return Qnil;
 }
 
@@ -726,7 +729,10 @@ static VALUE rb_curandGenerateNormalDouble(VALUE self, VALUE generator_val, VALU
   rb_curand_generator* generator_ptr;
   Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
 
-  // curandStatus_t status = curandGenerateNormalDouble(curandGenerator_t generator, double *outputPtr, size_t n, double mean, double stddev);
+  dev_ptr* output;
+  Data_Get_Struct(outputPtr, dev_ptr, output);
+
+  curandStatus_t status = curandGenerateNormalDouble(generator_ptr->generator, output->carray, NUM2UINT(n), NUM2DBL(mean), NUM2DBL(stddev));
   return Qnil;
 }
 
@@ -833,7 +839,10 @@ static VALUE rb_curandGenerateLogNormalDouble(VALUE self, VALUE generator_val, V
   rb_curand_generator* generator_ptr;
   Data_Get_Struct(generator_val, rb_curand_generator, generator_ptr);
 
-  // curandStatus_t status = curandGenerateLogNormalDouble(curandGenerator_t generator, double *outputPtr, size_t n, double mean, double stddev);
+  dev_ptr* output;
+  Data_Get_Struct(outputPtr, dev_ptr, output);
+
+  curandStatus_t status = curandGenerateLogNormalDouble(generator_ptr->generator, output->carray, NUM2UINT(n), NUM2DBL(mean), NUM2DBL(stddev));
   return Qnil;
 }
 
