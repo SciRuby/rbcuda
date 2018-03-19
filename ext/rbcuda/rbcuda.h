@@ -94,6 +94,11 @@ typedef struct RB_CUBLAS_HANDLE
   cublasHandle_t handle;
 }rb_cublas_handle;
 
+typedef struct RB_CUBLASXT_HANDLE
+{
+  cublasXtHandle_t handle;
+}rb_cublasxt_handle;
+
 typedef struct RB_CUSOLVER_HANDLE
 {
   cusolverDnHandle_t handle;
