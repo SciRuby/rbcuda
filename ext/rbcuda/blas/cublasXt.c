@@ -104,14 +104,27 @@ static VALUE rb_cublasXtSetPinningMemMode(VALUE self, VALUE handler_val, VALUE m
   return Qnil;
 }
 
-const char* const CuBLASXtOpType_t[4] = {
+const char* const RbCuBLASXtOpType[4] = {
   "CUBLASXT_FLOAT",
   "CUBLASXT_DOUBLE",
   "CUBLASXT_COMPLEX",
   "CUBLASXT_DOUBLECOMPLEX"
 };
 
-const char* const CuBLASXtBlasOp_t[13] = {
+cublasXtOpType_t rbcu_cublasXt_op_type(VALUE sym) {
+  ID sym_id = SYM2ID(sym);
+
+  for (size_t index = 0; index < 4; ++index) {
+    if (sym_id == rb_intern(RbCuBLASXtOpType[index])) {
+      return static_cast<cublasXtOpType_t>(index);
+    }
+  }
+
+  VALUE str = rb_any_to_s(sym);
+  rb_raise(rb_eArgError, "invalid CuBLASXT Op Type symbol (:%s) specified", RSTRING_PTR(str));
+}
+
+const char* const RbCuBLASXtBlasOp[13] = {
   "CUBLASXT_GEMM",
   "CUBLASXT_SYRK",
   "CUBLASXT_HERK",
@@ -128,6 +141,19 @@ const char* const CuBLASXtBlasOp_t[13] = {
   "CUBLASXT_ROUTINE_MAX"
 };
 
+cublasXtBlasOp_t rbcu_cublasXtBlas_op(VALUE sym) {
+  ID sym_id = SYM2ID(sym);
+
+  for (size_t index = 0; index < 13; ++index) {
+    if (sym_id == rb_intern(RbCuBLASXtBlasOp[index])) {
+      return static_cast<cublasXtBlasOp_t>(index);
+    }
+  }
+
+  VALUE str = rb_any_to_s(sym);
+  rb_raise(rb_eArgError, "invalid CuBLASXT BLAS Op symbol (:%s) specified", RSTRING_PTR(str));
+}
+
 /* Currently only 32-bit integer BLAS routines are supported */
 // cublasStatus_t cublasXtSetCpuRoutine (cublasXtHandle_t handle, cublasXtBlasOp_t blasOp, cublasXtOpType_t type, void* blasFunctor);
 static VALUE rb_cublasXtSetCpuRoutine(VALUE self){
@@ -141,7 +167,7 @@ static VALUE rb_cublasXtSetCpuRatio(VALUE self, VALUE handler_val, VALUE blasOp,
   rb_cublasxt_handle* handler;
   Data_Get_Struct(handler_val, rb_cublasxt_handle, handler);
 
-  // cublasStatus_t status = cublasXtSetCpuRatio(cublasXtHandle_t handle, cublasXtBlasOp_t blasOp, cublasXtOpType_t type, float ratio);
+  cublasStatus_t status = cublasXtSetCpuRatio(handler->handle, rbcu_cublasXtBlas_op(blasOp), rbcu_cublasXt_op_type(type),NUM2DBL(ratio));
   return Qnil;
 }
 
