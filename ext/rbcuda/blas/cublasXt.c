@@ -141,7 +141,7 @@ static VALUE rb_cublasXtSetCpuRatio(VALUE self, VALUE handler_val, VALUE blasOp,
   rb_cublasxt_handle* handler;
   Data_Get_Struct(handler_val, rb_cublasxt_handle, handler);
 
-  // cublasStatus_t status = cublasXtSetCpuRatio (cublasXtHandle_t handle, cublasXtBlasOp_t blasOp, cublasXtOpType_t type, float ratio);
+  // cublasStatus_t status = cublasXtSetCpuRatio(cublasXtHandle_t handle, cublasXtBlasOp_t blasOp, cublasXtOpType_t type, float ratio);
   return Qnil;
 }
 
@@ -156,7 +156,19 @@ static VALUE rb_cublasXtDgemm(VALUE self, VALUE handler_val, VALUE transa, VALUE
   rb_cublasxt_handle* handler;
   Data_Get_Struct(handler_val, rb_cublasxt_handle, handler);
 
-  // cublasStatus_t status = cublasXtDgemm ( cublasXtHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, size_t m, size_t n, size_t k, const(double)* alpha, const(double)* A, size_t lda, const(double)* B, size_t ldb, const(double)* beta, double* C, size_t ldc);
+  dev_ptr* ptr_a;
+  dev_ptr* ptr_b;
+  dev_ptr* ptr_c;
+  Data_Get_Struct(A, dev_ptr, ptr_a);
+  Data_Get_Struct(B, dev_ptr, ptr_b);
+  Data_Get_Struct(C, dev_ptr, ptr_c);
+
+  const double alf = NUM2DBL(alpha);
+  const double bet = NUM2DBL(beta);
+
+  cublasStatus_t status = cublasXtDgemm(handler->handle, rbcu_cublasOperation_t(transa), rbcu_cublasOperation_t(transb),
+                                  NUM2ULONG(m), NUM2ULONG(n), NUM2ULONG(k), &alf, ptr_a->carray, NUM2ULONG(lda), ptr_b->carray,
+                                  NUM2ULONG(ldb), &bet, ptr_c->carray, NUM2ULONG(ldc));
 
   return Qnil;
 }
@@ -180,7 +192,18 @@ static VALUE rb_cublasXtDsyrk(VALUE self, VALUE handler_val, VALUE uplo, VALUE t
   rb_cublasxt_handle* handler;
   Data_Get_Struct(handler_val, rb_cublasxt_handle, handler);
 
-  // cublasStatus_t status = cublasXtDsyrk ( cublasXtHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, size_t n, size_t k, const(double)* alpha, const(double)* A, size_t lda, const(double)* beta, double* C, size_t ldc);
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_C;
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(C, dev_ptr, ptr_C);
+
+  const double alf = NUM2DBL(alpha);
+  const double bet = NUM2DBL(beta);
+
+ cublasStatus_t status = cublasXtDsyrk(handler->handle, rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans),
+                                          NUM2ULONG(n), NUM2ULONG(k), &alf, ptr_A->carray, NUM2ULONG(lda),
+                                          &bet, ptr_C->carray, NUM2ULONG(ldc));
+
   return Qnil;
 }
 
@@ -215,7 +238,19 @@ static VALUE rb_cublasXtDsyr2k(VALUE self, VALUE handler_val, VALUE uplo, VALUE 
   rb_cublasxt_handle* handler;
   Data_Get_Struct(handler_val, rb_cublasxt_handle, handler);
 
-  // cublasStatus_t status = cublasXtDsyr2k(cublasXtHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, size_t n, size_t k, const(double)* alpha, const(double)* A, size_t lda, const(double)* B, size_t ldb, const(double)* beta, double* C, size_t ldc);
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_B;
+  dev_ptr* ptr_C;
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(B, dev_ptr, ptr_B);
+  Data_Get_Struct(C, dev_ptr, ptr_C);
+
+  const double alf = NUM2DBL(alpha);
+  const double bet = NUM2DBL(beta);
+
+  cublasStatus_t status = cublasXtDsyr2k(handler->handle, rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans),
+                                          NUM2ULONG(n), NUM2ULONG(k), &alf, ptr_A->carray, NUM2ULONG(lda), ptr_B->carray,
+                                          NUM2ULONG(ldb), &bet, ptr_C->carray, NUM2ULONG(ldc));
   return Qnil;
 }
 
@@ -250,7 +285,16 @@ static VALUE rb_cublasXtDtrsm(VALUE self, VALUE handler_val, VALUE side, VALUE u
   rb_cublasxt_handle* handler;
   Data_Get_Struct(handler_val, rb_cublasxt_handle, handler);
 
-  // cublasStatus_t status = cublasXtDtrsm ( cublasXtHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, size_t m, size_t n, const(double)* alpha, const(double)* A, size_t lda, double* B, size_t ldb);
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_B;
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(B, dev_ptr, ptr_B);
+
+  const double alf = NUM2DBL(alpha);
+
+  cublasStatus_t status = cublasXtDtrsm(handler->handle, rbcu_cublasSideMode_t(side), rbcu_cublasFillMode_t(uplo),
+                                          rbcu_cublasOperation_t(trans), rbcu_cublasDiagType_t(diag), NUM2ULONG(m), NUM2ULONG(n),
+                                          &alf, ptr_A->carray, NUM2ULONG(lda), ptr_B->carray, NUM2ULONG(ldb));
   return Qnil;
 }
 
@@ -275,7 +319,19 @@ static VALUE rb_cublasXtDsymm(VALUE self, VALUE handler_val, VALUE side, VALUE u
   rb_cublasxt_handle* handler;
   Data_Get_Struct(handler_val, rb_cublasxt_handle, handler);
 
-  // cublasStatus_t status = cublasXtDsymm ( cublasXtHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, size_t m, size_t n, const(double)* alpha, const(double)* A, size_t lda, const(double)* B, size_t ldb, const(double)* beta, double* C, size_t ldc);
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_B;
+  dev_ptr* ptr_C;
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(B, dev_ptr, ptr_B);
+  Data_Get_Struct(C, dev_ptr, ptr_C);
+
+  const double alf = NUM2DBL(alpha);
+  const double bet = NUM2DBL(beta);
+
+  cublasStatus_t status = cublasXtDsymm(handler->handle, rbcu_cublasSideMode_t(side), rbcu_cublasFillMode_t(uplo),
+                                          NUM2ULONG(m), NUM2ULONG(n), &alf,  ptr_A->carray, NUM2ULONG(lda), ptr_B->carray,
+                                          NUM2ULONG(ldb), &bet, ptr_C->carray, NUM2ULONG(ldc));
   return Qnil;
 }
 
@@ -309,7 +365,19 @@ static VALUE rb_cublasXtDsyrkx(VALUE self, VALUE handler_val, VALUE uplo, VALUE 
   rb_cublasxt_handle* handler;
   Data_Get_Struct(handler_val, rb_cublasxt_handle, handler);
 
-  // cublasStatus_t status = cublasXtDsyrkx(cublasXtHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, size_t n, size_t k, const(double)* alpha, const(double)* A, size_t lda, const(double)* B, size_t ldb, const(double)* beta, double* C, size_t ldc);
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_B;
+  dev_ptr* ptr_C;
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(B, dev_ptr, ptr_B);
+  Data_Get_Struct(C, dev_ptr, ptr_C);
+
+  const double alf = NUM2DBL(alpha);
+  const double bet = NUM2DBL(beta);
+
+  cublasStatus_t status = cublasXtDsyrkx(handler->handle, rbcu_cublasFillMode_t(uplo), rbcu_cublasOperation_t(trans),
+                                        NUM2ULONG(n), NUM2ULONG(k), &alf, ptr_A->carray, NUM2ULONG(lda), ptr_B->carray,
+                                        NUM2ULONG(ldb), &bet, ptr_C->carray, NUM2ULONG(ldc));
   return Qnil;
 }
 
@@ -344,8 +412,19 @@ static VALUE rb_cublasXtDspmm(VALUE self, VALUE handler_val, VALUE side, VALUE u
   rb_cublasxt_handle* handler;
   Data_Get_Struct(handler_val, rb_cublasxt_handle, handler);
 
-  // cublasStatus_t status = cublasXtDspmm ( cublasXtHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, size_t m, size_t n, const(double)* alpha, const(double)* AP, const(double)* B, size_t ldb, const(double)* beta, double* C,size_t ldc);
+  dev_ptr* ptr_AP;
+  dev_ptr* ptr_B;
+  dev_ptr* ptr_C;
+  Data_Get_Struct(AP, dev_ptr, ptr_AP);
+  Data_Get_Struct(B, dev_ptr, ptr_B);
+  Data_Get_Struct(C, dev_ptr, ptr_C);
 
+  const double alf = NUM2DBL(alpha);
+  const double bet = NUM2DBL(beta);
+
+  cublasStatus_t status = cublasXtDspmm(handler->handle, rbcu_cublasSideMode_t(side), rbcu_cublasFillMode_t(uplo),
+                                        NUM2ULONG(m), NUM2ULONG(n), &alf,  ptr_AP->carray, ptr_B->carray,
+                                        NUM2ULONG(ldb), &bet, ptr_C->carray, NUM2ULONG(ldc));
   return Qnil;
 }
 
@@ -369,7 +448,18 @@ static VALUE rb_cublasXtDtrmm(VALUE self, VALUE handler_val, VALUE side, VALUE u
   rb_cublasxt_handle* handler;
   Data_Get_Struct(handler_val, rb_cublasxt_handle, handler);
 
-  // cublasStatus_t status = cublasXtDtrmm(cublasXtHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, size_t m, size_t n, const(double)* alpha, const(double)* A, size_t lda, const(double)* B, size_t ldb, double* C, size_t ldc);
+  dev_ptr* ptr_A;
+  dev_ptr* ptr_B;
+  dev_ptr* ptr_C;
+  Data_Get_Struct(A, dev_ptr, ptr_A);
+  Data_Get_Struct(B, dev_ptr, ptr_B);
+  Data_Get_Struct(C, dev_ptr, ptr_C);
+
+  const double alf = NUM2DBL(alpha);
+
+  cublasStatus_t status = cublasXtDtrmm(handler->handle, rbcu_cublasSideMode_t(side), rbcu_cublasFillMode_t(uplo),
+                                            rbcu_cublasOperation_t(trans), rbcu_cublasDiagType_t(diag), NUM2ULONG(m), NUM2ULONG(n),
+                                            &alf, ptr_A->carray, NUM2ULONG(lda), ptr_B->carray, NUM2ULONG(ldb), ptr_C->carray, NUM2ULONG(ldc));
 
   return Qnil;
 }
