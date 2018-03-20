@@ -14,7 +14,7 @@
 #include "cublasXt.h"
 #include <cuda_profiler_api.h>
 #include "nmatrix.h"
-
+#include "narray.h"
 
 /*
  * Project Includes

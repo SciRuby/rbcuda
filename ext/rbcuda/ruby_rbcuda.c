@@ -999,10 +999,12 @@ static VALUE rb_curandGetScrambleConstants64(VALUE self, VALUE constants);
 
 // NMatrix
 extern "C++" {
-  VALUE cNMatrix;
+  VALUE cNMatrix, cNArray;
 }
+
 static VALUE rb_dev_ary_to_nmatrix(VALUE self, VALUE shape);
 extern VALUE rb_nmatrix_to_gpu_ary_method(VALUE nmatrix);
+extern VALUE rb_narray_to_gpu_ary_method(VALUE narray);
 dev_ptr* rb_nmatrix_to_dev_ary(VALUE nm);
 
 void Init_rbcuda() {
@@ -1018,6 +1020,9 @@ void Init_rbcuda() {
 
   cNMatrix = rb_define_class("NMatrix", rb_cObject);
   rb_define_method(cNMatrix, "to_dev_array", (METHOD)rb_nmatrix_to_gpu_ary_method, 0);
+
+  cNArray = rb_define_class("NArray", rb_cObject);
+  rb_define_method(cNArray, "to_dev_array", (METHOD)rb_narray_to_gpu_ary_method, 0);
 
   CuBLASHandler   = rb_define_class_under(RbCUDA, "CuBLASHandler",   rb_cObject);
   CuBLASXTHandler = rb_define_class_under(RbCUDA, "CuBLASXTHandler", rb_cObject);
@@ -1954,7 +1959,7 @@ static void rbcu_free(dev_ptr* ptr){
 #include "blas/cublas_v2.c"
 #include "blas/cublasXt.c"
 
-
+#include "interfaces/narray.c"
 #include "interfaces/nmatrix.c"
 
 #include "internals/cuda.c"
