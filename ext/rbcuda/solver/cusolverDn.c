@@ -426,7 +426,7 @@ static VALUE rb_cusolverDnSsytrd(VALUE self){
   return Qnil;
 }
 
-// cusolverStatus_t CUDENSEAPI cusolverDnDsytrd( cusolverDnHandle_t handle, signed char uplo, int n, double *A, int lda, double *D, double *E, double *tau, double *Work, int Lwork, int *info);
+// cusolverStatus_t cusolverDnDsytrd( cusolverDnHandle_t handle, cublasFillMode_t uplo, int n, double *A, int lda, double *d, double *e, double *tau, double *work, int lwork, int *devInfo);
 static VALUE rb_cusolverDnDsytrd(VALUE self, VALUE handler_val, VALUE uplo, VALUE n, VALUE A, VALUE lda, VALUE D, VALUE E, VALUE tau, VALUE Work, VALUE Lwork, VALUE info){
   rb_cusolver_handle* handler;
   Data_Get_Struct(handler_val, rb_cusolver_handle, handler);
@@ -444,7 +444,7 @@ static VALUE rb_cusolverDnDsytrd(VALUE self, VALUE handler_val, VALUE uplo, VALU
 
   int info_op = NUM2INT(info);
 
-  cusolverStatus_t status = cusolverDnDsytrd(handler->handle, StringValuePtr(uplo)[0], NUM2INT(n), ptr_A->carray, NUM2INT(lda),
+  cusolverStatus_t status = cusolverDnDsytrd(handler->handle, rbcu_cublasFillMode_t(uplo), NUM2INT(n), ptr_A->carray, NUM2INT(lda),
                                               ptr_D->carray, ptr_E->carray, ptr_tau->carray, ptr_Work->carray, NUM2INT(Lwork), &info_op);
   return Qnil;
 }
