@@ -19,10 +19,13 @@ Add this line to your application's Gemfile:
 
 ```ruby
 git clone https://github.com/prasunanand/rbcuda
+cd rbcuda
 bundle install
 rake compile
 rake test
 ```
+
+Note: `rake compile` failed in ruby 2.3. Make sure to upgrade to ruby 2.4.
 
 ## Usage
 
