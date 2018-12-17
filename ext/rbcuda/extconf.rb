@@ -26,6 +26,7 @@ INCLUDEDIR  = RbConfig::CONFIG['includedir']
 HEADER_DIRS = [
   '/opt/local/include',
   '/usr/local/include',
+  '/usr/local/cuda/include',
   INCLUDEDIR,
   '/usr/include',
   nmatrix_header_dir,
