@@ -22,8 +22,8 @@ class ResultCollect
 
     shapeArray.each do |shape|
       puts "shape"+shape.to_s
-      cpu_ary1 = Array.new(shape[0]*shape[1]) { 2 }
-      cpu_ary2 = Array.new(shape[0]*shape[1]) { 2 }
+      cpu_ary1 = Array.new(shape[0]*shape[1]) { |index| index }
+      cpu_ary2 = Array.new(shape[0]*shape[1]) { |index| index * 2 }
       cpu_ary_res = []
 
 
@@ -48,7 +48,10 @@ class ResultCollect
           RbCUDA::CuBLAS_v2.cublasDgemm_v2(handle, :CUBLAS_OP_N, :CUBLAS_OP_N, m, n, k, alpha, gpu_ary1, lda, gpu_ary2, ldb, beta, gpu_ary_res, ldc)
         }
       end
-      # puts RbCUDA::Runtime.cudaMemcpy([], gpu_ary_res, shape[0]*shape[1], :cudaMemcpyDeviceToHost);
+      # prints the result of the [10 x 10] [10 x 10] matrix product
+#       if shape == shapeArray[0]
+#           puts RbCUDA::Runtime.cudaMemcpy([], gpu_ary_res, shape[0]*shape[1], :cudaMemcpyDeviceToHost);
+#       end
       RbCUDA::CuBLAS_v2.cublasDestroy_v2(handle)
       RbCUDA::Runtime.cudaFree(gpu_ary1)
       RbCUDA::Runtime.cudaFree(gpu_ary2)
